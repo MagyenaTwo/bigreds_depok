@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 import os
@@ -21,6 +21,7 @@ from werkzeug.security import check_password_hash
 from models import User 
 from database import SessionLocal
 from fastapi.responses import RedirectResponse
+from werkzeug.security import generate_password_hash
 load_dotenv()
 
 app = FastAPI()
@@ -145,11 +146,6 @@ async def upload_image(title: str = Form(...), image: UploadFile = File(...)):
 
     return RedirectResponse(url="/cms", status_code=303)
 
-@app.get("/cms/delete/{id}")
-def delete_image(id: int):
-    supabase.table("gallery_nobar").delete().eq("id", id).execute()
-    return RedirectResponse(url="/cms", status_code=303)
-
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_get(request: Request):
@@ -166,7 +162,7 @@ async def login_post(
     user = db.query(User).filter(User.username == username).first()
     if user and check_password_hash(user.password, password):
         request.session['user_id'] = user.id
-        return RedirectResponse(url="/cms", status_code=302)
+        return RedirectResponse(url="/cms/tiket", status_code=302)
     return templates.TemplateResponse("login.html", {
         "request": request,
         "error": "Username atau password salah."
@@ -177,15 +173,78 @@ def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/login", status_code=302)
 
+@app.get("/cms/tiket")
+def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
 
-@app.get("/cms/tiket", response_class=HTMLResponse)
-async def cms_tiket(request: Request):
-    return templates.TemplateResponse("cms_tiket.html", {"request": request})
+    per_page = 20
+    offset = (page - 1) * per_page
+
+    total_items = db.query(func.count(TicketOrder.id)).scalar()
+    total_pages = (total_items + per_page - 1) // per_page
+
+    daftar_tiket = (
+        db.query(TicketOrder)
+        .order_by(TicketOrder.nama.asc())
+        .offset(offset)
+        .limit(per_page)
+        .all()
+    )
+
+    return templates.TemplateResponse("cms_tiket.html", {
+        "request": request,
+        "daftar_tiket": daftar_tiket,
+        "current_page": page,
+        "total_pages": total_pages
+    })
+
 
 @app.get("/cms/laporan", response_class=HTMLResponse)
 async def cms_laporan(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
+
     return templates.TemplateResponse("cms_laporan.html", {"request": request})
-    
+
+
 @app.get("/cms/berita", response_class=HTMLResponse)
-async def cms_laporan(request: Request):
-    return templates.TemplateResponse("cms_laporan.html", {"request": request})
+async def cms_berita(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
+
+    return templates.TemplateResponse("cms_berita.html", {"request": request})
+
+
+@app.get("/cms/akun")
+def form_akun(request: Request):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
+
+    return templates.TemplateResponse("cms_akun.html", {"request": request})
+@app.post("/cms/akun", response_class=HTMLResponse)
+async def buat_akun_post(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
+
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        return templates.TemplateResponse("cms_akun.html", {
+            "request": request,
+            "error": "Username sudah digunakan. Coba yang lain."
+        })
+
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, password=hashed_password)
+    db.add(new_user)
+    db.commit()
+
+    return templates.TemplateResponse("cms_akun.html", {
+        "request": request,
+        "success": "Akun berhasil dibuat!"
+    })

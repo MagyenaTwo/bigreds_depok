@@ -3,27 +3,71 @@
 {% block title %}Data Tiket - CMS Bigreds Depok{% endblock %}
 
 {% block content %}
-<h1>Data Tiket</h1>
-<table>
-  <thead>
-    <tr>
-      <th>Nama</th>
-      <th>Jumlah</th>
-      <th>Tanggal</th>
-      <th>Bukti</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for tiket in daftar_tiket %}
-    <tr>
-      <td>{{ tiket.nama }}</td>
-      <td>{{ tiket.jumlah }}</td>
-      <td>{{ tiket.tanggal }}</td>
-      <td><a href="{{ tiket.bukti_url }}" target="_blank">Lihat</a></td>
-      <td><a href="/cms/tiket/delete/{{ tiket.id }}">Hapus</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<h1>Data Pemesanan Tiket</h1>
+
+<input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="search-input" onkeyup="filterTable()">
+
+<div class="table-container">
+  <table class="styled-table" id="tiketTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>ID Card</th>
+        <th>Jumlah</th>
+        <th>WhatsApp</th>
+        <th>Status</th>
+        <th>Waktu Daftar</th>
+        <th>Bukti Transfer</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tiket in daftar_tiket %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ tiket.nama }}</td>
+        <td>{{ tiket.id_card or '-' }}</td>
+        <td>{{ tiket.jumlah }}</td>
+        <td>
+          <a href="https://wa.me/{{ tiket.whatsapp }}" target="_blank" class="wa-link">
+            {{ tiket.whatsapp }}
+          </a>
+        </td>
+        <td>
+          <span class="status-label {{ tiket.status|lower }}">{{ tiket.status }}</span>
+        </td>
+        <td>{{ tiket.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+        <td>
+          <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="pagination">
+  {% if current_page > 1 %}
+    <a href="?page={{ current_page - 1 }}">&laquo; Prev</a>
+  {% endif %}
+
+  {% for i in range(1, total_pages + 1) %}
+    <a href="?page={{ i }}" class="{% if i == current_page %}active{% endif %}">{{ i }}</a>
+  {% endfor %}
+
+  {% if current_page < total_pages %}
+    <a href="?page={{ current_page + 1 }}">Next &raquo;</a>
+  {% endif %}
+</div>
+
+<script>
+  function filterTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#tiketTable tbody tr");
+    rows.forEach(row => {
+      const nama = row.cells[1].textContent.toLowerCase();
+      row.style.display = nama.includes(input) ? "" : "none";
+    });
+  }
+</script>
 {% endblock %}
+
