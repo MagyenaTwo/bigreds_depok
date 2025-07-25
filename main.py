@@ -1,3 +1,4 @@
+import shutil
 from uuid import uuid4
 from fastapi import FastAPI, File, Request, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -100,3 +101,33 @@ async def submit_form(
 @app.get("/success", response_class=HTMLResponse)
 async def success_page(request: Request):
     return templates.TemplateResponse("sukses.html", {"request": request})
+
+
+@app.get("/cms")
+def cms_page(request: Request):
+    data = supabase.table("gallery_nobar").select("*").order("created_at", desc=True).execute()
+    return templates.TemplateResponse("cms.html", {
+        "request": request,
+        "images": data.data
+    })
+
+@app.post("/cms/upload")
+async def upload_image(title: str = Form(...), image: UploadFile = File(...)):
+    filename = image.filename
+    file_path = f"frontend/static/img/{filename}"
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    image_url = f"/static/img/{filename}"
+    supabase.table("gallery_nobar").insert({
+        "title": title,
+        "image_url": image_url
+    }).execute()
+
+    return RedirectResponse(url="/cms", status_code=303)
+
+@app.get("/cms/delete/{id}")
+def delete_image(id: int):
+    supabase.table("gallery_nobar").delete().eq("id", id).execute()
+    return RedirectResponse(url="/cms", status_code=303)
