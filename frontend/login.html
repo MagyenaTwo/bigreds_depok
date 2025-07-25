@@ -5,66 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CMS BIGREDS</title>
   <style>
+    :root {
+      --primary-color: #c31432;
+      --primary-dark: #a30d27;
+      --bg-gradient: linear-gradient(to right, #c31432, #240b36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #c31432, #240b36);
+      background: var(--bg-gradient);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      padding: 20px;
     }
 
     .container {
       background: white;
-      padding: 40px 30px;
+      padding: 40px 35px;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .logo {
-      width: 100px;
+      width: 90px;
       margin-bottom: 20px;
+      border-radius: 8px;
     }
 
     h2 {
       margin-bottom: 25px;
-      color: #c31432;
+      color: var(--primary-color);
+      font-size: 24px;
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+      margin-top: 10px;
     }
 
     input[type="text"],
     input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 12px 14px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary-color);
+      outline: none;
     }
 
     button {
-      width: 100%;
       padding: 12px;
-      background: #c31432;
+      background: var(--primary-color);
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       color: white;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
       transition: background 0.3s ease;
     }
 
     button:hover {
-      background: #a30d27;
+      background: var(--primary-dark);
     }
 
     .error {
       color: red;
-      margin-bottom: 10px;
+      margin-top: -5px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px;
+      }
     }
   </style>
 </head>

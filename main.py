@@ -18,14 +18,19 @@ from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import Depends
 from werkzeug.security import check_password_hash
-from models import User  # pastikan model User sesuai dengan tabel users
+from models import User 
 from database import SessionLocal
 from fastapi.responses import RedirectResponse
 load_dotenv()
 
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="bigredsmantap",  
+    max_age=1800 
+)
+
 app.add_middleware(SessionMiddleware, secret_key="bigredsmantap")
-# ⬇️ Perbaiki path ke folder frontend
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 templates = Jinja2Templates(directory="frontend")
