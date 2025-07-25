@@ -176,3 +176,16 @@ async def login_post(
 def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/login", status_code=302)
+
+
+@app.get("/cms/tiket", response_class=HTMLResponse)
+async def cms_tiket(request: Request):
+    return templates.TemplateResponse("cms_tiket.html", {"request": request})
+
+@app.get("/cms/laporan", response_class=HTMLResponse)
+async def cms_laporan(request: Request):
+    return templates.TemplateResponse("cms_laporan.html", {"request": request})
+    
+@app.get("/cms/berita", response_class=HTMLResponse)
+async def cms_laporan(request: Request):
+    return templates.TemplateResponse("cms_laporan.html", {"request": request})

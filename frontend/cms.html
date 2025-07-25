@@ -1,66 +1,23 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>CMS Bigreds Depok</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/static/cms.css?v=2">
-</head>
-<body>
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+{% extends "base.html" %}
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <h2>CMS Bigreds Depok</h2>
-    <a href="/cms" class="active">Galeri Nobar</a>
-    <a href="#">Data Tiket</a>
-    <a href="#">Berita RT</a>
-    <a href="#">Laporan</a>
-    <a href="#">Pengaturan</a>
-    <a href="/logout">Keluar</a>
+{% block title %}Galeri Nobar - CMS Bigreds Depok{% endblock %}
 
+{% block content %}
+<h1>Galeri Nobar</h1>
+<div class="gallery">
+  {% for img in images %}
+  <div class="item">
+    <img src="{{ img.image_url }}" alt="{{ img.title }}">
+    <div class="item-title">{{ img.title }}</div>
+    <a class="delete-btn" href="/cms/delete/{{ img.id }}">Hapus</a>
   </div>
+  {% endfor %}
+</div>
 
-  <!-- Tombol hamburger -->
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-  <!-- Wrapper -->
-  <div class="wrapper">
-    <div class="content-area">
-      <div class="main">
-        <h1>Galeri Nobar</h1>
-
-        <div class="gallery">
-          {% for img in images %}
-          <div class="item">
-            <img src="{{ img.image_url }}" alt="{{ img.title }}">
-            <div class="item-title">{{ img.title }}</div>
-            <a class="delete-btn" href="/cms/delete/{{ img.id }}">Hapus</a>
-          </div>
-          {% endfor %}
-        </div>
-
-        <form class="upload-form" action="/cms/upload" method="post" enctype="multipart/form-data">
-          <h2>Upload Gambar Baru</h2>
-          <input type="text" name="title" placeholder="Judul Gambar" required>
-          <input type="file" name="image" accept="image/*" required>
-          <button type="submit">Upload</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <p>&copy; 2025 Bigreds Depok. All rights reserved.</p>
-  </footer>
-
-  <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('overlay').classList.toggle('active');
-    }
-  </script>
-  <script src="/static/js/cms.js?v=1"></script>
-</body>
-
-</html>
+<form class="upload-form" action="/cms/upload" method="post" enctype="multipart/form-data">
+  <h2>Upload Gambar Baru</h2>
+  <input type="text" name="title" placeholder="Judul Gambar" required>
+  <input type="file" name="image" accept="image/*" required>
+  <button type="submit">Upload</button>
+</form>
+{% endblock %}

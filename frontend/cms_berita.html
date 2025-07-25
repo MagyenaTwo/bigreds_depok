@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Berita RT - CMS Bigreds Depok{% endblock %}
+
+{% block content %}
+<h1>Berita RT</h1>
+
+<div class="berita-list">
+  {% for berita in daftar_berita %}
+  <div class="berita-item">
+    <h2>{{ berita.judul }}</h2>
+    <p><em>{{ berita.tanggal }}</em></p>
+    <p>{{ berita.isi }}</p>
+    <a class="delete-btn" href="/cms/berita/delete/{{ berita.id }}">Hapus</a>
+  </div>
+  {% endfor %}
+</div>
+
+<form class="upload-form" action="/cms/berita/tambah" method="post">
+  <h2>Tambah Berita Baru</h2>
+  <input type="text" name="judul" placeholder="Judul Berita" required>
+  <textarea name="isi" placeholder="Isi Berita" rows="5" required></textarea>
+  <button type="submit">Kirim</button>
+</form>
+{% endblock %}

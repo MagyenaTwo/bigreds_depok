@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Laporan Keuangan - CMS Bigreds Depok{% endblock %}
+
+{% block content %}
+<h1>Laporan Keuangan</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tanggal</th>
+      <th>Jenis</th>
+      <th>Keterangan</th>
+      <th>Jumlah</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for laporan in daftar_laporan %}
+    <tr>
+      <td>{{ laporan.tanggal }}</td>
+      <td>{{ laporan.jenis }}</td>
+      <td>{{ laporan.keterangan }}</td>
+      <td>{{ laporan.jumlah }}</td>
+      <td><a class="delete-btn" href="/cms/laporan/delete/{{ laporan.id }}">Hapus</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<form class="upload-form" action="/cms/laporan/tambah" method="post">
+  <h2>Tambah Laporan Baru</h2>
+  <input type="date" name="tanggal" required>
+  <select name="jenis" required>
+    <option value="Pemasukan">Pemasukan</option>
+    <option value="Pengeluaran">Pengeluaran</option>
+  </select>
+  <input type="text" name="keterangan" placeholder="Keterangan" required>
+  <input type="number" name="jumlah" placeholder="Jumlah (Rp)" required>
+  <button type="submit">Simpan</button>
+</form>
+{% endblock %}

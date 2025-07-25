@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}CMS Bigreds Depok{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/cms.css?v=2">
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>CMS Bigreds Depok</h2>
+    <a href="/cms" class="{% if request.path == '/cms' %}active{% endif %}">Galeri Nobar</a>
+    <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Data Tiket</a>
+    <a href="/cms/berita" class="{% if request.path == '/cms/berita' %}active{% endif %}">Berita RT</a>
+    <a href="/cms/laporan" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
+    <a href="/logout">Keluar</a>
+  </div>
+
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <div class="wrapper">
+    <div class="content-area">
+      <div class="main">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2025 Bigreds Depok. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('overlay').classList.toggle('active');
+    }
+  </script>
+  <script src="/static/js/cms.js?v=1"></script>
+</body>
+</html>

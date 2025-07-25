@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Data Tiket - CMS Bigreds Depok{% endblock %}
+
+{% block content %}
+<h1>Data Tiket</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Nama</th>
+      <th>Jumlah</th>
+      <th>Tanggal</th>
+      <th>Bukti</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tiket in daftar_tiket %}
+    <tr>
+      <td>{{ tiket.nama }}</td>
+      <td>{{ tiket.jumlah }}</td>
+      <td>{{ tiket.tanggal }}</td>
+      <td><a href="{{ tiket.bukti_url }}" target="_blank">Lihat</a></td>
+      <td><a href="/cms/tiket/delete/{{ tiket.id }}">Hapus</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
