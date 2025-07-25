@@ -7,6 +7,19 @@
   ],
   "routes": [
     {
+      "src": "^/",
+      "has": [
+        {
+          "type": "host",
+          "value": "bigredsdepok.com"
+        }
+      ],
+      "status": 308,
+      "headers": {
+        "Location": "https://www.bigredsdepok.com"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "main.py"
     }
