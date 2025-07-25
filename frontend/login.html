@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>CMS BIGREDS</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMS BIGREDS</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -17,15 +17,20 @@
 
     .container {
       background: white;
-      padding: 30px;
+      padding: 40px 30px;
       border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       width: 100%;
       max-width: 400px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
     }
 
     h2 {
-      text-align: center;
       margin-bottom: 25px;
       color: #c31432;
     }
@@ -34,7 +39,7 @@
     input[type="password"] {
       width: 100%;
       padding: 12px;
-      margin: 8px 0 16px;
+      margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 16px;
@@ -49,6 +54,7 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+      margin-top: 10px;
       transition: background 0.3s ease;
     }
 
@@ -58,13 +64,13 @@
 
     .error {
       color: red;
-      text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <img src="/static/img/logo.jpeg" alt="Logo Bigreds" class="logo" />
     <h2>CMS BIGREDS</h2>
     {% if error %}
       <p class="error">{{ error }}</p>
