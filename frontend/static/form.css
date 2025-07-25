@@ -1,0 +1,118 @@
+
+.container {
+  max-width: 600px;
+  margin: 100px auto 50px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+}
+
+.container h2 {
+  text-align: center;
+  color: #a60000; /* warna merah khas LFC */
+  margin-bottom: 25px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+select:focus {
+  border-color: #a60000;
+  outline: none;
+}
+
+button[type="submit"] {
+  padding: 12px;
+  background-color: #a60000;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+  background-color: #a60000;
+}
+
+p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Sembunyikan field ID Card secara default */
+.hidden {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    margin: 60px 10px;
+    padding: 20px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  button[type="submit"] {
+    font-size: 15px;
+  }
+}
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+
+
+#popupOverlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* semi transparan */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#popupSuccess {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+

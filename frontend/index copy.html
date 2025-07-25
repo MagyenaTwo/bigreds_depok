@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>BIGREDS DEPOK</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/form.css" />
+  <link rel="icon" href="/static/img/logo.jpeg" type="image/png">
+  <!-- AOS CSS -->
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="/static/img/logo2.png" alt="Logo" class="logo-img">
+      BIGREDS DEPOK
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="menu" id="mobileMenu">
+      <a href="#">Home</a>
+      <a href="#events">Events</a>
+      <a href="#gallery">Gallery</a>
+      <a href="/form">Beli Tiket</a>
+    </div>
+  </div>
+
+  <!-- Konten Formulir -->
+  <div class="container">
+    <h2>Pendaftaran Tiket Nobar</h2>
+    <form method="post" action="/submit">
+      <label>Nama Lengkap</label>
+      <input type="text" name="nama" required />
+
+      <label>Status</label>
+      <select name="status" id="status" required onchange="toggleIDCard()">
+        <option value="">Pilih Status</option>
+        <option value="member">Member</option>
+        <option value="non_member">Non Member</option>
+      </select>
+
+      <div id="idCardField" class="hidden">
+        <label>ID Card</label>
+        <input type="text" name="id_card" />
+      </div>
+
+      <label>Jumlah Tiket (max 4)</label>
+      <input type="number" name="jumlah" min="1" max="4" required />
+
+      <label>Nomor WhatsApp</label>
+      <input type="text" name="whatsapp" required />
+
+      <label>Pembayaran</label>
+      <p>Pembayaran hanya melalui <strong>QRIS</strong>. QR akan dikirim setelah submit.</p>
+
+      <button type="submit">Kirim & Lanjut Bayar</button>
+    </form>
+  </div>
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-left">
+      <img src="/static/img/logo.jpeg" alt="BigReds Depok" class="footer-logo" />
+      <div class="footer-text">
+        <h3>Bigreds Depok</h3>
+        <p>You'll Never Walk Alone</p>
+        <p>&copy; 2025 Bigreds Depok. All rights reserved.</p>
+      </div>
+    </div>
+   <div class="footer-right">
+  <div class="footer-right-content">
+    <h4>Ikuti Kami</h4>
+    <div class="social-icons">
+      <a href="https://instagram.com/bigreds_depok" target="_blank" aria-label="Instagram">
+        <img src="/static/img/ig.png" alt="Instagram" />
+      </a>
+      <a href="https://facebook.com/BigredsDepok" target="_blank" aria-label="Facebook">
+        <img src="/static/img/fb.png" alt="Facebook" />
+      </a>
+      <a href="https://twitter.com/BIGREDS_Depok" target="_blank" aria-label="Twitter">
+        <img src="/static/img/x.png" alt="Twitter" />
+      </a>
+      <a href="https://wa.me/6285786922128" target="_blank" aria-label="WhatsApp">
+        <img src="/static/img/wa.png" alt="WhatsApp" />
+      </a>
+    </div>
+  </div>
+</div>
+</footer>
+<script src="/static/js/index.js"></script>
+
+</body>
+</html>
