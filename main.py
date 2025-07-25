@@ -172,7 +172,6 @@ async def login_post(
 def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/login", status_code=302)
-
 @app.get("/cms/tiket")
 def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)):
     if not request.session.get("user_id"):
@@ -192,13 +191,17 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
         .all()
     )
 
+    total_pemesan = total_items
+    
+
     return templates.TemplateResponse("cms_tiket.html", {
         "request": request,
         "daftar_tiket": daftar_tiket,
         "current_page": page,
-        "total_pages": total_pages
+        "total_pages": total_pages,
+        "total_pemesan": total_pemesan,
+        
     })
-
 
 @app.get("/cms/laporan", response_class=HTMLResponse)
 async def cms_laporan(request: Request):

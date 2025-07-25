@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <title>{% block title %}CMS Bigreds Depok{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome CDN (Free) -->
+<!-- Font Awesome CDN (Free) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-papdzFfZ3vmB/9M0Yf8F0vOcimL7wtXUgYekUZ+P3JrNWh6Yt1pUzx2Ao/xwYd9Lxss69YXTXFL7wBSV7XyJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <link rel="stylesheet" href="/static/cms.css?v=2">
+  
 </head>
 <body>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
   <div class="sidebar" id="sidebar">
     <h2>CMS Bigreds Depok</h2>
-    <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Data Tiket</a>
+    <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Dashboard</a>
      <a href="/cms" class="{% if request.path == '/cms' %}active{% endif %}">Galeri Nobar</a>
     <a href="/cms/berita" class="{% if request.path == '/cms/berita' %}active{% endif %}">Upload Berita</a>
     <a href="/cms/laporan" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
