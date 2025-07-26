@@ -563,3 +563,18 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 
+.join-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #25D366; /* Warna hijau WhatsApp */
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.join-btn:hover {
+  background-color: #1ebe5d;
+}
