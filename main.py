@@ -127,17 +127,37 @@ async def submit_form(
 @app.get("/success", response_class=HTMLResponse)
 async def success_page(request: Request):
     return templates.TemplateResponse("sukses.html", {"request": request})
-
 @app.get("/cms")
-def cms_page(request: Request):
+def cms_page(request: Request, page: int = 1):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
-    
-    data = supabase.table("gallery_nobar").select("*").order("tanggal", desc=True).execute()
+
+    per_page = 20
+    start = (page - 1) * per_page
+    end = start + per_page - 1
+
+    # Ambil total jumlah data
+    total_res = supabase.table("gallery_nobar").select("id", count="exact").execute()
+    total_count = total_res.count or 0
+    total_pages = (total_count + per_page - 1) // per_page
+
+    # Ambil data sesuai range
+    data = (
+        supabase.table("gallery_nobar")
+        .select("*")
+        .order("tanggal", desc=True)
+        .range(start, end)
+        .execute()
+    )
+
     return templates.TemplateResponse("cms.html", {
         "request": request,
-        "images": data.data
+        "images": data.data,
+        "current_page": page,
+        "total_pages": total_pages,
     })
+
+
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_get(request: Request):

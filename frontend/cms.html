@@ -57,6 +57,21 @@
       {% endfor %}
     </tbody>
   </table>
+  <div class="pagination" style="margin-top: 25px;">
+  {% if current_page > 1 %}
+    <a href="?page={{ current_page - 1 }}">&laquo; Prev</a>
+  {% endif %}
+
+  {% for i in range(1, total_pages + 1) %}
+    <a href="?page={{ i }}" class="{% if i == current_page %}active{% endif %}">{{ i }}</a>
+  {% endfor %}
+
+  {% if current_page < total_pages %}
+    <a href="?page={{ current_page + 1 }}">Next &raquo;</a>
+  {% endif %}
+</div>
+
+
 </div>
 
 <script>
