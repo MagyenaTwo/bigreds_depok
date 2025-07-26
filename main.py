@@ -1,4 +1,5 @@
 import shutil
+from typing import List
 from uuid import uuid4
 from fastapi import FastAPI, File, Request, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,11 +10,11 @@ from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 import os
-
-from supabase import create_client
+from typing import List
+from supabase import StorageException, create_client
 from utils import format_datetime_indo
 from database import SessionLocal
-from models import Match, TicketOrder
+from models import GalleryNobar, Match, TicketOrder
 from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import Depends
@@ -39,6 +40,15 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def datetimeformat(value, format="%d-%m-%Y"):
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except:
+            return value
+    return value.strftime(format)
+
+templates.env.filters["datetimeformat"] = datetimeformat
 def get_db():
     db = SessionLocal()
     try:
@@ -123,29 +133,11 @@ def cms_page(request: Request):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
     
-    data = supabase.table("gallery_nobar").select("*").order("created_at", desc=True).execute()
+    data = supabase.table("gallery_nobar").select("*").order("tanggal", desc=True).execute()
     return templates.TemplateResponse("cms.html", {
         "request": request,
         "images": data.data
     })
-
-
-@app.post("/cms/upload")
-async def upload_image(title: str = Form(...), image: UploadFile = File(...)):
-    filename = image.filename
-    file_path = f"frontend/static/img/{filename}"
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
-
-    image_url = f"/static/img/{filename}"
-    supabase.table("gallery_nobar").insert({
-        "title": title,
-        "image_url": image_url
-    }).execute()
-
-    return RedirectResponse(url="/cms", status_code=303)
-
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_get(request: Request):
@@ -251,3 +243,46 @@ async def buat_akun_post(
         "request": request,
         "success": "Akun berhasil dibuat!"
     })
+@app.post("/cms/upload")
+async def upload_gallery_nobar(
+    title: str = Form(...),
+    tanggal: str = Form(...),  # Tanggal dari input HTML
+    image: List[UploadFile] = File(...)
+):
+    db: Session = SessionLocal()
+    uploaded_urls = []
+
+    try:
+        tanggal_dt = datetime.strptime(tanggal, "%Y-%m-%dT%H:%M")  # Format dari input type datetime-local
+    except ValueError:
+        return {"error": "Format tanggal tidak valid"}
+
+    for media in image:
+        ext = media.filename.split('.')[-1]
+        filename = f"nobar/{uuid4()}.{ext}"
+        content = await media.read()
+
+        try:
+            upload_res = supabase.storage.from_("nobar").upload(
+                path=filename,
+                file=content,
+                file_options={"content-type": media.content_type}
+            )
+        except StorageException as e:
+            print("UPLOAD ERROR:", e.message)
+            continue
+
+        media_url = f"{SUPABASE_URL}/storage/v1/object/public/nobar/{filename}"
+        uploaded_urls.append(media_url)
+
+        new_item = GalleryNobar(
+            title=title,
+            image_url=media_url,
+            tanggal=tanggal_dt  
+        )
+        db.add(new_item)
+
+    db.commit()
+    db.close()
+
+    return RedirectResponse(url="/cms", status_code=303)

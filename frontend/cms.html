@@ -4,20 +4,69 @@
 
 {% block content %}
 <h1>Galeri Nobar</h1>
-<div class="gallery">
-  {% for img in images %}
-  <div class="item">
-    <img src="{{ img.image_url }}" alt="{{ img.title }}">
-    <div class="item-title">{{ img.title }}</div>
-    <a class="delete-btn" href="/cms/delete/{{ img.id }}">Hapus</a>
-  </div>
-  {% endfor %}
-</div>
 
-<form class="upload-form" action="/cms/upload" method="post" enctype="multipart/form-data">
-  <h2>Upload Gambar Baru</h2>
-  <input type="text" name="title" placeholder="Judul Gambar" required>
-  <input type="file" name="image" accept="image/*" required>
+<!-- Upload Form -->
+<form action="/cms/upload" method="post" enctype="multipart/form-data" class="upload-form" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+  <h2 style="margin-bottom: 15px;">Upload Media Baru</h2>
+  
+  <label for="title">Judul</label><br>
+  <input type="text" id="title" name="title" required style="width: 100%; margin-bottom: 10px;"><br>
+<label for="tanggal">Tanggal & Waktu</label><br>
+<input type="datetime-local" id="tanggal" name="tanggal" required style="margin-bottom: 10px;"><br>
+
+  <label for="image">Pilih Gambar/Video</label><br>
+  <input type="file" id="image" name="image" multiple accept="image/*,video/*" required style="margin-bottom: 10px;"><br>
+
   <button type="submit">Upload</button>
 </form>
+
+<!-- Search and Counter -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+  <input type="text" id="searchInput" placeholder="Cari berdasarkan judul..." class="search-input" onkeyup="filterTable()" style="flex: 1; max-width: 250px;">
+  <div style="font-weight: bold; font-size: 15px; display: flex; flex-direction: column; align-items: flex-end;">
+    <div><span style="font-size: 18px;">🖼️</span> Total Media: {{ images|length }}</div>
+  </div>
+</div>
+
+<!-- Media List Table -->
+<div class="table-container">
+  <table class="styled-table" id="mediaTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Judul</th>
+        <th>Tanggal</th>
+        <th>Lihat</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for media in images %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ media.title }}</td>
+        <td>
+  {% if media.tanggal %}
+    {{ media.tanggal|datetimeformat('%d-%m-%Y') }}
+  {% else %}
+    -
+  {% endif %}
+</td>
+
+        <td><a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function filterTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#mediaTable tbody tr");
+    rows.forEach(row => {
+      const judul = row.cells[1].textContent.toLowerCase();
+      row.style.display = judul.includes(input) ? "" : "none";
+    });
+  }
+</script>
 {% endblock %}

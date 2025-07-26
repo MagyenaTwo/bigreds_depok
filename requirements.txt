@@ -7,3 +7,4 @@ jinja2
 supabase
 python-dotenv
 itsdangerous
+python-multipart>=0.0.5

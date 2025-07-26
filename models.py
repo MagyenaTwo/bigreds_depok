@@ -28,3 +28,11 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(255), nullable=False)  # hashed password
+
+class GalleryNobar(Base):
+    __tablename__ = "gallery_nobar"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    image_url = Column(String)
+    tanggal = Column(DateTime) 

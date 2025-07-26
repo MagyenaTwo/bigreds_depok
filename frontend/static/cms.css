@@ -336,3 +336,17 @@ body {
   color: white;
   border-color: #e53935;
 }
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.item {
+  width: 300px;
+}
+.item img,
+.item video {
+  width: 100%;
+  border-radius: 8px;
+}
