@@ -59,10 +59,10 @@ def get_db():
 async def read_form(request: Request):
     db: Session = SessionLocal()
 
-    now = datetime.now()  # waktu sekarang
+    now = datetime.now()  
     match = (
         db.query(Match)
-        .filter(Match.match_datetime >= now)  # hanya match di masa depan
+        .filter(Match.match_datetime >= now)  
         .order_by(Match.match_datetime.asc())
         .first()
     )
@@ -71,10 +71,20 @@ async def read_form(request: Request):
 
     formatted_datetime = format_datetime_indo(match.match_datetime) if match else None
 
+    # Ambil galeri nobar dari Supabase (limit 6 terbaru)
+    gallery_data = (
+        supabase.table("gallery_nobar")
+        .select("*")
+        .order("tanggal", desc=True)
+        .limit(6)
+        .execute()
+    )
+
     return templates.TemplateResponse("index.html", {
         "request": request,
         "match": match,
-        "formatted_datetime": formatted_datetime
+        "formatted_datetime": formatted_datetime,
+        "gallery_items": gallery_data.data  # Tambahan untuk galeri
     })
 
 

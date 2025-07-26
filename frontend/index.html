@@ -6,7 +6,10 @@
   <title>BIGREDS DEPOK</title>
   <link rel="stylesheet" href="/static/style.css?v=1">
   <link rel="icon" href="/static/img/logo.jpeg" type="image/png">
-
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+/>
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="BIGREDS DEPOK" />
   <meta property="og:description" content="Ayu Tingting makan pisang gepok, siapa kamu gak penting, kita Kopites dari Depok!" />
@@ -90,16 +93,34 @@
 
   </div>
 </div>
+<div class="section" id="gallery">
+  <h2>Gallery Nobar</h2>
 
-  <!-- Gallery Section -->
-  <div class="section" id="gallery">
-    <h2>Gallery Nobar </h2>
-    <div class="gallery">
-      <img src="/static/img/nbr1.jpeg" alt="Nobar 1"data-aos="flip-left">
-      <img src="/static/img/nbr2.jpeg" alt="Nobar 2"data-aos="flip-left">
-      <img src="/static/img/nbr3.jpeg" alt="Nobar 3"data-aos="flip-left">
+  <!-- Swiper Container -->
+  <div class="swiper mySwiper" style="max-width: 1000px; margin: auto; padding-bottom: 40px;">
+    <div class="swiper-wrapper">
+      {% for item in gallery_items %}
+        <div class="swiper-slide" style="display: flex; justify-content: center;">
+          {% if item.image_url.endswith(".mp4") %}
+            <video controls data-aos="flip-left"
+                   style="width: 100%; max-width: 400px; height: 300px; object-fit: cover; border-radius: 10px;">
+              <source src="{{ item.image_url }}" type="video/mp4">
+              Browser tidak mendukung tag video.
+            </video>
+          {% else %}
+            <img src="{{ item.image_url }}" alt="{{ item.title }}" data-aos="flip-left"
+                 style="width: 100%; max-width: 400px; height: 300px; object-fit: cover; border-radius: 10px;">
+          {% endif %}
+        </div>
+      {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    <div class="swiper-pagination" style="bottom: 10px;"></div>
   </div>
+</div>
+
+
 
 <!-- News & Update Section -->
 <div class="section news-update">
@@ -162,10 +183,37 @@
 <script src="/static/js/index.js?v=1"></script>
 <!-- AOS JS -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
 <script>
   AOS.init({
-    duration: 1000, // durasi animasi dalam ms
-    once: false     // animasi hanya sekali saat scroll pertama
+    duration: 1000, 
+    once: false     
+  });
+
+  const swiper = new Swiper(".mySwiper", {
+    slidesPerView: 1,
+    spaceBetween: 10,
+    loop: true,
+    autoplay: {
+      delay: 1000,
+      disableOnInteraction: false,
+    },
+    speed: 1000, // transisi lebih halus
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    breakpoints: {
+      640: {
+        slidesPerView: 2
+      },
+      1024: {
+        slidesPerView: 3
+      }
+    }
   });
 </script>
 
