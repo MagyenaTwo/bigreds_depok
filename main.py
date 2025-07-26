@@ -55,6 +55,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
     db: Session = SessionLocal()
@@ -76,7 +77,7 @@ async def read_form(request: Request):
         supabase.table("gallery_nobar")
         .select("*")
         .order("tanggal", desc=True)
-        .limit(6)
+        .limit(10)
         .execute()
     )
 
