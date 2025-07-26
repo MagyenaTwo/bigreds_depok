@@ -317,3 +317,7 @@ async def upload_gallery_nobar(
     db.close()
 
     return RedirectResponse(url="/cms", status_code=303)
+
+@app.get("/pengurus", response_class=HTMLResponse)
+async def pengurus(request: Request):
+    return templates.TemplateResponse("pengurus.html", {"request": request})
