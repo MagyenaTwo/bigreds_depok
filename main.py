@@ -5,6 +5,7 @@ from fastapi import FastAPI, File, Request, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import pytz
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +15,7 @@ from typing import List
 from supabase import StorageException, create_client
 from utils import format_datetime_indo
 from database import SessionLocal
-from models import GalleryNobar, Match, TicketOrder
+from models import Berita, GalleryNobar, Match, TicketOrder
 from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import Depends
@@ -23,6 +24,8 @@ from models import User
 from database import SessionLocal
 from fastapi.responses import RedirectResponse
 from werkzeug.security import generate_password_hash
+from apscheduler.schedulers.background import BackgroundScheduler
+import requests
 load_dotenv()
 
 app = FastAPI()
@@ -321,3 +324,56 @@ async def upload_gallery_nobar(
 @app.get("/pengurus", response_class=HTMLResponse)
 async def pengurus(request: Request):
     return templates.TemplateResponse("pengurus.html", {"request": request})
+# Fungsi utama untuk sinkronisasi berita
+def fetch_and_save_news():
+    url = "https://backend.liverpoolfc.com/lfc-rest-api/id/news?perPage=20"
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+
+    try:
+        res = requests.get(url, headers=headers)
+        data = res.json()
+    except Exception as e:
+        print("❌ Gagal ambil data dari API:", e)
+        return 0
+
+    db: Session = SessionLocal()
+    inserted = 0
+
+    for item in data.get("results", []):
+        slug = item["slug"]
+        exists = db.query(Berita).filter_by(slug=slug).first()
+        if exists:
+            continue
+
+        berita = Berita(
+            slug=slug,
+            title=item["title"],
+            content=item.get("byline", ""),
+            cover_image=item.get("coverImage", {}).get("sizes", {}).get("md", {}).get("url"),
+            publish_date=item.get("publishedAt")
+        )
+        db.add(berita)
+        inserted += 1
+
+    db.commit()
+    db.close()
+    print(f"✅ {inserted} berita baru disimpan. Waktu: {datetime.now()}")
+    return inserted
+
+# Endpoint manual
+@app.get("/sync-news")
+def sync_news():
+    inserted = fetch_and_save_news()
+    return {"message": f"✅ {inserted} berita baru disimpan."}
+
+# Scheduler otomatis
+scheduler = BackgroundScheduler(timezone=pytz.timezone("Asia/Jakarta"))
+scheduler.add_job(fetch_and_save_news, "cron", hour=8, minute=0)
+scheduler.start()
+
+@app.get("/")
+def root():
+    return {"message": "API Berita BIGREDS aktif ✅"}

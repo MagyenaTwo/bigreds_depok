@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, Text, func
 from database import Base
 
 class Match(Base):
@@ -36,3 +36,13 @@ class GalleryNobar(Base):
     title = Column(String)
     image_url = Column(String)
     tanggal = Column(DateTime) 
+
+class Berita(Base):
+    __tablename__ = "berita"  # ✅ Ganti nama tabel di sini
+
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String, unique=True, index=True, nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=True)
+    cover_image = Column(String, nullable=True)
+    publish_date = Column(DateTime, nullable=True)
