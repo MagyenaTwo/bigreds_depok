@@ -122,33 +122,23 @@
     <div class="swiper-pagination" style="bottom: 10px;"></div>
   </div>
 </div>
-
-
-
-<!-- News & Update Section -->
-<div class="section news-update">
+<section class="section berita-section">
   <h2>News & Update</h2>
-  <p>Simak kabar terbaru dari Bigreds Depok di media sosial kami!</p>
   <div class="news-cards">
-    <!-- Instagram -->
-    <a href="https://instagram.com/bigreds_depok" target="_blank" class="news-card">
-      <img src="/static/img/igpost1.jpeg" alt="IG Post">
-      <p>Keseruan nobar sebelumnya di Instagram kami! 📸</p>
-    </a>
-
-    <!-- Facebook (update) -->
-    <a href="https://www.facebook.com/BigredsDepok" target="_blank" class="news-card">
-      <img src="/static/img/fbpost1.jpeg" alt="Facebook Post">
-      <p>Lihat info resmi event dan foto-foto eksklusif hanya di Facebook kami! 📘</p>
-    </a>
-
-    <!-- Twitter / X (update) -->
-    <a href="https://twitter.com/BIGREDS_Depok" target="_blank" class="news-card">
-      <img src="/static/img/xpost1.jpeg" alt="X / Twitter Post">
-      <p>Ikuti update skor, lineup, dan komentar live match di akun X kami! 🐦</p>
-    </a>
+    {% for berita in berita_items %}
+      <a href="#" class="news-card">
+        <img src="{{ berita.cover_image or '/static/img/default.jpg' }}" alt="{{ berita.title }}">
+        <div class="news-content">
+          <h3>{{ berita.title }}</h3>
+          <p>{{ berita.content[:100] }}...</p>
+          <small>{{ berita.publish_date.strftime('%d %B %Y') }}</small>
+        </div>
+      </a>
+    {% endfor %}
   </div>
-</div>
+</section>
+
+
 <!-- Footer -->
 <footer class="footer">
   <div class="footer-container">

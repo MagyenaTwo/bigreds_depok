@@ -70,7 +70,12 @@ async def read_form(request: Request):
         .order_by(Match.match_datetime.asc())
         .first()
     )
-
+    berita_terbaru = (
+        db.query(Berita)
+        .order_by(Berita.publish_date.desc())
+        .limit(5)
+        .all()
+    )
     db.close()
 
     formatted_datetime = format_datetime_indo(match.match_datetime) if match else None
@@ -88,7 +93,8 @@ async def read_form(request: Request):
         "request": request,
         "match": match,
         "formatted_datetime": formatted_datetime,
-        "gallery_items": gallery_data.data  # Tambahan untuk galeri
+        "gallery_items": gallery_data.data , 
+        "berita_items": berita_terbaru
     })
 
 
