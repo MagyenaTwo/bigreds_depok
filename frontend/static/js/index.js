@@ -107,3 +107,28 @@ function validasiJumlahTiket(input) {
     input.value = 1;
   }
 }
+//JS MAINTENANCE TIKET
+  window.addEventListener("DOMContentLoaded", () => {
+    
+    document.getElementById("popupOverlay").style.display = "flex";
+    document.getElementById("popupSuccess").innerHTML = `
+      <div id="lottieSuccess" style="width: 180px; height: 180px; margin: 0 auto 15px;"></div>
+      <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+      <p style="color: #444;">Ticket purchase is currently under development.</p>
+      <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
+        background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
+        font-weight: bold; transition: background 0.3s;">
+        Back to Home
+      </a>
+    `;
+
+    // Tambah animasi Lottie sukses
+    lottie.loadAnimation({
+      container: document.getElementById('lottieSuccess'),
+      renderer: 'svg',
+      loop: false,
+      autoplay: true,
+      path: 'https://assets6.lottiefiles.com/packages/lf20_jbrw3hcz.json' // animasi coming soon
+    });
+  });
+
