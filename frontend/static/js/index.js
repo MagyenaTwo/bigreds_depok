@@ -131,24 +131,41 @@ function validasiJumlahTiket(input) {
       path: 'https://assets6.lottiefiles.com/packages/lf20_jbrw3hcz.json' // animasi coming soon
     });
   });
-function showModal(el) {
-  // Ambil data dari elemen yang diklik
+
+  async function showModal(el) {
   const title = el.dataset.title;
-  const content = el.dataset.content;
   const image = el.dataset.image;
   const date = el.dataset.date;
+  const slug = el.dataset.slug;
 
-  // Isi elemen modal
   document.getElementById('modalTitle').innerText = title;
   document.getElementById('modalDate').innerText = date;
-
-  // Jika content mengandung HTML (opsional: innerHTML)
-  document.getElementById('modalContent').innerHTML = content;
-
   document.getElementById('modalImage').src = image;
 
-  // Tampilkan modal
+  // Tampilkan loading sementara
+  document.getElementById('modalContent').innerHTML = "<em>Loading...</em>";
   document.getElementById('newsModal').style.display = 'flex';
+
+  try {
+    const res = await fetch(`https://backend.liverpoolfc.com/lfc-rest-api/id/news/${slug}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+      }
+    });
+    const data = await res.json();
+
+    // Cari block dengan type = formattedText
+    const block = data.blocks.find(b => b.type === "formattedText");
+    const html = block ? block.formattedText : "<em>Konten tidak tersedia.</em>";
+
+    // Masukkan konten ke modal
+    document.getElementById('modalContent').innerHTML = html;
+
+  } catch (err) {
+    document.getElementById('modalContent').innerHTML = "<em>Gagal memuat konten.</em>";
+    console.error("❌ Error loading detail berita:", err);
+  }
 }
 
 function closeModal() {

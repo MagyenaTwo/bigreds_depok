@@ -129,10 +129,11 @@
     {% for berita in berita_items %}
       <a href="#" class="news-card"
    data-title="{{ berita.title }}"
-   data-content="{{ berita.content|e }}"
    data-image="{{ berita.cover_image or '/static/img/default.jpg' }}"
    data-date="{{ berita.publish_date.strftime('%d %B %Y') }}"
+   data-slug="{{ berita.slug }}"
    onclick="showModal(this)">
+
   <img src="{{ berita.cover_image or '/static/img/default.jpg' }}" alt="{{ berita.title }}">
   <div class="news-content">
     <h3>{{ berita.title }}</h3>
