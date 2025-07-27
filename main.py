@@ -330,9 +330,10 @@ async def upload_gallery_nobar(
 @app.get("/pengurus", response_class=HTMLResponse)
 async def pengurus(request: Request):
     return templates.TemplateResponse("pengurus.html", {"request": request})
+
 # Fungsi utama untuk sinkronisasi berita
 def fetch_and_save_news():
-    url = "https://backend.liverpoolfc.com/lfc-rest-api/id/news?perPage=20"
+    url = "https://backend.liverpoolfc.com/lfc-rest-api/id/news"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Accept": "application/json"

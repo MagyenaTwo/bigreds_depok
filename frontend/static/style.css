@@ -622,7 +622,7 @@ body {
 }
 
 .news-card img {
-  width: 150px;
+  width: 300px;
   height: auto;
   object-fit: cover;
   flex-shrink: 0;
