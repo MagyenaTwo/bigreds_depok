@@ -673,3 +673,110 @@ body {
     text-align: center;
   }
 }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal content box */
+.modal-content {
+  background-color: #fff;
+  padding: 30px 30px 20px;
+  max-width: 700px;
+  width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: slideUp 0.4s ease;
+  font-family: 'Segoe UI', sans-serif;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* Tutup button */
+.close {
+  position: absolute;
+  top: 0px;
+  right: 20px;
+  background-color: #e53935;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.close:hover {
+  background-color: #c62828;
+}
+
+/* Image */
+.modal-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  object-fit: cover;
+}
+
+/* Title */
+#modalTitle {
+  font-size: 1.7rem;
+  margin-bottom: 8px;
+  color: #222;
+  font-weight: 600;
+}
+
+/* Date */
+#modalDate {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Content */
+#modalContent {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .modal-content {
+    padding: 20px;
+  }
+  #modalTitle {
+    font-size: 1.4rem;
+  }
+  .close {
+    padding: 0px 0px;
+    font-size: 13px;
+  }
+}

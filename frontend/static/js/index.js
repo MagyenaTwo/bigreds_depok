@@ -131,4 +131,26 @@ function validasiJumlahTiket(input) {
       path: 'https://assets6.lottiefiles.com/packages/lf20_jbrw3hcz.json' // animasi coming soon
     });
   });
+function showModal(el) {
+  // Ambil data dari elemen yang diklik
+  const title = el.dataset.title;
+  const content = el.dataset.content;
+  const image = el.dataset.image;
+  const date = el.dataset.date;
 
+  // Isi elemen modal
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modalDate').innerText = date;
+
+  // Jika content mengandung HTML (opsional: innerHTML)
+  document.getElementById('modalContent').innerHTML = content;
+
+  document.getElementById('modalImage').src = image;
+
+  // Tampilkan modal
+  document.getElementById('newsModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('newsModal').style.display = 'none';
+}

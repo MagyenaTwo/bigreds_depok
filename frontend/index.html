@@ -126,17 +126,33 @@
   <h2>News & Update</h2>
   <div class="news-cards">
     {% for berita in berita_items %}
-      <a href="#" class="news-card">
-        <img src="{{ berita.cover_image or '/static/img/default.jpg' }}" alt="{{ berita.title }}">
-        <div class="news-content">
-          <h3>{{ berita.title }}</h3>
-          <p>{{ berita.content[:100] }}...</p>
-          <small>{{ berita.publish_date.strftime('%d %B %Y') }}</small>
-        </div>
-      </a>
+      <a href="#" class="news-card"
+   data-title="{{ berita.title }}"
+   data-content="{{ berita.content|e }}"
+   data-image="{{ berita.cover_image or '/static/img/default.jpg' }}"
+   data-date="{{ berita.publish_date.strftime('%d %B %Y') }}"
+   onclick="showModal(this)">
+  <img src="{{ berita.cover_image or '/static/img/default.jpg' }}" alt="{{ berita.title }}">
+  <div class="news-content">
+    <h3>{{ berita.title }}</h3>
+    <p>{{ berita.content[:100] }}...</p>
+    <small>{{ berita.publish_date.strftime('%d %B %Y') }}</small>
+  </div>
+</a>
+
     {% endfor %}
   </div>
 </section>
+<div id="newsModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <button class="close" onclick="closeModal()">Close</button>
+
+    <img id="modalImage" src="" alt="" style="max-width:100%; height:auto; border-radius:10px;">
+    <h3 id="modalTitle"></h3>
+    <small id="modalDate"></small>
+    <p id="modalContent"></p>
+  </div>
+</div>
 
 
 <!-- Footer -->
@@ -173,7 +189,7 @@
   </div>
 </div>
 </footer>
-<script src="/static/js/index.js?v=1"></script>
+<script src="/static/js/index.js"></script>
 <!-- AOS JS -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
