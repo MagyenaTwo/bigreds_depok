@@ -8,7 +8,7 @@
 <!-- Font Awesome CDN (Free) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-papdzFfZ3vmB/9M0Yf8F0vOcimL7wtXUgYekUZ+P3JrNWh6Yt1pUzx2Ao/xwYd9Lxss69YXTXFL7wBSV7XyJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <link rel="stylesheet" href="/static/cms.css?v=2">
+  <link rel="stylesheet" href="{{ 'cms.css' | versioned }}">
   
 </head>
 <body>
@@ -44,6 +44,6 @@
       document.getElementById('overlay').classList.toggle('active');
     }
   </script>
-  <script src="/static/js/cms.js?v=1"></script>
+  <script src="{{ 'js/index.js' | versioned }}"></script>
 </body>
 </html>
