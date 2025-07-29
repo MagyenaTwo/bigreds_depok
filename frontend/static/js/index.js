@@ -31,112 +31,102 @@ document.addEventListener("DOMContentLoaded", function () {
     const selected = statusSelect.value;
     if (selected === "member") {
       nominalInfo.style.display = "block";
-      nominalInfo.textContent = "Biaya untuk Member: Rp20.000";
-    } else if (selected === "non_member") {
+      nominalInfo.textContent = "Biaya untuk Member: Rp20.000 / Tiket";
+    } else if (selected === "non member") {
       nominalInfo.style.display = "block";
-      nominalInfo.textContent = "Biaya untuk Non Member: Rp25.000";
+      nominalInfo.textContent = "Biaya untuk Non Member: Rp25.000 / Tiket";
     } else {
       nominalInfo.style.display = "none";
     }
   });
-});
+});document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('tiketForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-document.getElementById("tiketForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
 
-  const form = e.target;
-  const formData = new FormData(form);
+    document.getElementById('popupLoading').style.display = 'flex';
 
-  // Tampilkan loading popup
-  const loadingPopup = document.getElementById("popupLoading");
-  loadingPopup.style.display = "flex";
+    try {
+      const response = await fetch('/submit', {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) throw new Error('Gagal submit form');
 
-  try {
-    const response = await fetch("/submit", {
-      method: "POST",
-      body: formData
-    });
+      const result = await response.json();
+      document.getElementById('popupLoading').style.display = 'none';
 
-    loadingPopup.style.display = "none"; // Sembunyikan loading popup
+      const downloadBtn = document.getElementById('downloadTiketBtn');
+      downloadBtn.href = result.tiket_url;
+      downloadBtn.download = result.tiket_url.split('/').pop();
+      downloadBtn.addEventListener('click', async function (e) {
+        e.preventDefault();
+        const url = this.href;
+        const fileName = this.download || url.split('/').pop();
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
 
-    if (response.redirected || response.ok) {
-      // Tampilkan popup sukses
-      const popupOverlay = document.getElementById("popupOverlay");
-      popupOverlay.style.display = "flex";
+      document.getElementById('popupOverlay').style.display = 'flex';
+      successAnim.goToAndPlay(0, true); // restart animasi setiap submit
 
-      // Cegah animasi double-load
-      if (!popupOverlay.dataset.loaded) {
-        lottie.loadAnimation({
-          container: document.getElementById("lottieSuccess"),
-          renderer: "svg",
-          loop: false,
-          autoplay: true,
-          path: "/static/img/success.json"
-        });
-        popupOverlay.dataset.loaded = "true";
-      }
-    } else {
-      alert("Terjadi kesalahan. Silakan coba lagi.");
+      form.reset();
+    } catch (err) {
+      document.getElementById('popupLoading').style.display = 'none';
+      alert('Terjadi kesalahan: ' + err.message);
     }
-  } catch (error) {
-    loadingPopup.style.display = "none";
-    alert("Terjadi kesalahan jaringan.");
-  }
+  });
+
+  const successAnim = lottie.loadAnimation({
+    container: document.getElementById('lottieSuccess'),
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    path: '/static/img/success.json'
+  });
+document.getElementById('closePopup').addEventListener('click', () => {
+  document.getElementById('popupOverlay').style.display = 'none';
+  window.location.href = '/';
 });
 
-
-
-document.getElementById("downloadTiketBtn").addEventListener("click", function () {
-  setTimeout(() => {
-    window.location.href = "/";
-  }, 3000); 
 });
 
-function validasiJumlahTiket(input) {
-  const val = input.value;
-  // Hapus karakter non-angka
-  input.value = val.replace(/[^0-9]/g, '');
+// window.addEventListener("DOMContentLoaded", () => {
+//   const popupOverlay = document.getElementById("popupOverlay");
+//   const popupSuccess = document.getElementById("popupSuccess");
 
-  // Jika lebih dari 4, batasi ke 4
-  if (parseInt(input.value) > 4) {
-    input.value = 4;
-  }
-
-  // Jika kurang dari 1 tapi tidak kosong, set ke 1
-  if (input.value !== '' && parseInt(input.value) < 1) {
-    input.value = 1;
-  }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const popupOverlay = document.getElementById("popupOverlay");
-  const popupSuccess = document.getElementById("popupSuccess");
-
-  // Tambahkan kelas awal fade-in
-  popupSuccess.classList.add("fade-in");
+//   // Tambahkan kelas awal fade-in
+//   popupSuccess.classList.add("fade-in");
   
-  // Isi kontennya terlebih dahulu
-  popupSuccess.innerHTML = `
-    <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
-      <source src="/static/img/maintenance.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-    <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
-    <p style="color: #444;">Ticket purchase is currently under development.</p>
-    <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
-      background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
-      font-weight: bold; transition: background 0.3s;">
-      Back to Home
-    </a>
-  `;
+//   // Isi kontennya terlebih dahulu
+//   popupSuccess.innerHTML = `
+//     <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
+//       <source src="/static/img/maintenance.mp4" type="video/mp4">
+//       Your browser does not support the video tag.
+//     </video>
+//     <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+//     <p style="color: #444;">Ticket purchase is currently under development.</p>
+//     <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
+//       background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
+//       font-weight: bold; transition: background 0.3s;">
+//       Back to Home
+//     </a>
+//   `;
 
-  popupOverlay.style.display = "flex";
+//   popupOverlay.style.display = "flex";
 
-  // Tambahkan efek show setelah delay sedikit
-  setTimeout(() => {
-    popupSuccess.classList.add("show");
-  }, 100); // 100ms delay agar transisi terasa alami
-});
+//   // Tambahkan efek show setelah delay sedikit
+//   setTimeout(() => {
+//     popupSuccess.classList.add("show");
+//   }, 100); // 100ms delay agar transisi terasa alami
+// });
 
 
    

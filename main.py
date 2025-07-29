@@ -1,8 +1,8 @@
 import shutil
 from typing import List
 from uuid import uuid4
-from fastapi import FastAPI, File, Request, Form, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, File, HTTPException, Request, Form, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import pytz
@@ -26,7 +26,8 @@ from fastapi.responses import RedirectResponse
 from werkzeug.security import generate_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
-
+from PIL import Image, ImageDraw, ImageFont
+import io, qrcode
 load_dotenv()
 
 app = FastAPI()
@@ -114,11 +115,8 @@ async def read_form(request: Request):
 @app.get("/form", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("form.html", {"request": request})
-
-
 @app.post("/submit")
 async def submit_form(
-    request: Request,
     nama: str = Form(...),
     status: str = Form(...),
     id_card: str = Form(None),
@@ -127,18 +125,16 @@ async def submit_form(
     bukti_transfer: UploadFile = File(...),
 ):
     ext = bukti_transfer.filename.split(".")[-1]
-    filename = f"bukti/{uuid4()}.{ext}"
+    filename_bukti = f"bukti/{uuid4()}.{ext}"
     content = await bukti_transfer.read()
 
-    upload_res = supabase.storage.from_("bukti").upload(
-        path=filename,
+    supabase.storage.from_("bukti").upload(
+        path=filename_bukti,
         file=content,
         file_options={"content-type": bukti_transfer.content_type},
     )
+    bukti_url = f"{SUPABASE_URL}/storage/v1/object/public/bukti/{filename_bukti}"
 
-    bukti_url = f"{SUPABASE_URL}/storage/v1/object/public/bukti/{filename}"
-
-    # 2. Simpan data ke DB
     db: Session = SessionLocal()
     new_order = TicketOrder(
         nama=nama,
@@ -151,16 +147,137 @@ async def submit_form(
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
+    ticket_id = new_order.id
+
+    width, height = 600, 900
+    img = Image.new("RGB", (width, height), color="#fdfdfc")
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font_title = ImageFont.truetype("frontend/static/fonts/DejaVuSans-Bold.ttf", 42)
+        font_text = ImageFont.truetype("frontend/static/fonts/DejaVuSans.ttf", 28)
+        font_small = ImageFont.truetype("frontend/static/fonts/DejaVuSans.ttf", 24)
+
+    except:
+        font_title = ImageFont.load_default()
+        font_text = ImageFont.load_default()
+        font_small = ImageFont.load_default()
+
+    margin = 20
+    draw.rectangle([(margin, margin), (width-margin, height-margin)], outline="#999", width=3)
+
+    # HEADER
+    logo_size = 120
+    try:
+        logo_header = Image.open("frontend/static/img/logo.jpeg").resize((logo_size, logo_size))
+        img.paste(logo_header, (width//2 - 250, 50))
+    except:
+        pass
+    draw.text((width//2 - 120, 80), "TIKET NOBAR\nBIGREDS DEPOK", fill="black", font=font_title, align="center")
+
+    header_bottom = 200
+    draw.line([(margin, header_bottom), (width-margin, header_bottom)], fill="#999", width=2)
+
+    # INFO
+    info_y = header_bottom + 40
+    label_x = 60
+    value_x = 240 
+    line_gap = 60
+
+    draw.text((label_x, info_y), "Nama", fill="black", font=font_text)
+    draw.text((label_x+100, info_y), f": {nama}", fill="black", font=font_text)
+
+    draw.text((label_x, info_y + line_gap), "Status", fill="black", font=font_text)
+    draw.text((label_x+100, info_y + line_gap), f": {status}", fill="black", font=font_text)
+
+    draw.text((label_x, info_y + line_gap*2), "Jumlah", fill="black", font=font_text)
+    draw.text((label_x+100, info_y + line_gap*2), f": {jumlah} tiket", fill="black", font=font_text)
+
+    # Logo kecil di bawah jumlah
+    try:
+        logo_bottom = Image.open("static/img/logo.jpeg").resize((120, 120))
+        logo_x = label_x + 40
+        logo_y = info_y + line_gap*2 + 80
+        img.paste(logo_bottom, (logo_x, logo_y))
+    except:
+        pass
+
+        # QR CODE posisinya di kanan sejajar info
+    qr_data = f"TiketID:{ticket_id}|Nama:{nama}|Status:{status}|Jumlah:{jumlah}"
+    qr = qrcode.QRCode(box_size=8, border=2)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white").resize((260, 260))
+
+    qr_x = width - margin - 400
+    qr_y = info_y + 200   # sejajar dengan nama
+    img.paste(qr_img, (qr_x, qr_y))
+
+
+
+    # LOGO BAWAH
+    try:
+        logo_bottom = Image.open("static/img/logo.jpeg").resize((180, 180))
+        img.paste(logo_bottom, (margin+40, qr_y))
+    except:
+        pass
+
+    # FOOTER
+    footer_top = height - 140
+    draw.line([(margin, footer_top), (width-margin, footer_top)], fill="#999", width=2)
+    footer_text = "Harap tunjukkan tiket ini\n ke petugas tiket"
+    bbox = draw.multiline_textbbox((0, 0), footer_text, font=font_small, align="center")
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
+    draw.multiline_text(
+        ((width-w)/2, footer_top+30),
+        footer_text,
+        fill="black",
+        font=font_small,
+        align="center"
+    )
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    filename_tiket = f"qr/tiket_{ticket_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+
+    supabase.storage.from_("tiket").upload(
+        path=filename_tiket,
+        file=buffer.getvalue(),
+        file_options={"content-type": "image/png"},
+    )
+    ticket_url = f"{SUPABASE_URL}/storage/v1/object/public/tiket/{filename_tiket}"
+
+    db.query(TicketOrder).filter(TicketOrder.id == ticket_id).update({
+        "tiket_filename": filename_tiket,
+        "tiket_url": ticket_url
+    })
+    db.commit()
     db.close()
 
-    # 3. Redirect ke halaman QR atau sukses
-    return RedirectResponse(url="/success", status_code=302)
+    return JSONResponse({
+        "status": "success",
+        "tiket_url": ticket_url
+    })
 
 
-@app.get("/success", response_class=HTMLResponse)
-async def success_page(request: Request):
-    return templates.TemplateResponse("sukses.html", {"request": request})
 
+
+@app.get("/ticket/{ticket_id}")
+def get_ticket(ticket_id: int):
+    db = SessionLocal()
+    order = db.query(TicketOrder).filter(TicketOrder.id == ticket_id).first()
+    db.close()
+
+    if not order or not order.tiket_file:
+        raise HTTPException(status_code=404, detail="Tiket tidak ditemukan")
+
+    return StreamingResponse(
+        io.BytesIO(order.tiket_file),
+        media_type="image/png",
+        headers={"Content-Disposition": f'attachment; filename="{order.tiket_filename}"'}
+    )
 
 @app.get("/cms")
 def cms_page(request: Request, page: int = 1):

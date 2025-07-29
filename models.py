@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, func
+from sqlalchemy import Column, Integer, LargeBinary, String, DateTime, Text, func
 from database import Base
 
 class Match(Base):
@@ -21,6 +21,9 @@ class TicketOrder(Base):
     whatsapp = Column(String(20), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     bukti_transfer_url = Column(String(255), nullable=False) 
+    tiket_file = Column(LargeBinary)      # simpan gambar tiket
+    tiket_filename = Column(String(255))  # nama file tiket
+    tiket_url = Column(String(255), nullable=True)
 
 class User(Base):
     __tablename__ = "users"
