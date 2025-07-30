@@ -6,12 +6,13 @@
 <h1>DASHBOARD</h1>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
   <input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="search-input" onkeyup="filterTable()" style="flex: 1; max-width: 250px;">
-  <div style="font-weight: bold; font-size: 15px; display: flex; flex-direction: column; align-items: flex-end;">
-    <div><span style="font-size: 18px;">🎟️</span> Total Tiket: {{ total_pemesan }}</div>
 
-    
+  <div style="display: flex; flex-direction: row; align-items: center; gap: 20px; font-weight: bold; font-size: 15px;">
+    <div><span style="font-size: 18px;">💰</span> Total Pemasukan: {{ total_pemasukan | rupiah }}</div>
+    <div><span style="font-size: 18px;">🎟️</span> Total Tiket: {{ total_pemesan }}</div>
   </div>
 </div>
+
 
 
 <div class="table-container">
@@ -23,8 +24,8 @@
         <th>ID Card</th>
         <th>Jumlah</th>
         <th>WhatsApp</th>
-        <th>Status</th>
-        <th>Waktu Daftar</th>
+        <th>Nominal</th>
+        <th>Waktu Pembelian</th>
         <th>Bukti Transfer</th>
       </tr>
     </thead>
@@ -36,13 +37,14 @@
         <td>{{ tiket.id_card or '-' }}</td>
         <td>{{ tiket.jumlah }}</td>
         <td>
-          <a href="https://wa.me/{{ tiket.whatsapp }}" target="_blank" class="wa-link">
-            {{ tiket.whatsapp }}
-          </a>
+         <a href="https://wa.me/62{{ tiket.whatsapp[1:] }}" target="_blank" class="wa-link">
+  {{ tiket.whatsapp }}
+</a>
+
         </td>
-        <td>
-          <span class="status-label {{ tiket.status|lower }}">{{ tiket.status }}</span>
-        </td>
+    <td>{{ tiket.total_harga | rupiah }}</td>
+
+
         <td>{{ tiket.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
         <td>
           <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>

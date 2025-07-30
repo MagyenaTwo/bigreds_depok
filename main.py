@@ -2,7 +2,12 @@ import shutil
 from typing import List
 from uuid import uuid4
 from fastapi import FastAPI, File, HTTPException, Request, Form, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import (
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    StreamingResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import pytz
@@ -28,6 +33,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import io, qrcode
+
 load_dotenv()
 
 app = FastAPI()
@@ -73,6 +79,19 @@ def versioned_filter(filename):
 templates.env.filters["versioned"] = versioned_filter
 
 
+def format_rupiah(value):
+    if value is None:
+        return "Rp 0"
+    try:
+        return "Rp {:,}".format(int(value)).replace(",", ".")
+    except (ValueError, TypeError):
+        return "Rp 0"
+
+
+# Daftarkan filter ke environment Jinja2
+templates.env.filters["rupiah"] = format_rupiah
+
+
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
     db: Session = SessionLocal()
@@ -115,6 +134,8 @@ async def read_form(request: Request):
 @app.get("/form", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("form.html", {"request": request})
+
+
 @app.post("/submit")
 async def submit_form(
     nama: str = Form(...),
@@ -123,6 +144,7 @@ async def submit_form(
     jumlah: int = Form(...),
     whatsapp: str = Form(...),
     bukti_transfer: UploadFile = File(...),
+    total_harga: str = Form(...),
 ):
     ext = bukti_transfer.filename.split(".")[-1]
     filename_bukti = f"bukti/{uuid4()}.{ext}"
@@ -143,6 +165,7 @@ async def submit_form(
         jumlah=jumlah,
         whatsapp=whatsapp,
         bukti_transfer_url=bukti_url,
+        total_harga=total_harga,
     )
     db.add(new_order)
     db.commit()
@@ -164,40 +187,59 @@ async def submit_form(
         font_small = ImageFont.load_default()
 
     margin = 20
-    draw.rectangle([(margin, margin), (width-margin, height-margin)], outline="#999", width=3)
+    draw.rectangle(
+        [(margin, margin), (width - margin, height - margin)], outline="#999", width=3
+    )
 
     # HEADER
     logo_size = 120
     try:
-        logo_header = Image.open("frontend/static/img/logo.jpeg").resize((logo_size, logo_size))
-        img.paste(logo_header, (width//2 - 250, 50))
+        logo_header = Image.open("frontend/static/img/logo.jpeg").resize(
+            (logo_size, logo_size)
+        )
+        img.paste(logo_header, (width // 2 - 250, 50))
     except:
         pass
-    draw.text((width//2 - 120, 80), "TIKET NOBAR\nBIGREDS DEPOK", fill="black", font=font_title, align="center")
+    draw.text(
+        (width // 2 - 120, 80),
+        "TIKET NOBAR\nBIGREDS DEPOK",
+        fill="black",
+        font=font_title,
+        align="center",
+    )
 
     header_bottom = 200
-    draw.line([(margin, header_bottom), (width-margin, header_bottom)], fill="#999", width=2)
+    draw.line(
+        [(margin, header_bottom), (width - margin, header_bottom)], fill="#999", width=2
+    )
 
     # INFO
     info_y = header_bottom + 40
     label_x = 60
-    value_x = 240 
+    value_x = 240
     line_gap = 60
 
     draw.text((label_x, info_y), "Nama", fill="black", font=font_text)
-    draw.text((label_x+100, info_y), f": {nama}", fill="black", font=font_text)
+    draw.text((label_x + 100, info_y), f": {nama}", fill="black", font=font_text)
 
     draw.text((label_x, info_y + line_gap), "Status", fill="black", font=font_text)
-    draw.text((label_x+100, info_y + line_gap), f": {status}", fill="black", font=font_text)
+    draw.text(
+        (label_x + 100, info_y + line_gap), f": {status}", fill="black", font=font_text
+    )
 
-    draw.text((label_x, info_y + line_gap*2), "Jumlah", fill="black", font=font_text)
-    draw.text((label_x+100, info_y + line_gap*2), f": {jumlah} tiket", fill="black", font=font_text)
+    draw.text((label_x, info_y + line_gap * 2), "Jumlah", fill="black", font=font_text)
+    draw.text(
+        (label_x + 100, info_y + line_gap * 2),
+        f": {jumlah} tiket",
+        fill="black",
+        font=font_text,
+    )
 
     # Logo kecil di bawah jumlah
     try:
         logo_bottom = Image.open("static/img/logo.jpeg").resize((120, 120))
         logo_x = label_x + 40
-        logo_y = info_y + line_gap*2 + 80
+        logo_y = info_y + line_gap * 2 + 80
         img.paste(logo_bottom, (logo_x, logo_y))
     except:
         pass
@@ -210,37 +252,39 @@ async def submit_form(
     qr_img = qr.make_image(fill_color="black", back_color="white").resize((260, 260))
 
     qr_x = width - margin - 400
-    qr_y = info_y + 200   # sejajar dengan nama
+    qr_y = info_y + 200  # sejajar dengan nama
     img.paste(qr_img, (qr_x, qr_y))
-
-
 
     # LOGO BAWAH
     try:
         logo_bottom = Image.open("static/img/logo.jpeg").resize((180, 180))
-        img.paste(logo_bottom, (margin+40, qr_y))
+        img.paste(logo_bottom, (margin + 40, qr_y))
     except:
         pass
 
     # FOOTER
     footer_top = height - 140
-    draw.line([(margin, footer_top), (width-margin, footer_top)], fill="#999", width=2)
+    draw.line(
+        [(margin, footer_top), (width - margin, footer_top)], fill="#999", width=2
+    )
     footer_text = "Harap tunjukkan tiket ini\n ke petugas tiket"
     bbox = draw.multiline_textbbox((0, 0), footer_text, font=font_small, align="center")
     w = bbox[2] - bbox[0]
     h = bbox[3] - bbox[1]
     draw.multiline_text(
-        ((width-w)/2, footer_top+30),
+        ((width - w) / 2, footer_top + 30),
         footer_text,
         fill="black",
         font=font_small,
-        align="center"
+        align="center",
     )
 
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     buffer.seek(0)
-    filename_tiket = f"qr/tiket_{ticket_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+    filename_tiket = (
+        f"qr/tiket_{ticket_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+    )
 
     supabase.storage.from_("tiket").upload(
         path=filename_tiket,
@@ -249,19 +293,13 @@ async def submit_form(
     )
     ticket_url = f"{SUPABASE_URL}/storage/v1/object/public/tiket/{filename_tiket}"
 
-    db.query(TicketOrder).filter(TicketOrder.id == ticket_id).update({
-        "tiket_filename": filename_tiket,
-        "tiket_url": ticket_url
-    })
+    db.query(TicketOrder).filter(TicketOrder.id == ticket_id).update(
+        {"tiket_filename": filename_tiket, "tiket_url": ticket_url}
+    )
     db.commit()
     db.close()
 
-    return JSONResponse({
-        "status": "success",
-        "tiket_url": ticket_url
-    })
-
-
+    return JSONResponse({"status": "success", "tiket_url": ticket_url})
 
 
 @app.get("/ticket/{ticket_id}")
@@ -276,8 +314,11 @@ def get_ticket(ticket_id: int):
     return StreamingResponse(
         io.BytesIO(order.tiket_file),
         media_type="image/png",
-        headers={"Content-Disposition": f'attachment; filename="{order.tiket_filename}"'}
+        headers={
+            "Content-Disposition": f'attachment; filename="{order.tiket_filename}"'
+        },
     )
+
 
 @app.get("/cms")
 def cms_page(request: Request, page: int = 1):
@@ -361,6 +402,9 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
 
     total_pemesan = total_items
 
+    # ✅ Hitung total pemasukan (gunakan func.sum untuk efisiensi)
+    total_pemasukan = db.query(func.sum(TicketOrder.total_harga)).scalar() or 0
+
     return templates.TemplateResponse(
         "cms_tiket.html",
         {
@@ -369,6 +413,7 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
             "current_page": page,
             "total_pages": total_pages,
             "total_pemesan": total_pemesan,
+            "total_pemasukan": total_pemasukan,
         },
     )
 

@@ -23,23 +23,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
-document.addEventListener("DOMContentLoaded", function () {
-  const statusSelect = document.getElementById("status");
-  const nominalInfo = document.getElementById("nominalInfo");
 
-  statusSelect.addEventListener("change", function () {
-    const selected = statusSelect.value;
-    if (selected === "member") {
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("tiketForm");
+
+  const statusSelect = form.querySelector('[name="status"]');
+  const jumlahTiketInput = form.querySelector('[name="jumlah"]');
+  const nominalInfo = document.getElementById("nominalInfo");
+  const totalHargaInput = form.querySelector('[name="total_harga"]');
+
+  function updateHarga() {
+    const status = statusSelect.value;
+    const jumlah = parseInt(jumlahTiketInput.value) || 0;
+
+    let hargaPerTiket = 0;
+    if (status === "member") {
+      hargaPerTiket = 20000;
+    } else if (status === "non member") {
+      hargaPerTiket = 30000;
+    }
+
+    const total = hargaPerTiket * jumlah;
+    if (status && jumlah > 0) {
       nominalInfo.style.display = "block";
-      nominalInfo.textContent = "Biaya untuk Member: Rp20.000 / Tiket";
-    } else if (selected === "non member") {
-      nominalInfo.style.display = "block";
-      nominalInfo.textContent = "Biaya untuk Non Member: Rp25.000 / Tiket";
+      nominalInfo.textContent = `Total yang harus di Bayar: Rp ${total.toLocaleString("id-ID")}`;
     } else {
       nominalInfo.style.display = "none";
     }
-  });
-});document.addEventListener('DOMContentLoaded', () => {
+
+    totalHargaInput.value = total;
+  }
+
+  statusSelect.addEventListener("change", updateHarga);
+  jumlahTiketInput.addEventListener("input", updateHarga);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tiketForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
