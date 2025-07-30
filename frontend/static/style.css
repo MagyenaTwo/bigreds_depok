@@ -792,6 +792,7 @@ body {
 @media (max-width: 500px) {
   .modal-content {
     padding: 20px;
+    margin-top: 50px;
   }
   modal-content img {
  margin-top: 20px;
