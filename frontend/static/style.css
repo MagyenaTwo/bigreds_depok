@@ -43,6 +43,7 @@ body {
   margin-left: 0;
 }
 /* navbar */
+
 .header {
   position: relative;
   height: 400px;
@@ -54,19 +55,98 @@ body {
   text-shadow: 1px 1px 2px black;
   text-align: center;
   padding: 0 20px;
-  background-size: cover;
-  background-position: center;
-  animation: slideShow 15s infinite ease-in-out;
+  background-color: black;
   overflow: hidden;
+  will-change: transform;
 }
 
-.header::before {
+.header::before,
+.header::after {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* overlay gelap agar teks tetap kebaca */
-  z-index: 1;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+  z-index: 0;
+  will-change: opacity, background-image;
+  transform: translateZ(0); /* Trik agar diproses GPU */
 }
+
+/* Saat before ditampilkan */
+.show-before::before {
+  background-image: var(--before-bg);
+  opacity: 1;
+}
+.show-before::after {
+  opacity: 0;
+}
+
+/* Saat after ditampilkan */
+.show-after::after {
+  background-image: var(--after-bg);
+  opacity: 1;
+}
+.show-after::before {
+  opacity: 0;
+}
+.header {
+  position: relative;
+  height: 400px;
+  display: flex;
+  margin-top: -10px;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  text-align: center;
+  padding: 0 20px;
+  background-color: black;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.header::before,
+.header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+  z-index: 0;
+  will-change: opacity, background-image;
+  transform: translateZ(0); /* Trik agar diproses GPU */
+}
+
+/* Saat before ditampilkan */
+.show-before::before {
+  background-image: var(--before-bg);
+  opacity: 1;
+}
+.show-before::after {
+  opacity: 0;
+}
+
+/* Saat after ditampilkan */
+.show-after::after {
+  background-image: var(--after-bg);
+  opacity: 1;
+}
+.show-after::before {
+  opacity: 0;
+}
+
+
+.fade-transition::before {
+  background-image: var(--next-bg);
+  opacity: 1;
+}
+
 
 .header > div {
   position: relative;

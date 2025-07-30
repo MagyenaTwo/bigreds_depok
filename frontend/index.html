@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BIGREDS DEPOK</title>
   <link rel="stylesheet" href="{{ 'pengurus.css' | versioned }}">
-  <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
+  <link rel="stylesheet" href="/static/style.css?v=s1">
+   
+
+
+
   <!-- ?v=1 -->
   <link rel="icon" href="/static/img/logo.jpeg" type="image/png">
 <link
@@ -47,14 +51,19 @@
   </div>
 
   {% if match %}
-<div class="header">
-  <div>
+<div class="header" id="dynamic-header">
+  <div class="background-layer" id="bg-layer"></div>
+
+  <div class="content">
     <h1>Nonton Bareng {{ match.home_team }} vs {{ match.away_team }}</h1>
-    <h3 style="margin-top: 0.5em;">{{ match.competition }}</h3>
+    <h3>{{ match.competition }}</h3>
     <p>{{ formatted_datetime }} WIB • Warnoes Juanda, Depok</p>
     <a class="button" href="/form">Buy Ticket Now</a>
   </div>
 </div>
+
+<div id="gallery-data" data-gallery='{{ gallery_items | tojson | safe }}'></div>
+
 {% else %}
 <div class="header">
   <div>
@@ -226,6 +235,7 @@
       }
     }
   });
+
 </script>
 
 </body>

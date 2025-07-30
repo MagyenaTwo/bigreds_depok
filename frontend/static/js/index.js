@@ -170,3 +170,42 @@ document.getElementById('closePopup').addEventListener('click', () => {
 function closeModal() {
   document.getElementById('newsModal').style.display = 'none';
 }
+
+const rawGallery = document.getElementById("gallery-data").dataset.gallery;
+const galleryImages = JSON.parse(rawGallery);
+
+const header = document.getElementById("dynamic-header");
+let index = 1;
+let currentLayer = 'before'; // active layer
+
+function changeBackground() {
+  if (!galleryImages.length) return;
+
+  const nextImage = galleryImages[index].image_url;
+  const nextLayer = currentLayer === 'before' ? 'after' : 'before';
+
+  const img = new Image();
+  img.onload = () => {
+    header.style.setProperty(`--${nextLayer}-bg`, `url('${nextImage}')`);
+
+    // Trigger crossfade
+    header.classList.remove(`show-${currentLayer}`);
+    header.classList.add(`show-${nextLayer}`);
+
+    // Update current layer
+    currentLayer = nextLayer;
+    index = (index + 1) % galleryImages.length;
+  };
+
+  img.src = nextImage; // Preload dulu
+}
+
+// Inisialisasi gambar pertama
+window.addEventListener('DOMContentLoaded', () => {
+  if (galleryImages.length > 0) {
+    header.style.setProperty('--before-bg', `url('${galleryImages[0].image_url}')`);
+    header.classList.add('show-before');
+  }
+
+  setInterval(changeBackground, 7000); // Ubah tiap 5 detik
+});
