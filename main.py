@@ -10,6 +10,7 @@ from fastapi.responses import (
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import httpx
 import pytz
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
@@ -416,6 +417,22 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
             "total_pemasukan": total_pemasukan,
         },
     )
+
+
+@app.get("/proxy/news/{slug}")
+async def proxy_news(slug: str):
+    url = f"https://backend.liverpoolfc.com/lfc-rest-api/id/news/{slug}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            res = await client.get(url)
+            res.raise_for_status()
+        except httpx.HTTPError as e:
+            return JSONResponse(
+                status_code=500, content={"error": "Gagal mengambil berita."}
+            )
+
+    return JSONResponse(content=res.json())
 
 
 @app.get("/cms/laporan", response_class=HTMLResponse)

@@ -148,9 +148,7 @@ document.getElementById('closePopup').addEventListener('click', () => {
 // });
 
 
-   
-
-  async function showModal(el) {
+   async function showModal(el) {
   const title = el.dataset.title;
   const image = el.dataset.image;
   const date = el.dataset.date;
@@ -165,19 +163,13 @@ document.getElementById('closePopup').addEventListener('click', () => {
   document.getElementById('newsModal').style.display = 'flex';
 
   try {
-    const res = await fetch(`https://backend.liverpoolfc.com/lfc-rest-api/id/news/${slug}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-      }
-    });
+    // GUNAKAN ROUTE PROXY BACKENDMU
+    const res = await fetch(`/proxy/news/${slug}`);
     const data = await res.json();
 
-    // Cari block dengan type = formattedText
     const block = data.blocks.find(b => b.type === "formattedText");
     const html = block ? block.formattedText : "<em>Konten tidak tersedia.</em>";
 
-    // Masukkan konten ke modal
     document.getElementById('modalContent').innerHTML = html;
 
   } catch (err) {
