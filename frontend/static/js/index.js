@@ -174,38 +174,36 @@ function closeModal() {
 const rawGallery = document.getElementById("gallery-data").dataset.gallery;
 const galleryImages = JSON.parse(rawGallery);
 
-const header = document.getElementById("dynamic-header");
-let index = 1;
-let currentLayer = 'before'; // active layer
+const img1 = document.getElementById("bg1");
+const img2 = document.getElementById("bg2");
+
+let index = 0;
+let currentImg = img1;
+let nextImg = img2;
 
 function changeBackground() {
   if (!galleryImages.length) return;
 
   const nextImage = galleryImages[index].image_url;
-  const nextLayer = currentLayer === 'before' ? 'after' : 'before';
-
   const img = new Image();
+
   img.onload = () => {
-    header.style.setProperty(`--${nextLayer}-bg`, `url('${nextImage}')`);
-
-    // Trigger crossfade
-    header.classList.remove(`show-${currentLayer}`);
-    header.classList.add(`show-${nextLayer}`);
-
-    // Update current layer
-    currentLayer = nextLayer;
+    nextImg.src = nextImage;
+    nextImg.classList.add("visible");
+    currentImg.classList.remove("visible");
+    [currentImg, nextImg] = [nextImg, currentImg];
     index = (index + 1) % galleryImages.length;
   };
 
-  img.src = nextImage; // Preload dulu
+  img.src = nextImage;
 }
 
-// Inisialisasi gambar pertama
-window.addEventListener('DOMContentLoaded', () => {
+// Set gambar pertama saat load
+window.addEventListener("DOMContentLoaded", () => {
   if (galleryImages.length > 0) {
-    header.style.setProperty('--before-bg', `url('${galleryImages[0].image_url}')`);
-    header.classList.add('show-before');
+    img1.src = galleryImages[0].image_url;
+    img1.classList.add("visible");
   }
 
-  setInterval(changeBackground, 7000); // Ubah tiap 5 detik
+  setInterval(changeBackground, 7000);
 });

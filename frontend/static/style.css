@@ -51,94 +51,32 @@ body {
   margin-top: -10px;
   align-items: center;
   justify-content: center;
+  text-align: center;
   color: white;
   text-shadow: 1px 1px 2px black;
-  text-align: center;
-  padding: 0 20px;
-  background-color: black;
   overflow: hidden;
-  will-change: transform;
 }
 
-.header::before,
-.header::after {
-  content: "";
+.bg-image {
   position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: opacity 1.5s ease-in-out;
+  opacity: 0;
   z-index: 0;
-  will-change: opacity, background-image;
-  transform: translateZ(0); /* Trik agar diproses GPU */
 }
 
-/* Saat before ditampilkan */
-.show-before::before {
-  background-image: var(--before-bg);
+.bg-image.visible {
   opacity: 1;
-}
-.show-before::after {
-  opacity: 0;
+  z-index: 1;
 }
 
-/* Saat after ditampilkan */
-.show-after::after {
-  background-image: var(--after-bg);
-  opacity: 1;
-}
-.show-after::before {
-  opacity: 0;
-}
-.header {
+.content {
   position: relative;
-  height: 400px;
-  display: flex;
-  margin-top: -10px;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-shadow: 1px 1px 2px black;
-  text-align: center;
+  z-index: 2;
   padding: 0 20px;
-  background-color: black;
-  overflow: hidden;
-  will-change: transform;
-}
-
-.header::before,
-.header::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transition: opacity 2s ease-in-out;
-  z-index: 0;
-  will-change: opacity, background-image;
-  transform: translateZ(0); /* Trik agar diproses GPU */
-}
-
-/* Saat before ditampilkan */
-.show-before::before {
-  background-image: var(--before-bg);
-  opacity: 1;
-}
-.show-before::after {
-  opacity: 0;
-}
-
-/* Saat after ditampilkan */
-.show-after::after {
-  background-image: var(--after-bg);
-  opacity: 1;
-}
-.show-after::before {
-  opacity: 0;
 }
 
 
