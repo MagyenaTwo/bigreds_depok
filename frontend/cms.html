@@ -14,6 +14,16 @@
 <label for="tanggal">Tanggal & Waktu</label><br>
 <input type="datetime-local" id="tanggal" name="tanggal" required style="margin-bottom: 10px;"><br>
 
+ 
+<label for="kategori">Kategori</label><br>
+<select id="kategori" name="kategori" required style="width: 100%; margin-bottom: 10px; padding: 5px;">
+  <option value="">-- Pilih Kategori --</option>
+  <option value="matchday">Matchday</option>
+  <option value="community">Community</option>
+  <option value="event">Event</option>
+</select><br>
+
+
   <label for="image">Pilih Gambar/Video</label><br>
   <input type="file" id="image" name="image" multiple accept="image/*,video/*" required style="margin-bottom: 10px;"><br>
 
@@ -31,32 +41,34 @@
 <!-- Media List Table -->
 <div class="table-container">
   <table class="styled-table" id="mediaTable">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Judul</th>
-        <th>Tanggal</th>
-        <th>Lihat</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for media in images %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ media.title }}</td>
-        <td>
-  {% if media.tanggal %}
-    {{ media.tanggal|datetimeformat('%d-%m-%Y') }}
-  {% else %}
-    -
-  {% endif %}
-</td>
+  <thead>
+  <tr>
+    <th>No</th>
+    <th>Judul</th>
+    <th>Kategori</th>
+    <th>Tanggal</th>
+    <th>Lihat</th>
+  </tr>
+</thead>
+<tbody>
+  {% for media in images %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td>{{ media.title }}</td>
+    <td>{{ media.kategori or '-' }}</td> <!-- tampilkan kategori -->
+    <td>
+      {% if media.tanggal %}
+        {{ media.tanggal|datetimeformat('%d-%m-%Y') }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+    <td><a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a></td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
 
-        <td><a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
   <div class="pagination" style="margin-top: 25px;">
   {% if current_page > 1 %}
     <a href="?page={{ current_page - 1 }}">&laquo; Prev</a>

@@ -490,15 +490,14 @@ async def buat_akun_post(
 async def upload_gallery_nobar(
     title: str = Form(...),
     tanggal: str = Form(...),  # Tanggal dari input HTML
+    kategori: str = Form(...),  # Tambahkan kategori
     image: List[UploadFile] = File(...),
 ):
     db: Session = SessionLocal()
     uploaded_urls = []
 
     try:
-        tanggal_dt = datetime.strptime(
-            tanggal, "%Y-%m-%dT%H:%M"
-        )  # Format dari input type datetime-local
+        tanggal_dt = datetime.strptime(tanggal, "%Y-%m-%dT%H:%M")
     except ValueError:
         return {"error": "Format tanggal tidak valid"}
 
@@ -520,7 +519,12 @@ async def upload_gallery_nobar(
         media_url = f"{SUPABASE_URL}/storage/v1/object/public/nobar/{filename}"
         uploaded_urls.append(media_url)
 
-        new_item = GalleryNobar(title=title, image_url=media_url, tanggal=tanggal_dt)
+        new_item = GalleryNobar(
+            title=title,
+            image_url=media_url,
+            tanggal=tanggal_dt,
+            kategori=kategori  # simpan kategori
+        )
         db.add(new_item)
 
     db.commit()
@@ -532,6 +536,22 @@ async def upload_gallery_nobar(
 @app.get("/pengurus", response_class=HTMLResponse)
 async def pengurus(request: Request):
     return templates.TemplateResponse("pengurus.html", {"request": request})
+
+@app.get("/gallery", response_class=HTMLResponse)
+async def gallery(request: Request):
+    db: Session = SessionLocal()
+    images = db.query(GalleryNobar).order_by(GalleryNobar.tanggal.desc()).all()
+    db.close()
+    categories = list({img.kategori for img in images if img.kategori})
+
+    return templates.TemplateResponse(
+        "gallery.html",
+        {
+            "request": request,
+            "images": images,
+            "categories": categories
+        }
+    )
 
 
 # Fungsi utama untuk sinkronisasi berita

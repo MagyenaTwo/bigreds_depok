@@ -44,6 +44,7 @@ class GalleryNobar(Base):
     title = Column(String)
     image_url = Column(String)
     tanggal = Column(DateTime)
+    kategori = Column(String, default="event") 
 
 
 class Berita(Base):
