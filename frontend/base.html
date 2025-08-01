@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}CMS Bigreds Depok{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+
   <!-- Font Awesome CDN (Free) -->
 <!-- Font Awesome CDN (Free) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-papdzFfZ3vmB/9M0Yf8F0vOcimL7wtXUgYekUZ+P3JrNWh6Yt1pUzx2Ao/xwYd9Lxss69YXTXFL7wBSV7XyJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <link rel="stylesheet" href="{{ 'cms.css' | versioned }}">
+   <link rel="stylesheet" href="{{ 'cms.css' | versioned }}">
   
 </head>
 <body>
@@ -41,7 +43,7 @@
   <script>
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('overlay').classList.toggle('active');
+  
     }
   </script>
   <script src="{{ 'js/index.js' | versioned }}"></script>
