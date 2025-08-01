@@ -139,12 +139,12 @@
     .lightbox .next {
       position: absolute;
       color: white;
-      font-size: 2.5rem;
+      font-size: 1.5rem;
       cursor: pointer;
       user-select: none;
     }
 
-    .lightbox .close { top: 20px; right: 30px; }
+    .lightbox .close { top: 5px; right: 30px; }
     .lightbox .prev,
     .lightbox .next { top: 50%; transform: translateY(-50%); font-size: 3rem; }
     .lightbox .prev { left: 30px; }
