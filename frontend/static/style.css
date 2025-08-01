@@ -817,3 +817,8 @@ body {
   opacity: 1;
   transform: scale(1);
 }
+@media (max-width: 600px) {
+    .image-section img {
+      max-height: 500px; /* Atur sesuai kebutuhan */
+    }
+  }

@@ -44,6 +44,14 @@
     <option value="member">Member</option>
     <option value="non member">Non Member</option>
   </select>
+  <div id="idCardField" style="display: none; margin-top: 1em;">
+  <label>ID Card Member</label>
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <input type="text" name="id_card" id="idCardInput" />
+    <span id="idCardVerified" style="display: none; color: green; font-weight: bold; margin-left: 20px;">✅ Verified</span>
+  </div>
+</div>
+
 <div id="nominalInfo" style="margin: 1em 0; display: none; font-weight: bold; color: #d32f2f;"></div>
 <input type="hidden" name="total_harga" id="totalHarga" />
 
@@ -57,7 +65,7 @@
        maxlength="15"
        required
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-       style="width: 100%; padding: 10px; font-size: 16px;" />
+       style="width: 95%; padding: 10px; font-size: 16px;" />
 
   <!-- Tombol Tampilkan QRIS setelah WhatsApp -->
   <div style="margin-top: 1em;">
@@ -157,6 +165,42 @@
 <script src="{{ 'js/index.js' | versioned }}"></script>
 
 <script>
+  document.getElementById("status").addEventListener("change", cekMemberAuto);
+document.querySelector("input[name='nama']").addEventListener("blur", cekMemberAuto);
+
+async function cekMemberAuto() {
+  const nama = document.querySelector("input[name='nama']").value.trim();
+  const status = document.getElementById("status").value;
+  const idCardInput = document.getElementById("idCardInput");
+  const verifiedLabel = document.getElementById("idCardVerified");
+
+  if (status === "member" && nama !== "") {
+    try {
+      const res = await fetch(`/cek_member?nama=${encodeURIComponent(nama)}`);
+      const data = await res.json();
+
+      if (data.found) {
+        idCardInput.value = data.id_card;
+        idCardInput.setAttribute("disabled", "disabled");
+
+        // Tampilkan centang verified
+        verifiedLabel.style.display = "inline";
+      } else {
+        idCardInput.value = "";
+        idCardInput.removeAttribute("disabled");
+
+        // Sembunyikan centang
+        verifiedLabel.style.display = "none";
+      }
+    } catch (err) {
+      console.error("Gagal cek member:", err);
+    }
+  } else {
+    idCardInput.value = "";
+    idCardInput.removeAttribute("disabled");
+    verifiedLabel.style.display = "none";
+  }
+}
 </script>
 
 </body>

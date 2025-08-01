@@ -2,16 +2,19 @@
   function toggleMenu() {
     document.querySelector(".menu").classList.toggle("show");
   }
+function toggleIDCard() {
+  const status = document.getElementById("status").value;
+  const idCardField = document.getElementById("idCardField");
+  const idCardInput = document.getElementById("idCardInput");
 
-  // function toggleIDCard() {
-  //   const status = document.getElementById("status").value;
-  //   const idCard = document.getElementById("idCardField");
-  //   if (status === "member") {
-  //     idCard.classList.remove("hidden");
-  //   } else {
-  //     idCard.classList.add("hidden");
-  //   }
-  // }
+  if (status === "member") {
+    idCardField.style.display = "block";
+    idCardInput.setAttribute("required", "required");
+  } else {
+    idCardField.style.display = "none";
+    idCardInput.removeAttribute("required");
+  }
+}
 
 document.addEventListener("DOMContentLoaded", function () {
   const tombolQRIS = document.getElementById("tombolQRIS");
@@ -218,3 +221,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
   setInterval(changeBackground, 7000);
 });
+

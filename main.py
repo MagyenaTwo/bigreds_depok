@@ -590,3 +590,19 @@ scheduler.start()
 @app.get("/")
 def root():
     return {"message": "API Berita BIGREDS aktif ✅"}
+
+
+@app.get("/cek_member")
+def cek_member(nama: str):
+    db: Session = SessionLocal()
+    existing = (
+        db.query(TicketOrder)
+        .filter(TicketOrder.nama.ilike(nama), TicketOrder.status == "member")
+        .order_by(TicketOrder.id.desc())
+        .first()
+    )
+    db.close()
+
+    if existing and existing.id_card:
+        return {"found": True, "id_card": existing.id_card}
+    return {"found": False}
