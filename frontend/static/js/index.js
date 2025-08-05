@@ -120,35 +120,35 @@ document.getElementById('closePopup').addEventListener('click', () => {
 
 });
 
-// window.addEventListener("DOMContentLoaded", () => {
-//   const popupOverlay = document.getElementById("popupOverlay");
-//   const popupSuccess = document.getElementById("popupSuccess");
+window.addEventListener("DOMContentLoaded", () => {
+  const popupOverlay = document.getElementById("popupOverlay");
+  const popupSuccess = document.getElementById("popupSuccess");
 
-//   // Tambahkan kelas awal fade-in
-//   popupSuccess.classList.add("fade-in");
+  // Tambahkan kelas awal fade-in
+  popupSuccess.classList.add("fade-in");
   
-//   // Isi kontennya terlebih dahulu
-//   popupSuccess.innerHTML = `
-//     <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
-//       <source src="/static/img/maintenance.mp4" type="video/mp4">
-//       Your browser does not support the video tag.
-//     </video>
-//     <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
-//     <p style="color: #444;">Ticket purchase is currently under development.</p>
-//     <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
-//       background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
-//       font-weight: bold; transition: background 0.3s;">
-//       Back to Home
-//     </a>
-//   `;
+  // Isi kontennya terlebih dahulu
+  popupSuccess.innerHTML = `
+    <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
+      <source src="/static/img/maintenance.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+    <p style="color: #444;">Ticket purchase is currently under development.</p>
+    <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
+      background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
+      font-weight: bold; transition: background 0.3s;">
+      Back to Home
+    </a>
+  `;
 
-//   popupOverlay.style.display = "flex";
+  popupOverlay.style.display = "flex";
 
-//   // Tambahkan efek show setelah delay sedikit
-//   setTimeout(() => {
-//     popupSuccess.classList.add("show");
-//   }, 100); // 100ms delay agar transisi terasa alami
-// });
+  // Tambahkan efek show setelah delay sedikit
+  setTimeout(() => {
+    popupSuccess.classList.add("show");
+  }, 100); // 100ms delay agar transisi terasa alami
+});
 
 
    async function showModal(el) {
