@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scan Tiket</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #111, #222);
+      color: white;
+      text-align: center;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-in-out;
+      gap: 20px;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      font-size: 1rem;
+      background-color: crimson;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: darkred;
+    }
+
+   #reader {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  border: 2px solid white;
+  border-radius: 10px;
+  position: relative;
+}
+
+#reader > div,
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 10px;
+}
+
+    #result-box {
+      display: none;
+      margin-top: 20px;
+      background-color: #1e1e1e;
+      padding: 15px 25px;
+      border-radius: 12px;
+      max-width: 95%;
+      width: 100%;
+      font-size: 16px;
+      line-height: 1.5;
+      border-left: 5px solid #444;
+      text-align: left;
+    }
+
+    .success {
+      border-left-color: #4caf50;
+    }
+
+    .error {
+      border-left-color: #f44336;
+    }
+
+    .info {
+      border-left-color: #2196f3;
+    }
+
+    audio {
+      display: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      padding-top: 100px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #222;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      color: white;
+      text-align: left;
+      position: relative;
+      animation: fadeIn 0.3s ease-in-out;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .close {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: white;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .btn {
+        width: 100%;
+        font-size: 1rem;
+      }
+
+      #reader {
+        max-width: 90vw;
+        height: auto;
+        aspect-ratio: 1/1;
+      }
+
+      .modal-content {
+        width: 95%;
+        max-height: 85vh;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-page" class="page active">
+    <h1>Scan Ticket Bigreds Depok</h1>
+    <button class="btn" onclick="goToScanner()">Mulai Scan Tiket</button>
+  </div>
+
+  <div id="scanner-page" class="page">
+    <div id="reader"></div>
+    <div id="result-box" class="info">Arahkan kamera ke QR Code tiket Anda</div>
+    <button class="btn" onclick="goBack()">🔙 Kembali</button>
+  </div>
+
+  <div id="popup-modal" class="modal">
+    <div class="modal-content" id="popup-content">
+      <span class="close" onclick="closePopup()">&times;</span>
+      <div id="popup-result"></div>
+    </div>
+  </div>
+
+  <audio id="beep-sound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+
+  <script>
+    const beep = document.getElementById("beep-sound");
+    const resultBox = document.getElementById("result-box");
+    const startPage = document.getElementById("start-page");
+    const scannerPage = document.getElementById("scanner-page");
+
+    let html5QrCode;
+    let lastScanned = "";
+
+    function goToScanner() {
+      startPage.classList.remove("active");
+      scannerPage.classList.add("active");
+      resultBox.className = "info";
+      resultBox.innerHTML = "Arahkan kamera ke QR Code tiket Anda";
+      startScanner();
+    }
+
+    function goBack() {
+      stopScanner();
+      scannerPage.classList.remove("active");
+      startPage.classList.add("active");
+    }
+
+    function showPopup(htmlContent) {
+      document.getElementById("popup-result").innerHTML = htmlContent;
+      document.getElementById("popup-modal").style.display = "block";
+    }
+
+    function closePopup() {
+      document.getElementById("popup-modal").style.display = "none";
+    }
+
+    function showResult(text, styleClass) {
+      resultBox.className = styleClass;
+      resultBox.innerHTML = text;
+      showPopup(text);
+    }
+
+    function startScanner() {
+      html5QrCode = new Html5Qrcode("reader");
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices.length) {
+          const backCamera = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+          html5QrCode.start(
+            { deviceId: { exact: backCamera.id } },
+            { fps: 10, qrbox: 250 },
+            qrCodeMessage => {
+              if (qrCodeMessage === lastScanned) return;
+              lastScanned = qrCodeMessage;
+              beep.play();
+              showResult("🔍 Memvalidasi...", "info");
+              fetch(`/validate_ticket?q=${encodeURIComponent(qrCodeMessage)}`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data.status.toLowerCase().includes("valid")) {
+                    showResult(`✅ <b>Tiket Valid</b><br>Nama: ${data.nama}<br>Jumlah: ${data.jumlah}<br>Dipakai ke: ${data.dipakai_ke}`, "success");
+                  } else {
+                    showResult(`❌ ${data.status}`, "error");
+                  }
+                  setTimeout(() => {
+                    lastScanned = "";
+                  }, 5000);
+                })
+                .catch(() => {
+                  showResult("❌ Gagal menghubungi server", "error");
+                  setTimeout(() => {
+                    lastScanned = "";
+                  }, 5000);
+                });
+            }
+          );
+        } else {
+          showResult("❌ Kamera tidak ditemukan", "error");
+        }
+      });
+    }
+
+    function stopScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+        });
+      }
+      lastScanned = "";
+    }
+    function resizeScanner() {
+  const reader = document.getElementById("reader");
+  const width = reader.offsetWidth;
+  reader.style.height = width + "px";
+}
+
+window.addEventListener("resize", resizeScanner);
+window.addEventListener("load", resizeScanner);
+
+  </script>
+
+</body>
+</html>

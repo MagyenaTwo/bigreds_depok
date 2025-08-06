@@ -27,6 +27,7 @@ class TicketOrder(Base):
     tiket_filename = Column(String(255))  # nama file tiket
     tiket_url = Column(String(255), nullable=True)
     total_harga = Column(Integer, nullable=False)
+    jumlah_terpakai = Column(Integer, default=0)
 
 
 class User(Base):
@@ -44,7 +45,7 @@ class GalleryNobar(Base):
     title = Column(String)
     image_url = Column(String)
     tanggal = Column(DateTime)
-    kategori = Column(String, default="event") 
+    kategori = Column(String, default="event")
 
 
 class Berita(Base):

@@ -3,6 +3,7 @@ from typing import List
 from uuid import uuid4
 from fastapi import FastAPI, File, HTTPException, Request, Form, UploadFile
 from fastapi.responses import (
+    FileResponse,
     HTMLResponse,
     JSONResponse,
     RedirectResponse,
@@ -523,7 +524,7 @@ async def upload_gallery_nobar(
             title=title,
             image_url=media_url,
             tanggal=tanggal_dt,
-            kategori=kategori  # simpan kategori
+            kategori=kategori,  # simpan kategori
         )
         db.add(new_item)
 
@@ -537,6 +538,7 @@ async def upload_gallery_nobar(
 async def pengurus(request: Request):
     return templates.TemplateResponse("pengurus.html", {"request": request})
 
+
 @app.get("/gallery", response_class=HTMLResponse)
 async def gallery(request: Request):
     db: Session = SessionLocal()
@@ -545,12 +547,7 @@ async def gallery(request: Request):
     categories = list({img.kategori for img in images if img.kategori})
 
     return templates.TemplateResponse(
-        "gallery.html",
-        {
-            "request": request,
-            "images": images,
-            "categories": categories
-        }
+        "gallery.html", {"request": request, "images": images, "categories": categories}
     )
 
 
@@ -626,3 +623,47 @@ def cek_member(nama: str):
     if existing and existing.id_card:
         return {"found": True, "id_card": existing.id_card}
     return {"found": False}
+
+
+@app.get("/validate_ticket")
+async def validate_ticket(q: str):
+    db: Session = SessionLocal()
+
+    try:
+        data = dict(item.split(":", 1) for item in q.split("|"))
+        ticket_id = int(data.get("TiketID", -1))
+
+        order = db.query(TicketOrder).filter(TicketOrder.id == ticket_id).first()
+
+        if not order:
+            return JSONResponse({"status": "Tiket tidak ditemukan"}, status_code=404)
+
+        # Cek apakah sudah dipakai maksimal
+        if order.jumlah_terpakai >= order.jumlah:
+            return JSONResponse(
+                {"status": "Tiket sudah habis dipakai"}, status_code=403
+            )
+
+        # Tambah jumlah terpakai
+        order.jumlah_terpakai += 1
+        db.commit()
+
+        return JSONResponse(
+            {
+                "status": "Tiket valid",
+                "nama": order.nama,
+                "status_pengguna": order.status,
+                "jumlah": order.jumlah,
+                "dipakai_ke": order.jumlah_terpakai,
+            }
+        )
+
+    except Exception as e:
+        return JSONResponse({"status": f"Error: {str(e)}"}, status_code=400)
+    finally:
+        db.close()
+
+
+@app.get("/scan")
+def serve_scan_page():
+    return FileResponse("frontend/scan.html", media_type="text/html")
