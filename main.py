@@ -265,18 +265,24 @@ async def submit_form(
         img.paste(logo_bottom, (margin + 40, qr_y))
     except:
         pass
-
     # FOOTER
-    footer_top = height - 140
+    footer_top = height - 160
     draw.line(
         [(margin, footer_top), (width - margin, footer_top)], fill="#999", width=2
     )
-    footer_text = "Harap tunjukkan tiket ini\n ke petugas tiket"
+
+    # Footer Text
+    footer_text = (
+        "Harap tunjukkan tiket ini\n"
+        "kepada petugas di lokasi acara.\n\n"
+        "www.bigredsdepok.com"
+    )
+
     bbox = draw.multiline_textbbox((0, 0), footer_text, font=font_small, align="center")
     w = bbox[2] - bbox[0]
     h = bbox[3] - bbox[1]
     draw.multiline_text(
-        ((width - w) / 2, footer_top + 30),
+        ((width - w) / 2, footer_top + 20),
         footer_text,
         fill="black",
         font=font_small,

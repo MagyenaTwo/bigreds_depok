@@ -33,15 +33,20 @@
     <tbody>
       {% for tiket in daftar_tiket %}
       {% set pesan_whatsapp = (
-  " BigReds Depok,\n\n"
-  ~ "Hallo *" ~ tiket.nama ~ "* Terima kasih telah melakukan pembelian tiket NOBAR.\n\n"
-  ~ "*Detail Tiket:*\n"
-  ~ "• Status: " ~ tiket.status|capitalize ~ "\n"
-  ~ "• Jumlah Tiket: " ~ tiket.jumlah|string ~ "\n"
-  ~ "• Total Pembayaran: Rp" ~ tiket.total_harga|string ~ "\n"
-  ~ "• Tiket: " ~ tiket.tiket_url ~ "\n\n"
-  ~ "Ayu Tingting makan pisang gepok, siapa kamu gak penting, kita Kopites dari Depok! 🙏"
+  "*🔴BIGREDS DEPOK🔴 *\n\n"
+  ~ "Hallo *" ~ tiket.nama ~ "* 👋\n"
+  ~ "Terima kasih telah melakukan pembelian tiket *NOBAR* bersama kami.\n\n"
+  ~ "📄 *Detail Tiket Anda:*\n"
+  ~ "• _Status_: *" ~ tiket.status|capitalize ~ "*\n"
+  ~ "• _Jumlah Tiket_: *" ~ tiket.jumlah|string ~ "*\n"
+  ~ "• _Total Pembayaran_: *Rp" ~ tiket.total_harga|string ~ "*\n"
+  ~ "• _Tiket QR_: " ~ tiket.tiket_url ~ "\n\n"
+  ~ "🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi.*\n\n"
+  ~ "_Ayu Tingting makan pisang gepok..._\n"
+  ~ "*Siapa kamu gak penting, yang penting kita Kopites dari Depok! 🔴⚪*\n\n"
+  ~ "🔴 www.bigreds.depok.com"
 ) %}
+
 
 
       <tr>
