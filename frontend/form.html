@@ -37,7 +37,7 @@
     <h2>Pembelian Tiket Nobar</h2>
     <form id="tiketForm" enctype="multipart/form-data">
   <label>Nama Lengkap</label>
-  <input type="text" name="nama" required />
+  <input type="text" name="nama" placeholder="Contoh: Mohammed Salah" required />
 
   <label>Status</label>
   <select name="status" id="status" required onchange="toggleIDCard()">
@@ -65,6 +65,7 @@
   <input type="text" name="whatsapp"
        maxlength="15"
        required
+       placeholder="Contoh: 0899239423"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        style="width: 95%; padding: 10px; font-size: 16px;" />
 
