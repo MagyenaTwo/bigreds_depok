@@ -329,3 +329,17 @@ body {
   width: 100%;
   border-radius: 8px;
 }
+.tombol-wa {
+  display: inline-block;
+  background-color: #25D366;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.tombol-wa:hover {
+  background-color: #1ebe5b;
+}

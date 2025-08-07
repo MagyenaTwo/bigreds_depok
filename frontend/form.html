@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ 'form.css' | versioned }}">
   <link rel="icon" href="/static/img/logo.jpeg" type="image/png">
   <!-- AOS CSS -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -24,7 +25,7 @@
       <a href="/">Home</a>
       <a href="/#events">Events</a>
       <a href="/gallery">Gallery</a>
-      <a href="/form">Buy Ticket</a>
+      <a href="/buy-ticket">Buy Ticket</a>
       <a href="/pengurus">Squad</a>
       </div>
       </div>
@@ -33,7 +34,7 @@
   <!-- Konten Formulir -->
   <div class="form-wrapper">
   <div class="container">
-    <h2>Pendaftaran Tiket Nobar</h2>
+    <h2>Pembelian Tiket Nobar</h2>
     <form id="tiketForm" enctype="multipart/form-data">
   <label>Nama Lengkap</label>
   <input type="text" name="nama" required />
@@ -67,63 +68,70 @@
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        style="width: 95%; padding: 10px; font-size: 16px;" />
 
-  <!-- Tombol Tampilkan QRIS setelah WhatsApp -->
-  <div style="margin-top: 1em;">
-   <button type="button" id="tombolQRIS" style="padding: 8px 16px;">Tampilkan QRIS</button>
-  </div>
+       <!-- Metode Pembayaran -->
+<label for="metode_pembayaran">Pilih Metode Pembayaran:</label>
+<select name="metode_pembayaran" id="metode_pembayaran" required>
+  <option value="" disabled selected>-- Pilih Metode --</option>
+  <option value="qris" disabled>QRIS 🔒 Belum tersedia</option>
+  <option value="gopay">GoPay 🟢 Tersedia</option>
+  <option value="shopeepay" disabled>ShopeePay 🔒 Belum tersedia</option>
+  <option value="bank_transfer">Bank Transfer 🟢 Tersedia</option>
+</select>
+
+<!-- Section khusus QRIS -->
+<div id="qrisSection" style="display: none; margin-top: 1em;">
+  <button type="button" id="tombolQRIS" style="padding: 8px 16px;">Tampilkan QRIS</button>
+</div>
+
+
 
   <div id="qrisContainer" style="display: none; margin-top: 1em; text-align: center;">
   <img src="/static/img/qris.png" alt="QRIS Pembayaran" style="max-width: 300px; margin: 0 auto;" />
   <p>Scan QRIS untuk membayar via Gopay, OVO, DANA, dll.</p>
 </div>
 
+<!-- SECTION METODE PEMBAYARAN TAMBAHAN -->
+<div id="gopaySection" style="display: none; text-align: center; margin-top: 1em;">
+  <img src="/static/img/gopay.jpeg" alt="Gopay QRIS" style="max-width: 300px;" />
+  <p>Scan QR untuk membayar via Gopay</p>
+</div>
+
+<div id="shopeeSection" style="display: none; text-align: center; margin-top: 1em;">
+  <img src="/static/img/qrais.png" alt="ShopeePay QRIS" style="max-width: 300px;" />
+  <p>Scan QR untuk membayar via ShopeePay</p>
+</div>
+<div id="bankSection" style="display: none; margin-top: 0; text-align: center;">
+  <div style="display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; background-color: #f9f9f9; gap: 10px;">
+    <div style="text-align: left;">
+      <p style="margin: 0; font-size: 14px; color: #555;">No. Rekening</p>
+      <p id="rekeningText" style="margin: 0; font-size: 18px; font-weight: bold;">1255414980</p>
+    </div>
+    <button type="button" onclick="copyRekening()" title="Salin Nomor Rekening"
+      style="padding: 6px 12px; font-size: 14px; border: none; border-radius: 6px; background-color: #e0e0e0; cursor: pointer;">
+      📋 Copy
+    </button>
+  </div>
+
+  <p style="margin-top: 1em;"><strong>Atas Nama:</strong> Tegar Irfandi</p>
+  <p><strong>Bank:</strong> BNI</p>
+</div>
+
+
 
   <label>Upload Bukti Transfer</label>
   <input type="file" name="bukti_transfer" accept="image/*" required />
 
-  <label>Pembayaran</label>
-  <p>Pembayaran hanya melalui <strong>QRIS</strong>. Tiket akan dikirim setelah submit.</p>
+  
+  <p>Setelah melakukan pembelian  <strong>TIKET</strong>. Akan dikirimkan melalui Whatsapp.</p>
 
-  <button class="submit" type="submit">Kirim</button>
+  <button class="submit" type="submit">Beli</button>
 </form>
 
   </div>
-</div><!-- Overlay Popup Sukses -->
-<div id="popupOverlay" style="display: none; position: fixed; top: 0; left: 0;
-  width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
-  justify-content: center; align-items: center; z-index: 9999;">
-  
-  <div id="popupSuccess" style="position: relative; background: #fff; padding: 30px 25px;
-    border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    max-width: 350px; width: 90%;">
-    
-    <button id="closePopup" style="position: absolute; top: 10px; right: 10px;
-      background: none; border: none; font-size: 20px; font-weight: bold; color: #666;
-      cursor: pointer;">&times;</button>
-
-    <div id="lottieSuccess" style="width: 180px; height: 180px; margin: 0 auto 15px;"></div>
-    
-    <h2 style="margin-bottom: 10px; color: #2e7d32;">Pendaftaran Berhasil!</h2>
-    <p style="color: #444;">Tiket berhasil dipesan. Silakan unduh tiketmu sekarang!</p>
-    
-    <a id="downloadTiketBtn" href="/static/img/tiket.png" download
-      class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
-      background-color: #2e7d32; color: white; border-radius: 8px; text-decoration: none;
-      font-weight: bold; transition: background 0.3s;">
-      Download Tiket
-    </a>
-  </div>
 </div>
 
 
-<!-- Overlay Loading -->
-<div id="popupLoading" style="display: none; position: fixed; top: 0; left: 0;
-  width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
-  justify-content: center; align-items: center; z-index: 9998;">
-  <div style="background: white; padding: 20px 30px; border-radius: 10px; font-size: 18px;">
-    Harap tunggu...
-  </div>
-</div>
+
 
 <!-- Footer -->
 <footer class="footer">
@@ -201,7 +209,62 @@ async function cekMemberAuto() {
     verifiedLabel.style.display = "none";
   }
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+    const tombolQRIS = document.getElementById("tombolQRIS");
+    const qrisContainer = document.getElementById("qrisContainer");
+    const radioQRIS = document.getElementById("radioQRIS");
+    const qrisSection = document.getElementById("qrisSection");
+
+    // Tampilkan popup QRIS
+    tombolQRIS.addEventListener("click", () => {
+      qrisContainer.style.display = "block";
+    });
+
+    // Sembunyikan/tampilkan section QRIS berdasarkan pilihan radio
+    const radios = document.querySelectorAll("input[name='metode_pembayaran']");
+    radios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        if (radioQRIS.checked) {
+          qrisSection.style.display = "block";
+        } else {
+          qrisSection.style.display = "none";
+          qrisContainer.style.display = "none"; // reset jika user pindah pilihan
+        }
+      });
+    });
+  });
+
 </script>
+
+<!-- Overlay Loading -->
+<div id="popupLoading" style="display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+  justify-content: center; align-items: center; z-index: 9998;">
+  <div style="background: white; padding: 20px 30px; border-radius: 10px; font-size: 18px;">
+    Harap tunggu...
+  </div>
+</div>
+
+<div id="popupOverlay" style="display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+  justify-content: center; align-items: center; z-index: 9999;">
+
+  
+  <div id="popupSuccess" style="position: relative; background: #fff; padding: 30px 25px;
+    border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    max-width: 350px; width: 90%;">
+    
+    <button id="closePopup" style="position: absolute; top: 10px; right: 10px;
+      background: none; border: none; font-size: 20px; font-weight: bold; color: #666;
+      cursor: pointer;">&times;</button>
+
+    <div id="lottieSuccess" style="width: 180px; height: 180px; margin: 0 auto 15px;"></div>
+    
+    <h2 style="margin-bottom: 10px; color: #2e7d32;">Pembelian Berhasil!</h2>
+    <p style="color: #444;">Tiket berhasil dipesan. Tiket akan dikirimkan melalui WhatsApp yang telah didaftarkan.</p>
+  </div>
+</div>
 
 </body>
 </html>

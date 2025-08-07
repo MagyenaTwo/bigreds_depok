@@ -23,6 +23,7 @@
         <th>Nama</th>
         <th>ID Card</th>
         <th>Jumlah</th>
+        <th>Metode</th>
         <th>WhatsApp</th>
         <th>Nominal</th>
         <th>Waktu Pembelian</th>
@@ -31,15 +32,30 @@
     </thead>
     <tbody>
       {% for tiket in daftar_tiket %}
+      {% set pesan_whatsapp = (
+  " BigReds Depok,\n\n"
+  ~ "Hallo *" ~ tiket.nama ~ "* Terima kasih telah melakukan pembelian tiket NOBAR.\n\n"
+  ~ "*Detail Tiket:*\n"
+  ~ "• Status: " ~ tiket.status|capitalize ~ "\n"
+  ~ "• Jumlah Tiket: " ~ tiket.jumlah|string ~ "\n"
+  ~ "• Total Pembayaran: Rp" ~ tiket.total_harga|string ~ "\n"
+  ~ "• Tiket: " ~ tiket.tiket_url ~ "\n\n"
+  ~ "Ayu Tingting makan pisang gepok, siapa kamu gak penting, kita Kopites dari Depok! 🙏"
+) %}
+
+
       <tr>
         <td>{{ loop.index }}</td>
         <td>{{ tiket.nama }}</td>
         <td>{{ tiket.id_card or '-' }}</td>
         <td>{{ tiket.jumlah }}</td>
+        <td>{{ tiket.metode_pembayaran }}</td>
         <td>
-         <a href="https://wa.me/62{{ tiket.whatsapp[1:] }}" target="_blank" class="wa-link">
-  {{ tiket.whatsapp }}
+      <a href="https://wa.me/62{{ tiket.whatsapp[1:] }}?text={{ pesan_whatsapp | urlencode }}" target="_blank" class="tombol-wa">
+  Kirim Tiket 
 </a>
+
+
 
         </td>
     <td>{{ tiket.total_harga | rupiah }}</td>

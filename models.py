@@ -28,6 +28,7 @@ class TicketOrder(Base):
     tiket_url = Column(String(255), nullable=True)
     total_harga = Column(Integer, nullable=False)
     jumlah_terpakai = Column(Integer, default=0)
+    metode_pembayaran = Column(String(50), nullable=False)
 
 
 class User(Base):

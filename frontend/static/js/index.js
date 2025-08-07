@@ -41,9 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let hargaPerTiket = 0;
     if (status === "member") {
-      hargaPerTiket = 20000;
+      hargaPerTiket = 22000;
     } else if (status === "non member") {
-      hargaPerTiket = 30000;
+      hargaPerTiket = 22000;
     }
 
     const total = hargaPerTiket * jumlah;
@@ -62,95 +62,159 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('tiketForm').addEventListener('submit', async function (e) {
+  const form = document.getElementById('tiketForm');
+  const popupLoading = document.getElementById('popupLoading');
+  const popupOverlay = document.getElementById('popupOverlay');
+  const lottieContainer = document.getElementById('lottieSuccess');
+  const closeBtn = document.getElementById('closePopup');
+
+  // 1. Pastikan semua elemen ada
+  if (!form || !popupLoading || !popupOverlay || !lottieContainer || !closeBtn) {
+    console.error("Elemen penting tidak ditemukan di DOM.");
+    return;
+  }
+
+  // 2. Load Lottie animasi setelah DOM siap
+  const successAnim = lottie.loadAnimation({
+    container: lottieContainer,
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    path: '/static/img/success.json'
+  });
+
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
-
-    const form = e.target;
     const formData = new FormData(form);
-
-    document.getElementById('popupLoading').style.display = 'flex';
+    popupLoading.style.display = 'flex';
 
     try {
       const response = await fetch('/submit', {
         method: 'POST',
         body: formData
       });
+
       if (!response.ok) throw new Error('Gagal submit form');
 
+      // Opsional: Ambil result jika dibutuhkan
       const result = await response.json();
-      document.getElementById('popupLoading').style.display = 'none';
 
-      const downloadBtn = document.getElementById('downloadTiketBtn');
-      downloadBtn.href = result.tiket_url;
-      downloadBtn.download = result.tiket_url.split('/').pop();
-      downloadBtn.addEventListener('click', async function (e) {
-        e.preventDefault();
-        const url = this.href;
-        const fileName = this.download || url.split('/').pop();
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
+      // Matikan loading
+      popupLoading.style.display = 'none';
 
-      document.getElementById('popupOverlay').style.display = 'flex';
-      successAnim.goToAndPlay(0, true); // restart animasi setiap submit
+      // Mainkan animasi jika sudah berhasil di-load
+     if (successAnim && successAnim.goToAndPlay) {
+  
+  successAnim.goToAndPlay(0, true);
 
+}
+
+
+      // Tampilkan popup sukses
+      popupOverlay.style.display = 'flex';
+
+      // Reset form
       form.reset();
+
     } catch (err) {
-      document.getElementById('popupLoading').style.display = 'none';
+      popupLoading.style.display = 'none';
       alert('Terjadi kesalahan: ' + err.message);
+      console.error(err);
     }
   });
 
-  const successAnim = lottie.loadAnimation({
-    container: document.getElementById('lottieSuccess'),
-    renderer: 'svg',
-    loop: false,
-    autoplay: false,
-    path: '/static/img/success.json'
+  closeBtn.addEventListener('click', () => {
+    popupOverlay.style.display = 'none';
+    window.location.href = '/';
   });
-document.getElementById('closePopup').addEventListener('click', () => {
-  document.getElementById('popupOverlay').style.display = 'none';
-  window.location.href = '/';
 });
 
-});
-
+// TampilanQRIS
 window.addEventListener("DOMContentLoaded", () => {
+  const tombolQRIS = document.getElementById("tombolQRIS");
   const popupOverlay = document.getElementById("popupOverlay");
   const popupSuccess = document.getElementById("popupSuccess");
+  const qrisSection = document.getElementById("qrisSection");
+  const metodeSelect = document.getElementById("metode_pembayaran");
+  const gopaySection = document.getElementById("gopaySection");
+  const shopeeSection = document.getElementById("shopeeSection");
+  const bankSection = document.getElementById("bankSection");
 
-  // Tambahkan kelas awal fade-in
-  popupSuccess.classList.add("fade-in");
-  
-  // Isi kontennya terlebih dahulu
-  popupSuccess.innerHTML = `
-    <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
-      <source src="/static/img/maintenance.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-    <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
-    <p style="color: #444;">Ticket purchase is currently under development.</p>
-    <a href="/" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
-      background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
-      font-weight: bold; transition: background 0.3s;">
-      Back to Home
-    </a>
-  `;
+  // Tombol QRIS diklik
+  tombolQRIS.addEventListener("click", () => {
+    popupSuccess.classList.add("fade-in");
 
-  popupOverlay.style.display = "flex";
+    popupSuccess.innerHTML = `
+      <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
+        <source src="/static/img/maintenance.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+      <p style="color: #444;">Payment QRIS under development.</p>
+      <a href="/buy-ticket" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
+        background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
+        font-weight: bold; transition: background 0.3s;">
+        Back
+      </a>
+    `;
 
-  // Tambahkan efek show setelah delay sedikit
-  setTimeout(() => {
-    popupSuccess.classList.add("show");
-  }, 100); // 100ms delay agar transisi terasa alami
+    popupOverlay.style.display = "flex";
+
+    setTimeout(() => {
+      popupSuccess.classList.add("show");
+    }, 100);
+  });
+
+  // Klik luar popup → tutup
+  popupOverlay.addEventListener("click", (e) => {
+    if (e.target === popupOverlay) {
+      popupOverlay.style.display = "none";
+      popupSuccess.classList.remove("show");
+      popupSuccess.innerHTML = "";
+    }
+  });
+
+  metodeSelect.addEventListener("change", () => {
+  const selected = metodeSelect.value;
+
+  qrisSection.style.display = selected === "qris" ? "block" : "none";
+  gopaySection.style.display = selected === "gopay" ? "block" : "none";
+  shopeeSection.style.display = selected === "shopeepay" ? "block" : "none";
+  bankSection.style.display = selected === "bank_transfer" ? "block" : "none";
+
+  });
 });
 
 
+function copyRekening() {
+  const rekeningText = document.getElementById("rekeningText").textContent;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(rekeningText)
+      .then(() => {
+        alert("✅ Nomor rekening berhasil disalin ke clipboard!");
+      })
+      .catch(err => {
+        console.error("Gagal menyalin:", err);
+        alert("Gagal menyalin nomor rekening.");
+      });
+  } else {
+    // Fallback: gunakan textarea
+    const tempInput = document.createElement("textarea");
+    tempInput.value = rekeningText;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    try {
+      document.execCommand("copy");
+      alert("✅ Nomor rekening berhasil disalin!");
+    } catch (err) {
+      alert("Gagal menyalin nomor rekening.");
+    }
+    document.body.removeChild(tempInput);
+  }
+}
+
+  
    async function showModal(el) {
   const title = el.dataset.title;
   const image = el.dataset.image;

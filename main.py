@@ -133,7 +133,7 @@ async def read_form(request: Request):
     )
 
 
-@app.get("/form", response_class=HTMLResponse)
+@app.get("/buy-ticket", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("form.html", {"request": request})
 
@@ -147,6 +147,7 @@ async def submit_form(
     whatsapp: str = Form(...),
     bukti_transfer: UploadFile = File(...),
     total_harga: str = Form(...),
+    metode_pembayaran: str = Form(...),
 ):
     ext = bukti_transfer.filename.split(".")[-1]
     filename_bukti = f"bukti/{uuid4()}.{ext}"
@@ -168,6 +169,7 @@ async def submit_form(
         whatsapp=whatsapp,
         bukti_transfer_url=bukti_url,
         total_harga=total_harga,
+        metode_pembayaran=metode_pembayaran,
     )
     db.add(new_order)
     db.commit()
