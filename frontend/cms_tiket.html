@@ -4,13 +4,118 @@
 
 {% block content %}
 <h1>DASHBOARD</h1>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-  <input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="search-input" onkeyup="filterTable()" style="flex: 1; max-width: 250px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+ 
 
-  <div style="display: flex; flex-direction: row; align-items: center; gap: 20px; font-weight: bold; font-size: 15px;">
-    <div><span style="font-size: 18px;">💰</span> Total Pemasukan: {{ total_pemasukan | rupiah }}</div>
-    <div><span style="font-size: 18px;">🎟️</span> Total Tiket: {{ total_pemesan }}</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 24px;">
+
+  <!-- Card: Total Pemasukan -->
+  <div style="
+    flex: 1;
+    min-width: 260px;
+    background: #ffffff;
+    border-radius: 14px;
+    border-left: 5px solid #28a745;
+    padding: 20px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  ">
+
+    <div style="
+      background: #e6f4ec;
+      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <span style="font-size: 24px; color: #28a745;">💰</span>
+    </div>
+
+    <div style="flex-grow: 1;">
+      <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">Total Pemasukan</div>
+      <div style="font-size: 22px; font-weight: 700; color: #111827;">{{ total_pemasukan | rupiah }}</div>
+    </div>
   </div>
+
+  <!-- Card: Total Tiket -->
+  <div style="
+    flex: 1;
+    min-width: 260px;
+    background: #ffffff;
+    border-radius: 14px;
+    border-left: 5px solid #007bff;
+    padding: 20px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  ">
+
+    <div style="
+      background: #e7f0fa;
+      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <span style="font-size: 24px; color: #007bff;">🎟️</span>
+    </div>
+
+    <div style="flex-grow: 1;">
+      <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">Total Tiket</div>
+      <div style="font-size: 22px; font-weight: 700; color: #111827;">{{ total_pemesan }}</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+ <div style="position: relative; flex: 1; max-width: 280px;">
+
+  <!-- Search Input -->
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Cari berdasarkan nama..."
+    onkeyup="filterTable()"
+    style="
+      width: 100%;
+      padding: 10px 36px 10px 14px;
+      font-size: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      color: #111827;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+      transition: border-color 0.2s ease;
+    "
+    onfocus="this.style.borderColor='#3b82f6'"
+    onblur="this.style.borderColor='#d1d5db'"
+  >
+
+  <!-- Clear Button (×) -->
+  <span
+    id="clearSearch"
+    onclick="clearSearch()"
+    style="
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #6b7280;
+      cursor: pointer;
+      display: none;
+      user-select: none;
+    "
+  >×</span>
+
 </div>
 
 
@@ -24,55 +129,50 @@
         <th>ID Card</th>
         <th>Jumlah</th>
         <th>Metode</th>
-        <th>WhatsApp</th>
+        
         <th>Nominal</th>
         <th>Waktu Pembelian</th>
         <th>Bukti Transfer</th>
+        <th>WhatsApp</th>
       </tr>
     </thead>
-    <tbody>
-      {% for tiket in daftar_tiket %}
-      {% set pesan_whatsapp = (
-  "*🔴BIGREDS DEPOK🔴 *\n\n"
-  ~ "Hallo *" ~ tiket.nama ~ "* 👋\n"
-  ~ "Terima kasih telah melakukan pembelian tiket *NOBAR* bersama kami.\n\n"
-  ~ "📄 *Detail Tiket Anda:*\n"
-  ~ "• _Status_: *" ~ tiket.status|capitalize ~ "*\n"
-  ~ "• _Jumlah Tiket_: *" ~ tiket.jumlah|string ~ "*\n"
-  ~ "• _Total Pembayaran_: *Rp. " ~ tiket.total_harga|rupiah ~ "*\n"
-  ~ "• _Tiket QR_: " ~ tiket.tiket_url ~ "\n\n"
-  ~ "🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi.*\n\n"
-  ~ "_Ayu Tingting makan pisang gepok._\n"
-  ~ "_Siapa kamu gak penting, yang penting kita Kopites dari Depok! 🔴⚪_\n\n"
-  ~ "🔴 www.bigreds.depok.com"
-) %}
-
-
-
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ tiket.nama }}</td>
-        <td>{{ tiket.id_card or '-' }}</td>
-        <td>{{ tiket.jumlah }}</td>
-        <td>{{ tiket.metode_pembayaran }}</td>
-        <td>
+   <tbody>
+  {% for tiket in daftar_tiket %}
+  {% set pesan_whatsapp = (
+    "*🔴BIGREDS DEPOK🔴 *\n\n"
+    ~ "Hallo *" ~ tiket.nama ~ "* 👋\n"
+    ~ "Terima kasih telah melakukan pembelian tiket *NOBAR* bersama kami.\n\n"
+    ~ "📄 *Detail Tiket Anda:*\n"
+    ~ "• _Status_: *" ~ tiket.status|capitalize ~ "*\n"
+    ~ "• _Jumlah Tiket_: *" ~ tiket.jumlah|string ~ "*\n"
+    ~ "• _Total Pembayaran_: *Rp. " ~ tiket.total_harga|rupiah ~ "*\n"
+    ~ "• _Tiket QR_: " ~ tiket.tiket_url ~ "\n\n"
+    ~ "🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi.*\n\n"
+    ~ "_Ayu Tingting makan pisang gepok._\n"
+    ~ "_Siapa kamu gak penting, yang penting kita Kopites dari Depok! 🔴⚪_\n\n"
+    ~ "🔴 www.bigreds.depok.com"
+  ) %}
+  <tr>
+    <td class="nomor-kolom" data-label="No">{{ loop.index }}</td>
+    <td data-label="Nama">{{ tiket.nama }}</td>
+    <td data-label="ID Card">{{ tiket.id_card or '-' }}</td>
+    <td data-label="Jumlah">{{ tiket.jumlah }}</td>
+    <td data-label="Metode">{{ tiket.metode_pembayaran }}</td>
+   
+    <td data-label="Nominal">{{ tiket.total_harga | rupiah }}</td>
+    <td data-label="Waktu Pembelian">{{ tiket.created_at | datetimeformat("%d-%m-%Y %H:%M") }}</td>
+    <td data-label="Bukti Transfer">
+      <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>
+    </td>
+     <td data-label="WhatsApp">
       <a href="https://wa.me/62{{ tiket.whatsapp[1:] }}?text={{ pesan_whatsapp | urlencode }}" target="_blank" class="tombol-wa">
-  Kirim Tiket 
-</a>
+        Kirim Tiket 
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
 
-
-
-        </td>
-    <td>{{ tiket.total_harga | rupiah }}</td>
-
-
-        <td>{{ tiket.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
-        <td>
-          <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
   </table>
 </div>
 <div class="pagination">
@@ -90,13 +190,25 @@
 </div>
 
 <script>
-  function filterTable() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
+ function filterTable() {
+    const input = document.getElementById("searchInput");
+    const filter = input.value.toLowerCase();
     const rows = document.querySelectorAll("#tiketTable tbody tr");
+    const clearBtn = document.getElementById("clearSearch");
+
+    clearBtn.style.display = filter ? "block" : "none";
+
     rows.forEach(row => {
       const nama = row.cells[1].textContent.toLowerCase();
-      row.style.display = nama.includes(input) ? "" : "none";
+      row.style.display = nama.includes(filter) ? "" : "none";
     });
+  }
+
+  function clearSearch() {
+    const input = document.getElementById("searchInput");
+    input.value = "";
+    document.getElementById("clearSearch").style.display = "none";
+    filterTable(); // reset tampilannya
   }
 </script>
 {% endblock %}

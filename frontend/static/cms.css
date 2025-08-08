@@ -249,16 +249,18 @@ body {
 }
 
 .bukti-btn {
-  background-color: #0288d1;
+   display: inline-block;
+  background-color: #ff0000;
   color: white;
-  padding: 6px 12px;
-  border-radius: 5px;
+  padding: 10px 20px;
   text-decoration: none;
-  font-size: 13px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
 }
 
 .bukti-btn:hover {
-  background-color: #0277bd;
+   background-color: #ff0000;
 }
 
 /* Status label */
@@ -343,3 +345,164 @@ body {
 .tombol-wa:hover {
   background-color: #1ebe5b;
 }
+
+
+@media (max-width: 768px) {
+  .styled-table thead {
+    display: none;
+  }
+
+  .styled-table,
+  .styled-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .styled-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 18px;
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #dddddd;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .styled-table td {
+     user-select: none;     /* nonaktifkan pemilihan teks */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    background-color: #f6f6f6;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #222;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .styled-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #555;
+    font-size: 12px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Tombol WhatsApp Hijau */
+  .tombol-wa {
+    grid-column: span 2;
+    background-color: #28a745;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 8px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .tombol-wa::before {
+    content: "📱 ";
+  }
+
+  /* Tombol Bukti Merah */
+  .bukti-btn {
+    grid-column: span 2;
+    background-color: #dc3545;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 8px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .bukti-btn::before {
+    content: "📄 ";
+  }
+.styled-table tbody tr:hover {
+  background-color: #ffff; /* warna merah lebih terang */
+  color: white; /* teks jadi putih supaya kontras */
+  cursor: pointer; /* cursor berubah jadi pointer */
+}
+
+}
+
+@media (max-width: 769px) {
+  .nomor-kolom {
+  grid-column: span 2;
+  background-color: #b30000; /* merah tua */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin-bottom: 10px;
+}
+
+.nomor-kolom::before {
+  content: "NO";
+  display: none;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #ffcccc;
+  margin-bottom: 4px;
+}
+
+  .styled-table td.nomor-kolom {
+    background-color: #b30000;
+    color: white;
+    display: block;
+    font-weight: bold;
+    text-align: center;
+  }
+}
+
+
+.search-reset-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .search-reset-container input[type="text"] {
+    flex: 1;
+    max-width: 300px;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .search-reset-container button {
+    padding: 10px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .search-reset-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-reset-container input[type="text"],
+    .search-reset-container button {
+      width: 100%;
+      max-width: 100%;
+    }
+  }

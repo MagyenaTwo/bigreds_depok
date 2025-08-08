@@ -50,12 +50,21 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-def datetimeformat(value, format="%d-%m-%Y"):
+def datetimeformat(value, format="%d-%m-%Y %H:%M"):
     if isinstance(value, str):
         try:
             value = datetime.fromisoformat(value)
         except:
             return value
+
+    # Jika datetime tanpa timezone (naive), anggap dari UTC
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=pytz.UTC)
+
+    # Konversi ke WIB
+    wib = pytz.timezone("Asia/Jakarta")
+    value = value.astimezone(wib)
+
     return value.strftime(format)
 
 
@@ -399,7 +408,7 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
     per_page = 20
     offset = (page - 1) * per_page
 
-    total_items = db.query(func.count(TicketOrder.id)).scalar()
+    total_items = db.query(func.sum(TicketOrder.jumlah)).scalar() or 0
     total_pages = (total_items + per_page - 1) // per_page
 
     daftar_tiket = (

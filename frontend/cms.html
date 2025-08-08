@@ -29,14 +29,55 @@
 
   <button type="submit">Upload</button>
 </form>
-
-<!-- Search and Counter -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-  <input type="text" id="searchInput" placeholder="Cari berdasarkan judul..." class="search-input" onkeyup="filterTable()" style="flex: 1; max-width: 250px;">
+
+  <!-- Input pencarian dengan tombol clear -->
+  <div style="position: relative; flex: 1; max-width: 280px;">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Cari berdasarkan judul..."
+      onkeyup="filterTable()"
+      style="
+        width: 100%;
+        padding: 10px 36px 10px 14px;
+        font-size: 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background-color: #f9fafb;
+        color: #111827;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+        transition: border-color 0.2s ease;
+      "
+      onfocus="this.style.borderColor='#3b82f6'"
+      onblur="this.style.borderColor='#d1d5db'"
+    >
+
+    <span
+      id="clearSearch"
+      onclick="clearSearch()"
+      style="
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: #6b7280;
+        cursor: pointer;
+        display: none;
+        user-select: none;
+      "
+    >×</span>
+  </div>
+
+
+
+  <!-- Total Media -->
   <div style="font-weight: bold; font-size: 15px; display: flex; flex-direction: column; align-items: flex-end;">
     <div><span style="font-size: 18px;">🖼️</span> Total Media: {{ images|length }}</div>
   </div>
 </div>
+
 
 <!-- Media List Table -->
 <div class="table-container">
@@ -53,18 +94,21 @@
 <tbody>
   {% for media in images %}
   <tr>
-    <td>{{ loop.index }}</td>
-    <td>{{ media.title }}</td>
-    <td>{{ media.kategori or '-' }}</td> <!-- tampilkan kategori -->
-    <td>
-      {% if media.tanggal %}
-        {{ media.tanggal|datetimeformat('%d-%m-%Y') }}
-      {% else %}
-        -
-      {% endif %}
-    </td>
-    <td><a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a></td>
-  </tr>
+  <td class="nomor-kolom" data-label="No">{{ loop.index }}</td>
+  <td data-label="Judul">{{ media.title }}</td>
+  <td data-label="Kategori">{{ media.kategori or '-' }}</td>
+  <td data-label="Tanggal">
+    {% if media.tanggal %}
+      {{ media.tanggal|datetimeformat('%d-%m-%Y') }}
+    {% else %}
+      -
+    {% endif %}
+  </td>
+  <td data-label="Lihat">
+    <a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a>
+  </td>
+</tr>
+
   {% endfor %}
 </tbody>
 </table>
@@ -87,13 +131,25 @@
 </div>
 
 <script>
-  function filterTable() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#mediaTable tbody tr");
-    rows.forEach(row => {
-      const judul = row.cells[1].textContent.toLowerCase();
-      row.style.display = judul.includes(input) ? "" : "none";
+function filterTable() {
+    const input = document.getElementById("searchInput");
+    const filter = input.value.toLowerCase();
+    const clearBtn = document.getElementById("clearSearch");
+    const tableRows = document.querySelectorAll("table tbody tr"); // sesuaikan jika berbeda
+
+    // Tampilkan tombol clear jika ada input
+    clearBtn.style.display = filter ? "block" : "none";
+
+    tableRows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? "" : "none";
     });
+  }
+
+  function clearSearch() {
+    const input = document.getElementById("searchInput");
+    input.value = "";
+    filterTable();
   }
 </script>
 {% endblock %}
