@@ -35,6 +35,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import io, qrcode
+import random
+import string
 
 load_dotenv()
 
@@ -184,7 +186,18 @@ async def submit_form(
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
+
     ticket_id = new_order.id
+
+    def generate_alias(length=8):
+        return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+
+    # Generate alias dan update tiket
+    alias = generate_alias()
+    db.query(TicketOrder).filter(TicketOrder.id == ticket_id).update(
+        {"alias_url": alias}
+    )
+    db.commit()
 
     width, height = 600, 900
     img = Image.new("RGB", (width, height), color="#fdfdfc")
@@ -284,7 +297,7 @@ async def submit_form(
     # Footer Text
     footer_text = (
         "Harap tunjukkan tiket ini\n"
-        "kepada petugas di lokasi acara.\n\n"
+        "kepada petugas tiket di lokasi acara.\n\n"
         "www.bigredsdepok.com"
     )
 
@@ -727,8 +740,7 @@ Terima kasih telah melakukan pembelian tiket *NOBAR* Bigreds Depok.
 • _Status_: *{tiket.status.capitalize()}*
 • _Jumlah Tiket_: *{tiket.jumlah}*
 • _Total Pembayaran_: *Rp {tiket.total_harga:,.0f}*
-• _Tiket QR_: {tiket.tiket_url}
-
+• _Tiket Nobar_: https://bigredsdepok.com/tiket/{tiket.alias_url}
 🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi ke penjaga tiket.*
 
 _Ayu Tingting makan pisang gepok._
@@ -762,3 +774,18 @@ www.bigredsdepok.com"""
     db.commit()
 
     return {"success": True}
+
+
+@app.get("/tiket/{alias}")
+def tiket_proxy(alias: str, db: Session = Depends(get_db)):
+    tiket = db.query(TicketOrder).filter(TicketOrder.alias_url == alias).first()
+    if not tiket:
+        raise HTTPException(status_code=404, detail="Tiket tidak ditemukan")
+
+    url_asli = tiket.tiket_url
+
+    r = httpx.get(url_asli)
+    if r.status_code != 200:
+        raise HTTPException(status_code=404, detail="Gambar tiket tidak ditemukan")
+
+    return StreamingResponse(io.BytesIO(r.content), media_type="image/png")

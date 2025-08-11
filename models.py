@@ -39,6 +39,7 @@ class TicketOrder(Base):
     jumlah_terpakai = Column(Integer, default=0)
     metode_pembayaran = Column(String(50), nullable=False)
     sudah_dikirim = Column(Boolean, default=False)
+    alias_url = Column(String, unique=True, index=True, nullable=True)
 
 
 class User(Base):
