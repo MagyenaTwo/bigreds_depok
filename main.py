@@ -424,7 +424,18 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
 
     # ✅ Hitung total pemasukan (gunakan func.sum untuk efisiensi)
     total_pemasukan = db.query(func.sum(TicketOrder.total_harga)).scalar() or 0
-
+    total_gopay = (
+        db.query(func.sum(TicketOrder.total_harga))
+        .filter(TicketOrder.metode_pembayaran == "gopay")
+        .scalar()
+        or 0
+    )
+    total_bni = (
+        db.query(func.sum(TicketOrder.total_harga))
+        .filter(TicketOrder.metode_pembayaran == "bank_transfer")
+        .scalar()
+        or 0
+    )
     return templates.TemplateResponse(
         "cms_tiket.html",
         {
@@ -434,6 +445,8 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
             "total_pages": total_pages,
             "total_pemesan": total_pemesan,
             "total_pemasukan": total_pemasukan,
+            "total_gopay": total_gopay,
+            "total_bni": total_bni,
         },
     )
 
