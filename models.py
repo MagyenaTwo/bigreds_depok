@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, LargeBinary, String, DateTime, Text, func
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    LargeBinary,
+    String,
+    DateTime,
+    Text,
+    func,
+)
 from database import Base
 
 
@@ -29,6 +38,7 @@ class TicketOrder(Base):
     total_harga = Column(Integer, nullable=False)
     jumlah_terpakai = Column(Integer, default=0)
     metode_pembayaran = Column(String(50), nullable=False)
+    sudah_dikirim = Column(Boolean, default=False)
 
 
 class User(Base):

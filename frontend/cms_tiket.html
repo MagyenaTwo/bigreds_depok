@@ -129,28 +129,29 @@
         <th>ID Card</th>
         <th>Jumlah</th>
         <th>Metode</th>
-        
         <th>Nominal</th>
         <th>Waktu Pembelian</th>
         <th>Bukti Transfer</th>
         <th>WhatsApp</th>
+        <th>Status Tiket</th>
+
       </tr>
     </thead>
    <tbody>
   {% for tiket in daftar_tiket %}
   {% set pesan_whatsapp = (
-    "*🔴BIGREDS DEPOK🔴 *\n\n"
+    "*🔴*BIGREDS DEPOK*🔴*\n\n"
     ~ "Hallo *" ~ tiket.nama ~ "* 👋\n"
-    ~ "Terima kasih telah melakukan pembelian tiket *NOBAR* bersama kami.\n\n"
+    ~ "Terima kasih telah melakukan pembelian tiket *NOBAR* Bigreds Depok.\n\n"
     ~ "📄 *Detail Tiket Anda:*\n"
     ~ "• _Status_: *" ~ tiket.status|capitalize ~ "*\n"
     ~ "• _Jumlah Tiket_: *" ~ tiket.jumlah|string ~ "*\n"
-    ~ "• _Total Pembayaran_: *Rp. " ~ tiket.total_harga|rupiah ~ "*\n"
+    ~ "• _Total Pembayaran_: *" ~ tiket.total_harga|rupiah ~ "*\n"
     ~ "• _Tiket QR_: " ~ tiket.tiket_url ~ "\n\n"
-    ~ "🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi.*\n\n"
+    ~ "🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi  ke penjaga tiket.*\n\n"
     ~ "_Ayu Tingting makan pisang gepok._\n"
     ~ "_Siapa kamu gak penting, yang penting kita Kopites dari Depok! 🔴⚪_\n\n"
-    ~ "🔴 www.bigreds.depok.com"
+    ~ "🔴 www.bigredsdepok.com"
   ) %}
   <tr>
     <td class="nomor-kolom" data-label="No">{{ loop.index }}</td>
@@ -164,11 +165,27 @@
     <td data-label="Bukti Transfer">
       <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>
     </td>
-     <td data-label="WhatsApp">
-      <a href="https://wa.me/62{{ tiket.whatsapp[1:] }}?text={{ pesan_whatsapp | urlencode }}" target="_blank" class="tombol-wa">
-        Kirim Tiket 
-      </a>
-    </td>
+    <td data-label="WhatsApp">
+{% if tiket.sudah_dikirim %}
+  <span style="color: green; font-weight: bold; display:inline-flex; align-items:center; margin-top: 20px; gap:5px;">✅ Tiket Terkirim</span>
+{% else %}
+  <button 
+      onclick="kirimTiket('{{ tiket.id }}')" 
+      class="tombol-wa"
+      style="cursor:pointer;">
+    Kirim Tiket
+  </button>
+{% endif %}
+</td>
+
+    <td data-label="Status Tiket">
+  {% if tiket.jumlah_terpakai == tiket.jumlah %}
+    <span style="color: green; font-weight: bold;">Sudah Ditukar</span>
+  {% else %}
+    <span style="color: red; font-weight: bold;">Belum Ditukar</span>
+  {% endif %}
+</td>
+
   </tr>
   {% endfor %}
 </tbody>

@@ -48,6 +48,7 @@ templates = Jinja2Templates(directory="frontend")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+FONNTE_TOKEN = os.getenv("FONNTE_TOKEN")
 
 
 def datetimeformat(value, format="%d-%m-%Y %H:%M"):
@@ -413,7 +414,7 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
 
     daftar_tiket = (
         db.query(TicketOrder)
-        .order_by(TicketOrder.nama.asc())
+        .order_by(TicketOrder.created_at.desc())
         .offset(offset)
         .limit(per_page)
         .all()
@@ -684,3 +685,67 @@ async def validate_ticket(q: str):
 @app.get("/scan")
 def serve_scan_page():
     return FileResponse("frontend/scan.html", media_type="text/html")
+
+
+@app.post("/update-status/{tiket_id}")
+def update_status(tiket_id: int, db: Session = Depends(get_db)):
+    tiket = db.query(TicketOrder).filter(TicketOrder.id == tiket_id).first()
+    if not tiket:
+        raise HTTPException(status_code=404, detail="Tiket tidak ditemukan")
+
+    tiket.sudah_dikirim = True
+    db.commit()
+    db.refresh(tiket)
+    return {"success": True}
+
+
+@app.post("/kirim-tiket/{tiket_id}")
+def kirim_tiket(tiket_id: int, db: Session = Depends(get_db)):
+    tiket = db.query(TicketOrder).filter(TicketOrder.id == tiket_id).first()
+    if not tiket:
+        raise HTTPException(status_code=404, detail="Tiket tidak ditemukan")
+
+    pesan = f"""*🔴 BIGREDS DEPOK 🔴*
+
+Hallo *{tiket.nama}* 👋
+Terima kasih telah melakukan pembelian tiket *NOBAR* Bigreds Depok.
+
+📄 *Detail Tiket Anda:*
+• _Status_: *{tiket.status.capitalize()}*
+• _Jumlah Tiket_: *{tiket.jumlah}*
+• _Total Pembayaran_: *Rp {tiket.total_harga:,.0f}*
+• _Tiket QR_: {tiket.tiket_url}
+
+🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi ke penjaga tiket.*
+
+_Ayu Tingting makan pisang gepok._
+_Siapa kamu gak penting, yang penting kita Kopites dari Depok!_
+
+www.bigredsdepok.com"""
+
+    response = requests.post(
+        "https://api.fonnte.com/send",
+        headers={"Authorization": FONNTE_TOKEN},
+        data={
+            "target": f"62{tiket.whatsapp[1:]}",
+            "message": pesan,
+        },
+    )
+
+    try:
+        res_data = response.json()
+    except Exception:
+        res_data = {"error": response.text}
+
+    if not res_data.get("status", True):
+        raise HTTPException(
+            status_code=500, detail=f"Gagal mengirim WhatsApp: {res_data}"
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Gagal mengirim WhatsApp")
+
+    tiket.sudah_dikirim = True
+    db.commit()
+
+    return {"success": True}
