@@ -61,7 +61,7 @@
 /* Image */
 .event-image {
   width: 100%;
-  height: 220px;
+  height: 260px;
   object-fit: cover;
   display: block;
   filter: brightness(85%);
