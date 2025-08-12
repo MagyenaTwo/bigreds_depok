@@ -1,16 +1,75 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>BIGREDS DEPOK - Events</title>
-  <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
-  <link rel="stylesheet" href="{{ 'gallery.css' | versioned }}">
-  <link rel="stylesheet" href="{{ 'events.css' | versioned }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Judul SEO -->
+  <title>BIGREDS Depok - Jadwal & Event Kopites Depok</title>
+
+  <!-- Deskripsi SEO -->
+  <meta name="description" content="Temukan jadwal event BIGREDS Depok seperti nonton bareng, gathering, dan kegiatan seru lainnya untuk para fans Liverpool FC di Depok.">
+
+  <!-- Kata kunci SEO -->
+  <meta name="keywords" content="BIGREDS Depok event, jadwal nobar Liverpool Depok, Kopites Depok, acara Liverpool Indonesia, komunitas Liverpool Depok">
+
+  <!-- Penulis -->
+  <meta name="author" content="BIGREDS Depok">
+
+  <!-- Izinkan indexing -->
+  <meta name="robots" content="index, follow">
+
+  <!-- Favicon -->
   <link rel="icon" href="/static/img/logo3.png" type="image/png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
+  <link rel="stylesheet" href="{{ 'events.css' | versioned }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
   <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-  </style>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="BIGREDS Depok - Jadwal & Event Kopites Depok" />
+  <meta property="og:description" content="Ikuti event resmi BIGREDS Depok seperti nobar Liverpool FC, gathering komunitas, dan kegiatan Kopites Depok lainnya." />
+  <meta property="og:image" content="https://bigredsdepok.com/static/img/logo.jpeg" />
+  <meta property="og:url" content="https://bigredsdepok.com/events" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="BIGREDS Depok - Jadwal & Event Kopites Depok" />
+  <meta name="twitter:description" content="Temukan jadwal event BIGREDS Depok seperti nonton bareng, gathering, dan kegiatan seru lainnya untuk fans Liverpool di Depok." />
+  <meta name="twitter:image" content="https://bigredsdepok.com/static/img/logo.jpeg" />
+
+  <!-- Structured Data (Schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Event BIGREDS Depok",
+    "startDate": "2025-08-12",
+    "location": {
+      "@type": "Place",
+      "name": "BIGREDS Depok HQ",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Depok",
+        "addressCountry": "ID"
+      }
+    },
+    "image": [
+      "https://bigredsdepok.com/static/img/logo.jpeg"
+    ],
+    "description": "Jadwal event BIGREDS Depok seperti nobar, gathering, dan kegiatan seru untuk fans Liverpool FC di Depok.",
+    "organizer": {
+      "@type": "Organization",
+      "name": "BIGREDS Depok",
+      "url": "https://bigredsdepok.com"
+    }
+  }
+  </script>
 </head>
+
 <body>
   <div class="navbar">
     <div class="logo">

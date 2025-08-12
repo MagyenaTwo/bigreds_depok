@@ -105,6 +105,14 @@ def format_rupiah(value):
 # Daftarkan filter ke environment Jinja2
 templates.env.filters["rupiah"] = format_rupiah
 
+@app.get("/robots.txt")
+def robots():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "robots.txt"))
+
+@app.get("/sitemap.xml")
+def sitemap():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "sitemap.xml"))
+
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):

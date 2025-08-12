@@ -112,6 +112,7 @@ body {
   line-height: 1.6;
 }
 
+
 .button {
   display: inline-block;
   background: #ff002b;
@@ -822,3 +823,162 @@ body {
       max-height: 500px; /* Atur sesuai kebutuhan */
     }
   }
+
+  
+    .gallery-container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .gallery-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: bold;
+      color: #a60000;
+    }
+
+    /* Filter Buttons (Chip Style) */
+    .filter-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .filter-buttons button {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(200,16,46,0.2);
+      color: #a60000;
+      font-weight: 600;
+      border-radius: 25px;
+      padding: 10px 25px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .filter-buttons button.active,
+    .filter-buttons button:hover {
+      background: #a60000;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(200,16,46,0.4);
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      columns: 4 220px;
+      column-gap: 15px;
+    }
+
+    .gallery-item {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 15px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      transition: 0.4s ease;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      display: block;
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+      filter: brightness(0.95);
+    }
+
+    /* Badge Category Glass Effect */
+    .gallery-item .category-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* Lightbox Fullscreen */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.92);
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 10px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    /* Caption in Lightbox */
+    .lightbox-caption {
+      color: white;
+      font-size: 1rem;
+      opacity: 0.85;
+      text-align: center;
+      max-width: 80%;
+    }
+
+    /* Close & Navigation */
+    .lightbox .close,
+    .lightbox .prev,
+    .lightbox .next {
+      position: absolute;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lightbox .close { top: 5px; right: 30px; }
+    .lightbox .prev,
+    .lightbox .next { top: 50%; transform: translateY(-50%); font-size: 3rem; }
+    .lightbox .prev { left: 30px; }
+    .lightbox .next { right: 30px; }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @media(max-width: 768px) {
+      .gallery-grid { columns: 2 150px; }
+    }
+    @media(max-width: 480px) {
+      .gallery-grid { columns: 1 100%; }
+    }
