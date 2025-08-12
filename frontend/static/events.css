@@ -129,7 +129,7 @@
     min-height: 420px; /* biar semua sama tinggi */
   }
   .event-image {
-    height: 180px;
+    height: 300px;
     object-fit: cover;
   }
 }
