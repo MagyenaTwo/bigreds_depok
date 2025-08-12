@@ -1,7 +1,7 @@
 import shutil
 from typing import List
 from uuid import uuid4
-from fastapi import FastAPI, File, HTTPException, Request, Form, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, Form, UploadFile
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
@@ -534,8 +534,9 @@ async def buat_akun_post(
 @app.post("/cms/upload")
 async def upload_gallery_nobar(
     title: str = Form(...),
-    tanggal: str = Form(...),  # Tanggal dari input HTML
-    kategori: str = Form(...),  # Tambahkan kategori
+    tanggal: str = Form(...),
+    kategori: str = Form(...),
+    deskripsi: str = Form(...),
     image: List[UploadFile] = File(...),
 ):
     db: Session = SessionLocal()
@@ -568,7 +569,8 @@ async def upload_gallery_nobar(
             title=title,
             image_url=media_url,
             tanggal=tanggal_dt,
-            kategori=kategori,  # simpan kategori
+            kategori=kategori,
+            deskripsi=deskripsi,
         )
         db.add(new_item)
 
@@ -789,3 +791,56 @@ def tiket_proxy(alias: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Gambar tiket tidak ditemukan")
 
     return StreamingResponse(io.BytesIO(r.content), media_type="image/png")
+
+
+@app.get("/events", response_class=HTMLResponse)
+async def events(request: Request):
+    db: Session = SessionLocal()
+    images = (
+        db.query(GalleryNobar)
+        .filter(GalleryNobar.kategori == "event")
+        .order_by(GalleryNobar.id.asc())  # urut berdasarkan id terkecil dulu
+        .all()
+    )
+
+    unique_events_dict = {}
+    for img in images:
+        if img.title not in unique_events_dict:
+            unique_events_dict[img.title] = img
+
+    unique_events = list(unique_events_dict.values())
+
+    db.close()
+
+    categories = list({img.kategori for img in unique_events if img.kategori})
+
+    return templates.TemplateResponse(
+        "events.html",
+        {
+            "request": request,
+            "images": unique_events,
+            "categories": categories,
+            "now": datetime.now(),
+        },
+    )
+
+
+@app.get("/event-details")
+async def event_details(title: str = Query(...)):
+    db: Session = SessionLocal()
+    events = db.query(GalleryNobar).filter(GalleryNobar.title == title).all()
+    db.close()
+
+    if not events:
+        return JSONResponse(
+            status_code=404, content={"message": "Event tidak ditemukan"}
+        )
+    deskripsi = events[0].deskripsi if events[0].deskripsi else None
+
+    images = [{"image_url": ev.image_url} for ev in events]
+
+    return {
+        "title": title,
+        "deskripsi": deskripsi,
+        "images": images,
+    }

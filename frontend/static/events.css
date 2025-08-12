@@ -1,0 +1,241 @@
+/* Section */
+.events-section {
+  padding: 60px 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: #c8102e;
+}
+
+/* Tabs */
+.events-tabs {
+  margin-bottom: 30px;
+}
+.tab-btn {
+  background: transparent;
+  border: 2px solid #c8102e;
+  color: #c8102e;
+  padding: 8px 20px;
+  margin: 0 5px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tab-btn.active,
+.tab-btn:hover {
+  background: #c8102e;
+  color: white;
+}
+
+/* Grid */
+.events-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: flex-start;
+}
+
+/* Event Card */
+.event-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+  flex: 0 1 280px;
+  max-width: 280px;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+.event-card:hover {
+  transform: scale(1.02);
+}
+
+/* Image */
+.event-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  filter: brightness(85%);
+}
+
+/* Card Content */
+.event-overlay {
+  padding: 15px;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-date {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #c8102e;
+}
+
+.event-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 5px 0;
+  color: #222;
+}
+
+.event-details {
+  font-size: 0.9rem;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: auto; 
+}
+
+/* Status */
+.event-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.upcoming {
+  background-color: #ffcc00;
+  color: black;
+}
+
+.past-status {
+  background-color: #888;
+  color: white;
+}
+@media (max-width: 600px) {
+  .events-container {
+    flex-direction: column;
+    align-items: stretch; /* semua card penuh lebar & tinggi seragam */
+  }
+  .event-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-height: 420px; /* biar semua sama tinggi */
+  }
+  .event-image {
+    height: 180px;
+    object-fit: cover;
+  }
+}
+ /* Modal background */
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  /* Modal content box */
+  .modal-content {
+    background: #fff;
+    margin: 5% auto;
+    padding: 20px 30px;
+    border-radius: 12px;
+    max-width: 700px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease forwards;
+    position: relative;
+  }
+
+  /* Close button */
+  .close-btn {
+    position: absolute;
+    right: 20px; top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .close-btn:hover {
+    color: #e74c3c;
+  }
+
+  /* Modal title */
+  #modal-title {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 28px;
+    color: #2c3e50;
+  }
+
+  /* Modal description */
+  #modal-description {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Gallery container */
+  .modal-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  /* Gallery images */
+  .modal-gallery img {
+    max-width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    object-fit: cover;
+    height: 200px;
+    width: 250px;
+  }
+
+  .modal-gallery img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  @keyframes slideDown {
+    from {transform: translateY(-20px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .modal-content {
+      width: 80%;
+      padding: 15px 20px;
+    }
+    #modal-title {
+      font-size: 22px;
+    }
+    .modal-gallery img {
+      max-width: 150px;
+      height: 150px;
+    }
+  }
