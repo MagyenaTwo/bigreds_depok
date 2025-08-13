@@ -90,7 +90,8 @@
     <th>Judul</th>
     <th>Kategori</th>
     <th>Tanggal</th>
-    <th>Lihat</th>
+    <th>Gambar</th>
+    <th>Aksi</th>
   </tr>
 </thead>
 <tbody>
@@ -109,12 +110,36 @@
   <td data-label="Lihat">
     <a href="{{ media.image_url }}" target="_blank" class="bukti-btn">Lihat</a>
   </td>
-</tr>
+ <td data-label="Aksi">
+     <form action="/delete_event/{{ media.id }}" method="post" style="display:inline;">
+ <!-- Tombol Delete -->
+<b<button type="button" 
+        onclick="showDeleteConfirm('{{ media.id }}')" 
+        style="background:transparent;border:none;color:#e53935;font-size:18px;cursor:pointer;">
+  🗑️
+</button>
+
+      </form>
+    </td>
+  </tr>
 
   {% endfor %}
 </tbody>
 </table>
-
+<!-- Modal Konfirmasi -->
+<div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:white; padding:20px; border-radius:8px; width:300px; text-align:center;">
+    <p>Yakin ingin menghapus media ini?</p>
+    <div style="margin-top:15px;">
+      <button id="confirmDeleteBtn" style="background:#e53935;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">
+        Hapus
+      </button>
+      <button onclick="closeDeleteModal()" style="background:#ccc;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">
+        Batal
+      </button>
+    </div>
+  </div>
+</div>
   <div class="pagination" style="margin-top: 25px;">
   {% if current_page > 1 %}
     <a href="?page={{ current_page - 1 }}">&laquo; Prev</a>
@@ -153,5 +178,28 @@ function filterTable() {
     input.value = "";
     filterTable();
   }
+
+let selectedDeleteId = null;
+
+function showDeleteConfirm(id) {
+  selectedDeleteId = id;
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  selectedDeleteId = null;
+  document.getElementById('deleteModal').style.display = 'none';
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (selectedDeleteId) {
+    // Buat form POST secara dinamis
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/cms/delete/${selectedDeleteId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+});
 </script>
 {% endblock %}

@@ -32,3 +32,27 @@ async function kirimTiket(tiketId) {
         btn.disabled = false;
     }
 }
+
+
+let selectedDeleteId = null;
+
+function showDeleteConfirm(id) {
+  selectedDeleteId = id;
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  selectedDeleteId = null;
+  document.getElementById('deleteModal').style.display = 'none';
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (selectedDeleteId) {
+    // Buat form POST secara dinamis
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/cms/delete/${selectedDeleteId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+});

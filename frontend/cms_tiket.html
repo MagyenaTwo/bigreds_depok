@@ -3,11 +3,24 @@
 {% block title %}Data Tiket - CMS Bigreds Depok{% endblock %}
 
 {% block content %}
-<h1>DASHBOARD</h1>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
- 
-
-<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 24px;">
+<h1>DASHBOARD</h1><div style="
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    justify-content: flex-start; /* Biar item rapat di kiri */
+    align-items: center;
+    max-width: 100%; /* Biar tidak terlalu lebar */
+">
+<div style="
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: flex-start; /* rapat di kiri */
+    max-width: 100%;
+">
 
   <!-- Card: Total Gopay -->
   <div style="
@@ -222,7 +235,7 @@
     <td data-label="Nominal">{{ tiket.total_harga | rupiah }}</td>
     <td data-label="Waktu Pembelian">{{ tiket.created_at | datetimeformat("%d-%m-%Y %H:%M") }}</td>
     <td data-label="Bukti Transfer">
-      <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat Bukti</a>
+      <a href="{{ tiket.bukti_transfer_url }}" target="_blank" class="bukti-btn">Lihat</a>
     </td>
     <td data-label="WhatsApp">
 {% if tiket.sudah_dikirim %}

@@ -873,3 +873,21 @@ async def event_details(title: str = Query(...)):
         "deskripsi": deskripsi,
         "images": images,
     }
+
+
+@app.post("/cms/delete/{event_id}")
+async def delete_event(event_id: int):
+    db: Session = SessionLocal()
+    try:
+        event = db.query(GalleryNobar).filter(GalleryNobar.id == event_id).first()
+        if not event:
+            return {"error": "Event tidak ditemukan"}
+
+        db.delete(event)
+        db.commit()
+        return RedirectResponse(url="/cms", status_code=303)
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    finally:
+        db.close()
