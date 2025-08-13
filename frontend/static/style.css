@@ -1105,37 +1105,77 @@ body {
 }
 .fans-corner-games p {
   text-align: center;
-  color: #a60000;
+  color: #ffff;
   font-size: 1.2rem;
   margin-bottom: 50px;
 }
+.fans-corner-leaderboard {
+  margin-top: 3rem;
+}
 
-/* Leaderboard */
-.leaderboard-container {
-  max-width: 500px;
-  margin: 0 auto 60px auto;
-  background: #b60000;
-  color: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  transition: transform 0.3s;
-}
-.leaderboard-container:hover {
-  transform: translateY(-5px);
-}
-.leaderboard-container h2 {
+.fans-corner-leaderboard h2 {
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 20px;
+  color: #b71c1c;
+  margin-bottom: 0.5rem;
 }
-.leaderboard-container ol {
-  padding-left: 25px;
-  font-size: 1.1rem;
+
+.fans-corner-leaderboard p {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #555;
 }
-.leaderboard-container ol li:nth-child(1) { color: gold; font-weight:bold; }
-.leaderboard-container ol li:nth-child(2) { color: silver; font-weight:bold; }
-.leaderboard-container ol li:nth-child(3) { color: #cd7f32; font-weight:bold; }
+.fans-corner-leaderboard {
+  max-width: 600px;
+  margin: 3rem auto;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.fans-corner-leaderboard h2 {
+  color: #b71c1c;
+  margin-bottom: 1.5rem;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.leaderboard-table thead {
+  background-color: #b71c1c;
+  color: white;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 12px;
+  text-align: center;
+}
+
+.leaderboard-table tbody tr {
+  background-color: #fff;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.leaderboard-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.leaderboard-table tbody tr:hover {
+  background-color: red;
+  transform: scale(1.02);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #b71c1c;
+}
 
 /* Game Cards */
 .game-list {
@@ -1202,4 +1242,31 @@ body {
   .fans-corner-games h1 { font-size: 2.2rem; }
   .leaderboard-container { padding: 25px; }
   .game-card { padding: 25px 15px; }
+}
+
+.game-card.disabled {
+  position: relative;
+  opacity: 0.5; /* card transparan */
+  pointer-events: none; /* card dan tombol tidak bisa diklik */
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.game-card.disabled::after {
+  content: "Belum Tersedia";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #ffeb3b; /* kuning solid */
+  color: #333;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+z-index: 10000;
 }

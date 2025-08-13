@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tebak Skor</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(120deg, #f6d365, #fda085);
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+    .match-info {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .teams {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .competition {
+        font-size: 1rem;
+        color: #666;
+    }
+    .score-box {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+    input {
+        width: 60px;
+        font-size: 1.2rem;
+        text-align: center;
+        padding: 5px;
+        border-radius: 8px;
+        border: 2px solid #fff;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 8px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .result {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+</style>
+</head>
+<body>
+
+<div class="match-info" id="match-info">
+    <div class="teams" id="teams">Memuat...</div>
+    <div class="competition" id="competition"></div>
+    <div class="time" id="time"></div>
+</div>
+
+<p>Masukkan prediksi skor:</p>
+<div class="score-box">
+    <div>
+        <p id="home-label">Tim A</p>
+        <input type="number" id="scoreA" min="0">
+    </div>
+    <div>
+        <p id="away-label">Tim B</p>
+        <input type="number" id="scoreB" min="0">
+    </div>
+</div>
+
+<button onclick="checkScore()">Kirim Tebakan</button>
+<div class="result" id="result"></div>
+
+<script>
+    let actualScore = { A: null, B: null };
+
+    // Ambil data match dari API FastAPI
+    fetch("/api/match")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("teams").textContent = `${data.home_team} vs ${data.away_team}`;
+            document.getElementById("home-label").textContent = data.home_team;
+            document.getElementById("away-label").textContent = data.away_team;
+            document.getElementById("competition").textContent = data.competition;
+            document.getElementById("time").textContent = `${data.datetime} WIB`;
+
+            // Kalau mau skornya diambil dari API juga
+            if (data.actual_score) {
+                actualScore = { A: data.actual_score.A, B: data.actual_score.B };
+            }
+        })
+        .catch(() => {
+            document.getElementById("teams").textContent = "Gagal memuat data pertandingan";
+        });
+
+    function checkScore() {
+        const scoreA = document.getElementById("scoreA").value;
+        const scoreB = document.getElementById("scoreB").value;
+        const resultEl = document.getElementById("result");
+
+        if (scoreA === "" || scoreB === "") {
+            resultEl.textContent = "⚠️ Harap isi kedua skor!";
+            resultEl.style.color = "red";
+            return;
+        }
+
+        if (actualScore.A === null || actualScore.B === null) {
+            resultEl.textContent = "✅ Tebakan tersimpan!";
+            resultEl.style.color = "blue";
+            return;
+        }
+
+        if (parseInt(scoreA) === actualScore.A && parseInt(scoreB) === actualScore.B) {
+            resultEl.textContent = "🎉 Tebakan kamu benar!";
+            resultEl.style.color = "green";
+        } else {
+            resultEl.textContent = `❌ Tebakan salah. Skor sebenarnya ${actualScore.A} - ${actualScore.B}`;
+            resultEl.style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>

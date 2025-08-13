@@ -1,6 +1,8 @@
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Column,
+    ForeignKey,
     Integer,
     LargeBinary,
     String,
@@ -78,3 +80,18 @@ class Leaderboard(Base):
     name = Column(String, nullable=False)
     score = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    game_key = Column(String, ForeignKey("games.game_key"), nullable=False)
+
+class Game(Base):
+    __tablename__ = "games"
+
+    id = Column(Integer, primary_key=True, index=True)
+    game_key = Column(String(50), unique=True, nullable=False)  # misal 'tebak-skor'
+    title = Column(String(100), nullable=False)
+    description = Column(Text)
+    icon = Column(String(10))
+    status = Column(String(10), nullable=False, default="locked")
+
+    __table_args__ = (
+        CheckConstraint("status IN ('open','locked')", name="check_status"),
+    )

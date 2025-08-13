@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-papdzFfZ3vmB/9M0Yf8F0vOcimL7wtXUgYekUZ+P3JrNWh6Yt1pUzx2Ao/xwYd9Lxss69YXTXFL7wBSV7XyJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
    <link rel="stylesheet" href="{{ 'cms.css' | versioned }}">
-  
+  <style></style>
 </head>
 <body>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -23,6 +23,7 @@
     <!-- <a href="/cms/berita" class="{% if request.path == '/cms/berita' %}active{% endif %}">Upload Berita</a> -->
     <a href="#" onclick="showMaintenanceModal(event)" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
     <a href="/cms/akun" class="{% if request.path == '/cms/akun' %}active{% endif %}">Buat Akun</a>
+    <a href="/cms/games" class="{% if request.path == '/games' %}active{% endif %}">Games</a>
     <a href="/logout">Keluar</a>
   </div>
 

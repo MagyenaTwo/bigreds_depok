@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>BIGREDS DEPOK - Fans Corner</title>
   <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
+  <link rel="stylesheet" href="{{ 'fans.css' | versioned }}">
   <link rel="icon" href="/static/img/logo3.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
   </style>
@@ -24,62 +25,79 @@
       <a href="/pengurus">Squad</a>
     </div>
   </div>
-
-  <section class="fans-corner-games">
+<section class="fans-corner-leaderboard">
   <div class="container">
-    <h1>🎯 Fans Corner</h1>
-    <p>Mainkan game seru bertema Liverpool & rebut posisi di leaderboard!</p>
+    <h2>🏆 Leaderboard</h2>
 
-    <!-- Leaderboard -->
-    <div class="leaderboard-container">
-      <h2>🏆 Kopites Leaderboard</h2>
-      <ol id="leaderboardList">
-        <!-- leaderboard akan diisi JS -->
-      </ol>
-    </div>
-
-    <!-- Game Cards -->
-    <div class="game-list">
-      <div class="game-card">
-        <div class="game-icon">⚽</div>
-        <h3>Tebak Skor</h3>
-        <p>Prediksi skor pertandingan Liverpool berikutnya!</p>
-        <button onclick="startGame('tebak-skor')">Mainkan</button>
-      </div>
-
-      <div class="game-card">
-        <div class="game-icon">🧠</div>
-        <h3>Quiz Liverpool</h3>
-        <p>Uji pengetahuanmu seputar sejarah & pemain Liverpool!</p>
-        <button onclick="startGame('quiz')">Mainkan</button>
-      </div>
-
-      <div class="game-card">
-        <div class="game-icon">🃏</div>
-        <h3>Memory Game</h3>
-        <p>Cocokkan kartu bertema Liverpool secepat mungkin!</p>
-        <button onclick="startGame('memory')">Mainkan</button>
-      </div>
-
-      <div class="game-card">
-        <div class="game-icon">⏳</div>
-        <h3>Trivia Cepat</h3>
-        <p>Jawab pertanyaan singkat sebelum waktu habis!</p>
-        <button onclick="startGame('trivia')">Mainkan</button>
-      </div>
-    </div>
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Player</th>
+          <th>Name</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in leaderboard %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>
+            <img src="{{ entry.avatar_url or '/static/img/logo.jpeg' }}" alt="{{ entry.name }}" class="avatar">
+          </td>
+          <td>{{ entry.name }}</td>
+          <td>{{ entry.score }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </section>
 
 
-<!-- Modal Game -->
-<div id="gameModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
-  <div style="background:white; width:90%; max-width:800px; height:80%; border-radius:10px; position:relative; overflow:hidden;">
-    <span onclick="closeGame()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px; font-weight:bold;">✖</span>
-    <iframe id="gameFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+
+  <section class="fans-corner-games">
+  <div class="container">
+  
+    <div class="game-list">
+      {% for game in games %}
+      <div 
+        class="game-card {% if game.status == 'locked' %}disabled{% endif %}" 
+        data-key="{{ game.game_key }}"
+      >
+        <div class="game-icon">{{ game.icon }}</div>
+        <h3>{{ game.title }}</h3>
+        <p>{{ game.description }}</p>
+      <button 
+  onclick="handlePlay('{{ game.game_key }}', '{{ game.status }}')" 
+  {% if game.status == 'locked' %}disabled{% endif %}
+>
+  Mainkan
+</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<div id="nameModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>Masukkan Nama Lengkap</h3>
+    <input type="text" id="playerName" placeholder="Nama Anda" />
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitName()">Lanjut Main</button>
+      <button class="btn-secondary" onclick="closeNameModal()">Batal</button>
+    </div>
   </div>
 </div>
+<!-- Modal Game -->
+<div id="gameModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box modal-game">
+    <button class="modal-close" onclick="closeGame()" aria-label="Tutup">✖</button>
+    <iframe id="gameFrame" allowfullscreen></iframe>
   </div>
+</div>
+
+
 <!-- Footer -->
 <footer class="footer">
   <div class="footer-container">
@@ -118,59 +136,6 @@
 <script src="{{ url_for('static', path='js/fans.js') }}?v=s1"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-  <script>
-    AOS.init();
-    function filterGallery(category) {
-      document.querySelectorAll('.filter-buttons button').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      document.querySelectorAll('.gallery-item').forEach(item => {
-        if (category === 'all' || item.classList.contains(category)) {
-          item.style.display = 'inline-block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    }
 
-    // Lightbox
-    const galleryItems = document.querySelectorAll('.gallery-item img');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCaption = document.getElementById('lightbox-caption');
-    let currentIndex = 0;
-
-    galleryItems.forEach((img, index) => {
-      img.addEventListener('click', () => {
-        currentIndex = index;
-        showLightbox(img.src, img.alt);
-      });
-    });
-
-    function showLightbox(src, caption) {
-      lightbox.classList.add('active');
-      lightboxImg.src = src;
-      lightboxCaption.textContent = caption || '';
-    }
-
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-    }
-
-    function nextImage() {
-      currentIndex = (currentIndex + 1) % galleryItems.length;
-      lightboxImg.src = galleryItems[currentIndex].src;
-      lightboxCaption.textContent = galleryItems[currentIndex].alt;
-    }
-
-    function prevImage() {
-      currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-      lightboxImg.src = galleryItems[currentIndex].src;
-      lightboxCaption.textContent = galleryItems[currentIndex].alt;
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeLightbox();
-    });
-  </script>
 </body>
 </html>

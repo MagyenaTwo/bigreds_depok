@@ -23,7 +23,7 @@ from supabase import StorageException, create_client
 import models
 from utils import format_datetime_indo
 from database import SessionLocal
-from models import Berita, GalleryNobar, Match, TicketOrder
+from models import Berita, GalleryNobar, Game, Leaderboard, Match, TicketOrder
 from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import Depends
@@ -893,39 +893,98 @@ async def delete_event(event_id: int):
     finally:
         db.close()
 
-
-@app.get("/fans-corner", response_class=HTMLResponse)
-async def fans_corner(request: Request):
-    return templates.TemplateResponse("fans_corner.html", {"request": request})
-
-
-# Tambah skor
-@app.post("/leaderboard")
-def add_score(name: str, score: int, db: Session = Depends(get_db)):
-    if not name.strip():
-        raise HTTPException(status_code=400, detail="Nama tidak boleh kosong")
-
-    new_score = models.Leaderboard(name=name, score=score)
-    db.add(new_score)
-    db.commit()
-    db.refresh(new_score)
-    return {
-        "id": new_score.id,
-        "name": new_score.name,
-        "score": new_score.score,
-        "created_at": new_score.created_at,
-    }
-
-
-# Ambil top 10 leaderboard
-@app.get("/leaderboard")
-def get_leaderboard(db: Session = Depends(get_db)):
-    scores = (
-        db.query(models.Leaderboard)
-        .order_by(models.Leaderboard.score.desc())
+@app.get("/fans-corner")
+def fans_corner(request: Request, db: Session = Depends(get_db)):
+    games = db.query(Game).order_by(Game.id.asc()).all()
+    leaderboard = (
+        db.query(Leaderboard)
+        .order_by(Leaderboard.score.desc())
         .limit(10)
         .all()
     )
-    return [
-        {"name": s.name, "score": s.score, "created_at": s.created_at} for s in scores
-    ]
+    return templates.TemplateResponse(
+        "fans_corner.html",
+        {
+            "request": request,
+            "games": games,
+            "leaderboard": leaderboard
+        }
+    )
+@app.post("/leaderboard")
+def add_leaderboard(name: str = Query(...), score: int = Query(...), db: Session = Depends(get_db)):
+    entry = Leaderboard(name=name, score=score)
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return {"message": "Score berhasil disimpan"}
+
+
+
+@app.get("/cms/games")
+def admin_games(request: Request, db: Session = Depends(get_db)):
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=302)
+    
+    games = db.query(Game).order_by(Game.id.asc()).all()
+
+    return templates.TemplateResponse("cms_games.html", {"request": request, "games": games})
+    
+@app.post("/cms/games/{game_id}/toggle")
+def toggle_game(game_id: int, db: Session = Depends(get_db)):
+    game = db.query(Game).filter(Game.id == game_id).first()
+    if game:
+        game.status = "open" if game.status == "locked" else "locked"
+        db.commit()
+        
+        return RedirectResponse(url="/cms/games", status_code=303)
+    return RedirectResponse(url="/cms/games", status_code=303)
+
+
+@app.post("/fans-corner/check-or-save-name")
+def check_or_save_name(
+    game_key: str = Form(...),
+    name: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    existing = db.query(Leaderboard).filter(
+        Leaderboard.game_key == game_key,
+        Leaderboard.name == name
+    ).first()
+
+    if existing:
+        return {"exists": True}  
+    entry = Leaderboard(game_key=game_key, name=name, score=0)
+    db.add(entry)
+    db.commit()
+
+    return {"exists": False}  
+
+
+@app.get("/games/{game_key}")
+def get_game(game_key: str):
+    file_path = os.path.join("frontend", f"{game_key}.html")
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+    return FileResponse(file_path)
+
+@app.get("/api/match")
+def get_match():
+    db: Session = SessionLocal()
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+    db.close()
+
+    if not match:
+        return {"error": "No upcoming match found"}
+
+    return {
+        "home_team": match.home_team,
+        "away_team": match.away_team,
+        "competition": match.competition,
+        "datetime": format_datetime_indo(match.match_datetime)
+    }

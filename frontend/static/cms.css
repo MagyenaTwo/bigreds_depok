@@ -567,3 +567,77 @@ body {
   50% { transform: rotate(-3deg); }
   75% { transform: rotate(3deg); }
 }
+
+.admin-games-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+  margin-left: 0%;
+
+}
+
+.admin-games-container h1 {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.admin-games-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.admin-games-table thead {
+  background-color: #b71c1c;
+  color: white;
+}
+
+.admin-games-table th,
+.admin-games-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-games-table tbody tr.even-row {
+  background-color: #f9f9f9;
+}
+
+.status-open {
+  color: green;
+  font-weight: bold;
+}
+
+.status-locked {
+  color: gray;
+  font-weight: bold;
+}
+
+.btn-toggle {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.btn-disable {
+  background-color: #e53935;
+}
+
+.btn-enable {
+  background-color: #4caf50;
+}
+
+.btn-toggle:hover {
+  transform: scale(1.05);
+}
+
+td.action {
+  text-align: center;
+}
+
+td.game-icon {
+  font-size: 1.5rem;
+}

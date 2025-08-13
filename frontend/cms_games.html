@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Games{% endblock %}
+
+{% block content %}
+<div class="admin-games-container">
+  <h1>🎮 Kelola Game</h1>
+  
+  <table class="admin-games-table">
+    <thead>
+      <tr>
+        <th>Icon</th>
+        <th>Judul</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr class="{% if loop.index0 % 2 == 0 %}even-row{% endif %}">
+        <td class="game-icon">{{ game.icon }}</td>
+        <td>{{ game.title }}</td>
+        <td class="status {% if game.status == 'open' %}status-open{% else %}status-locked{% endif %}">
+          {{ game.status | capitalize }}
+        </td>
+        <td class="action">
+          <form action="/cms/games/{{ game.id }}/toggle" method="post">
+            <button type="submit" class="btn-toggle {% if game.status == 'open' %}btn-disable{% else %}btn-enable{% endif %}">
+              {% if game.status == 'open' %}Disable{% else %}Enable{% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
