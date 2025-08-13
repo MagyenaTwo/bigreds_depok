@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import os
 from typing import List
 from supabase import StorageException, create_client
+import models
 from utils import format_datetime_indo
 from database import SessionLocal
 from models import Berita, GalleryNobar, Match, TicketOrder
@@ -891,3 +892,40 @@ async def delete_event(event_id: int):
         return {"error": str(e)}
     finally:
         db.close()
+
+
+@app.get("/fans-corner", response_class=HTMLResponse)
+async def fans_corner(request: Request):
+    return templates.TemplateResponse("fans_corner.html", {"request": request})
+
+
+# Tambah skor
+@app.post("/leaderboard")
+def add_score(name: str, score: int, db: Session = Depends(get_db)):
+    if not name.strip():
+        raise HTTPException(status_code=400, detail="Nama tidak boleh kosong")
+
+    new_score = models.Leaderboard(name=name, score=score)
+    db.add(new_score)
+    db.commit()
+    db.refresh(new_score)
+    return {
+        "id": new_score.id,
+        "name": new_score.name,
+        "score": new_score.score,
+        "created_at": new_score.created_at,
+    }
+
+
+# Ambil top 10 leaderboard
+@app.get("/leaderboard")
+def get_leaderboard(db: Session = Depends(get_db)):
+    scores = (
+        db.query(models.Leaderboard)
+        .order_by(models.Leaderboard.score.desc())
+        .limit(10)
+        .all()
+    )
+    return [
+        {"name": s.name, "score": s.score, "created_at": s.created_at} for s in scores
+    ]

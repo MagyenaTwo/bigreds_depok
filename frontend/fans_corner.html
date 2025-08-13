@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>BIGREDS DEPOK - Fans Corner</title>
+  <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
+  <link rel="icon" href="/static/img/logo3.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="/static/img/logo2.png" alt="Logo" class="logo-img">
+      BIGREDS DEPOK
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="menu" id="mobileMenu">
+      <a href="/">Home</a>
+      <a href="/events">Events</a>
+      <a href="/gallery">Gallery</a>
+      <a href="/buy-ticket">Buy Ticket</a>
+      <a href="/pengurus">Squad</a>
+    </div>
+  </div>
+
+  <section class="fans-corner-games">
+  <div class="container">
+    <h1>🎯 Fans Corner</h1>
+    <p>Mainkan game seru bertema Liverpool & rebut posisi di leaderboard!</p>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-container">
+      <h2>🏆 Kopites Leaderboard</h2>
+      <ol id="leaderboardList">
+        <!-- leaderboard akan diisi JS -->
+      </ol>
+    </div>
+
+    <!-- Game Cards -->
+    <div class="game-list">
+      <div class="game-card">
+        <div class="game-icon">⚽</div>
+        <h3>Tebak Skor</h3>
+        <p>Prediksi skor pertandingan Liverpool berikutnya!</p>
+        <button onclick="startGame('tebak-skor')">Mainkan</button>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🧠</div>
+        <h3>Quiz Liverpool</h3>
+        <p>Uji pengetahuanmu seputar sejarah & pemain Liverpool!</p>
+        <button onclick="startGame('quiz')">Mainkan</button>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🃏</div>
+        <h3>Memory Game</h3>
+        <p>Cocokkan kartu bertema Liverpool secepat mungkin!</p>
+        <button onclick="startGame('memory')">Mainkan</button>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">⏳</div>
+        <h3>Trivia Cepat</h3>
+        <p>Jawab pertanyaan singkat sebelum waktu habis!</p>
+        <button onclick="startGame('trivia')">Mainkan</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Modal Game -->
+<div id="gameModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
+  <div style="background:white; width:90%; max-width:800px; height:80%; border-radius:10px; position:relative; overflow:hidden;">
+    <span onclick="closeGame()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px; font-weight:bold;">✖</span>
+    <iframe id="gameFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+  </div>
+</div>
+  </div>
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-left">
+      <img src="/static/img/logo.jpeg" alt="BigReds Depok" class="footer-logo" />
+      <div class="footer-text">
+        <h3>Bigreds Depok</h3>
+        <p>You'll Never Walk Alone</p>
+        <p>&copy; 2025 Bigreds Depok. All rights reserved.</p>
+      </div>
+    </div>
+   <div class="footer-right">
+  <div class="footer-right-content">
+    <h4>Ikuti Kami</h4>
+    <div class="social-icons">
+      <a href="https://instagram.com/bigreds_depok" target="_blank" aria-label="Instagram">
+        <img src="/static/img/ig.png" alt="Instagram" />
+      </a>
+      <a href="https://facebook.com/BigredsDepok" target="_blank" aria-label="Facebook">
+        <img src="/static/img/fb.png" alt="Facebook" />
+      </a>
+      <a href="https://twitter.com/BIGREDS_Depok" target="_blank" aria-label="Twitter">
+        <img src="/static/img/x.png" alt="Twitter" />
+      </a>
+      <a href="https://wa.me/6285183259097" target="_blank" aria-label="WhatsApp">
+        <img src="/static/img/wa.png" alt="WhatsApp" />
+      </a>
+        <a href="https://www.youtube.com/@bigreds_depok" target="_blank" aria-label="Youtube">
+        <img src="/static/img/yt.png" alt="Youtube" />
+      </a>
+    </div>
+  </div>
+</div>
+</footer>
+<script src="{{ url_for('static', path='js/index.js') }}?v=s1"></script>
+<script src="{{ url_for('static', path='js/fans.js') }}?v=s1"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init();
+    function filterGallery(category) {
+      document.querySelectorAll('.filter-buttons button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.gallery-item').forEach(item => {
+        if (category === 'all' || item.classList.contains(category)) {
+          item.style.display = 'inline-block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Lightbox
+    const galleryItems = document.querySelectorAll('.gallery-item img');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    let currentIndex = 0;
+
+    galleryItems.forEach((img, index) => {
+      img.addEventListener('click', () => {
+        currentIndex = index;
+        showLightbox(img.src, img.alt);
+      });
+    });
+
+    function showLightbox(src, caption) {
+      lightbox.classList.add('active');
+      lightboxImg.src = src;
+      lightboxCaption.textContent = caption || '';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex + 1) % galleryItems.length;
+      lightboxImg.src = galleryItems[currentIndex].src;
+      lightboxCaption.textContent = galleryItems[currentIndex].alt;
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+      lightboxImg.src = galleryItems[currentIndex].src;
+      lightboxCaption.textContent = galleryItems[currentIndex].alt;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>

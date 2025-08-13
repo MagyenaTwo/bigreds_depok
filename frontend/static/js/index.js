@@ -286,3 +286,38 @@ window.addEventListener("DOMContentLoaded", () => {
   setInterval(changeBackground, 7000);
 });
 
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const giftsContainer = document.querySelector(".falling-gifts");
+  const giftEmojis = ["🎁", "🏆", "🎉", "⚽"];
+  
+  function createGift() {
+    const gift = document.createElement("div");
+    gift.classList.add("gift");
+    gift.textContent = giftEmojis[Math.floor(Math.random() * giftEmojis.length)];
+    gift.style.left = Math.random() * 100 + "vw";
+    gift.style.animationDuration = (Math.random() * 3 + 3) + "s";
+    giftsContainer.appendChild(gift);
+
+    setTimeout(() => gift.remove(), 6000);
+  }
+
+  setInterval(createGift, 500);
+});
+
+// Tampilkan modal saat klik tombol
+document.getElementById('maintenanceBtn').addEventListener('click', function(e){
+  e.preventDefault();
+  document.getElementById('maintenanceModal').style.display = 'block';
+});
+
+// Tutup modal saat klik tombol close
+document.getElementById('closeModal').addEventListener('click', function(){
+  document.getElementById('maintenanceModal').style.display = 'none';
+});
+
+// Tutup modal saat klik di luar modal
+window.addEventListener('click', function(e){
+  const modal = document.getElementById('maintenanceModal');
+  if(e.target === modal) modal.style.display = 'none';
+});
