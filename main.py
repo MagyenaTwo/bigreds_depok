@@ -105,9 +105,11 @@ def format_rupiah(value):
 # Daftarkan filter ke environment Jinja2
 templates.env.filters["rupiah"] = format_rupiah
 
+
 @app.get("/robots.txt")
 def robots():
     return FileResponse(os.path.join(os.path.dirname(__file__), "robots.txt"))
+
 
 @app.get("/sitemap.xml")
 def sitemap():
@@ -155,7 +157,26 @@ async def read_form(request: Request):
 
 @app.get("/buy-ticket", response_class=HTMLResponse)
 async def show_form(request: Request):
-    return templates.TemplateResponse("form.html", {"request": request})
+    db: Session = SessionLocal()
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+    formatted_datetime = format_datetime_indo(match.match_datetime) if match else None
+    db.close()
+
+    return templates.TemplateResponse(
+        "form.html",
+        {
+            "request": request,
+            "match": match,
+            "formatted_datetime": formatted_datetime,
+            "datetime_now": now,
+        },
+    )
 
 
 @app.post("/submit")

@@ -3,18 +3,72 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>BIGREDS DEPOK - Ticket</title>
+  <title>Beli Tiket Nobar - BIGREDS Depok</title>
+  <meta name="description" content="Beli tiket resmi nobar BIGREDS Depok. Dapatkan e-ticket atau tukarkan langsung di lokasi acara.">
+  <meta name="keywords" content="Beli tiket BIGREDS Depok, tiket nobar Liverpool, tiket BIGREDS Depok, nobar Liverpool Depok">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="BIGREDS Depok">
+  <meta property="og:title" content="Beli Tiket Nobar - BIGREDS Depok">
+  <meta property="og:description" content="Beli tiket resmi nobar BIGREDS Depok. Dapatkan e-ticket atau tukarkan langsung di lokasi acara.">
+  <meta property="og:image" content="https://bigredsdepok.com/static/img/logo.jpeg">
+  <meta property="og:url" content="https://bigredsdepok.com/buy-ticket">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Beli Tiket Nobar - BIGREDS Depok">
+  <meta name="twitter:description" content="Beli tiket resmi nobar BIGREDS Depok. Dapatkan e-ticket atau tukarkan langsung di lokasi acara.">
+  <meta name="twitter:image" content="https://bigredsdepok.com/static/img/logo.jpeg">
   <link rel="stylesheet" href="{{ 'style.css' | versioned }}">
   <link rel="stylesheet" href="{{ 'form.css' | versioned }}">
   <link rel="icon" href="/static/img/logo3.png" type="image/png">
-  <!-- AOS CSS -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-
-<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Nonton Bareng {{ match.home_team }} vs {{ match.away_team }}",
+  "startDate": "{{ match.match_datetime.isoformat() }}",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": "Warnoes Juanda",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Jl. Ir. H. Juanda",
+      "addressLocality": "Depok",
+      "addressRegion": "Jawa Barat",
+      "postalCode": "16421",
+      "addressCountry": "ID"
+    }
+  },
+  "image": [
+    "{{ match.image_url }}"
+  ],
+  "description": "Nobar seru BIGREDS Depok: {{ match.home_team }} vs {{ match.away_team }} di Warnoes Juanda, Depok.",
+  "offers": {
+    "@type": "Offer",
+    "url": "https://bigredsdepok.com/buy-ticket?id={{ match.id }}",
+    "price": "{{ match.ticket_price }}",
+    "priceCurrency": "IDR",
+    "availability": "https://schema.org/InStock",
+    "validFrom": "{{ match.match_datetime.isoformat() }}"
+  },
+  "performer": {
+    "@type": "SportsTeam",
+    "name": "{{ match.home_team }}"
+  },
+  "organizer": {
+    "@type": "SportsOrganization",
+    "name": "BIGREDS Depok",
+    "url": "https://bigredsdepok.com"
+  }
+}
+</script>
 </head>
 <body>
+   <h1 class="visually-hidden">BIGREDS Depok - Komunitas Resmi Fans Liverpool FC di Depok</h1>
   <div class="navbar">
     <div class="logo">
       <img src="/static/img/logo2.png" alt="Logo" class="logo-img">
@@ -27,9 +81,8 @@
       <a href="/gallery">Gallery</a>
       <a href="/buy-ticket">Buy Ticket</a>
       <a href="/pengurus">Squad</a>
-      </div>
-      </div>
-
+    </div>
+  </div>
 
   <!-- Konten Formulir -->
   <div class="form-wrapper">
