@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -11,6 +12,7 @@ from sqlalchemy import (
     func,
 )
 from database import Base
+from sqlalchemy.orm import relationship
 
 
 class Match(Base):
@@ -82,6 +84,7 @@ class Leaderboard(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     game_key = Column(String, ForeignKey("games.game_key"), nullable=False)
 
+
 class Game(Base):
     __tablename__ = "games"
 
@@ -95,3 +98,20 @@ class Game(Base):
     __table_args__ = (
         CheckConstraint("status IN ('open','locked')", name="check_status"),
     )
+
+
+class ScorePrediction(Base):
+    __tablename__ = "score_predictions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    match_id = Column(
+        Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False
+    )
+    full_name = Column(String(100), nullable=False)
+    predicted_home_score = Column(Integer, nullable=False)
+    predicted_away_score = Column(Integer, nullable=False)
+    points = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relasi ke tabel matches
+    match = relationship("Match", backref="predictions")

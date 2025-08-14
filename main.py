@@ -23,7 +23,15 @@ from supabase import StorageException, create_client
 import models
 from utils import format_datetime_indo
 from database import SessionLocal
-from models import Berita, GalleryNobar, Game, Leaderboard, Match, TicketOrder
+from models import (
+    Berita,
+    GalleryNobar,
+    Game,
+    Leaderboard,
+    Match,
+    ScorePrediction,
+    TicketOrder,
+)
 from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import Depends
@@ -893,25 +901,23 @@ async def delete_event(event_id: int):
     finally:
         db.close()
 
+
 @app.get("/fans-corner")
 def fans_corner(request: Request, db: Session = Depends(get_db)):
     games = db.query(Game).order_by(Game.id.asc()).all()
     leaderboard = (
-        db.query(Leaderboard)
-        .order_by(Leaderboard.score.desc())
-        .limit(10)
-        .all()
+        db.query(Leaderboard).order_by(Leaderboard.score.desc()).limit(10).all()
     )
     return templates.TemplateResponse(
         "fans_corner.html",
-        {
-            "request": request,
-            "games": games,
-            "leaderboard": leaderboard
-        }
+        {"request": request, "games": games, "leaderboard": leaderboard},
     )
+
+
 @app.post("/leaderboard")
-def add_leaderboard(name: str = Query(...), score: int = Query(...), db: Session = Depends(get_db)):
+def add_leaderboard(
+    name: str = Query(...), score: int = Query(...), db: Session = Depends(get_db)
+):
     entry = Leaderboard(name=name, score=score)
     db.add(entry)
     db.commit()
@@ -919,45 +925,46 @@ def add_leaderboard(name: str = Query(...), score: int = Query(...), db: Session
     return {"message": "Score berhasil disimpan"}
 
 
-
 @app.get("/cms/games")
 def admin_games(request: Request, db: Session = Depends(get_db)):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
-    
+
     games = db.query(Game).order_by(Game.id.asc()).all()
 
-    return templates.TemplateResponse("cms_games.html", {"request": request, "games": games})
-    
+    return templates.TemplateResponse(
+        "cms_games.html", {"request": request, "games": games}
+    )
+
+
 @app.post("/cms/games/{game_id}/toggle")
 def toggle_game(game_id: int, db: Session = Depends(get_db)):
     game = db.query(Game).filter(Game.id == game_id).first()
     if game:
         game.status = "open" if game.status == "locked" else "locked"
         db.commit()
-        
+
         return RedirectResponse(url="/cms/games", status_code=303)
     return RedirectResponse(url="/cms/games", status_code=303)
 
 
 @app.post("/fans-corner/check-or-save-name")
 def check_or_save_name(
-    game_key: str = Form(...),
-    name: str = Form(...),
-    db: Session = Depends(get_db)
+    game_key: str = Form(...), name: str = Form(...), db: Session = Depends(get_db)
 ):
-    existing = db.query(Leaderboard).filter(
-        Leaderboard.game_key == game_key,
-        Leaderboard.name == name
-    ).first()
+    existing = (
+        db.query(Leaderboard)
+        .filter(Leaderboard.game_key == game_key, Leaderboard.name == name)
+        .first()
+    )
 
     if existing:
-        return {"exists": True}  
+        return {"exists": True}
     entry = Leaderboard(game_key=game_key, name=name, score=0)
     db.add(entry)
     db.commit()
 
-    return {"exists": False}  
+    return {"exists": False}
 
 
 @app.get("/games/{game_key}")
@@ -966,6 +973,7 @@ def get_game(game_key: str):
     if not os.path.exists(file_path):
         return {"error": "File not found"}
     return FileResponse(file_path)
+
 
 @app.get("/api/match")
 def get_match():
@@ -983,8 +991,40 @@ def get_match():
         return {"error": "No upcoming match found"}
 
     return {
+        "id": match.id,
         "home_team": match.home_team,
         "away_team": match.away_team,
         "competition": match.competition,
-        "datetime": format_datetime_indo(match.match_datetime)
+        "datetime": format_datetime_indo(match.match_datetime),
     }
+
+
+@app.post("/api/prediction")
+async def create_prediction(request: Request, db: Session = Depends(get_db)):
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON format")
+
+    required_fields = [
+        "match_id",
+        "full_name",
+        "predicted_home_score",
+        "predicted_away_score",
+    ]
+    for field in required_fields:
+        if field not in data:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+    new_pred = ScorePrediction(
+        match_id=data["match_id"],
+        full_name=data["full_name"],
+        predicted_home_score=data["predicted_home_score"],
+        predicted_away_score=data["predicted_away_score"],
+    )
+
+    db.add(new_pred)
+    db.commit()
+    db.refresh(new_pred)
+
+    return {"status": "success", "prediction_id": new_pred.id}

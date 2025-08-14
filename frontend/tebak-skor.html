@@ -6,130 +6,240 @@
 <title>Tebak Skor</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(120deg, #f6d365, #fda085);
-        color: #333;
+        font-family: 'Poppins', sans-serif;
+        background: #a60000;
         margin: 0;
         padding: 20px;
-        text-align: center;
-    }
-    .match-info {
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .teams {
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    .competition {
-        font-size: 1rem;
-        color: #666;
-    }
-    .score-box {
         display: flex;
         justify-content: center;
-        gap: 20px;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        text-align: center;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .match-info {
+        margin-bottom: 20px;
+    }
+
+    .teams {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .competition {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 5px;
+    }
+
+    .time {
+        font-size: 0.9rem;
+        color: #fff;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
         margin: 20px 0;
     }
-    input {
-        width: 60px;
-        font-size: 1.2rem;
-        text-align: center;
-        padding: 5px;
-        border-radius: 8px;
-        border: 2px solid #fff;
-    }
-    button {
-        padding: 10px 20px;
+
+    input[type="text"], input[type="number"] {
+        padding: 10px;
         font-size: 1rem;
+        border-radius: 12px;
         border: none;
-        border-radius: 8px;
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
+        outline: none;
+        text-align: center;
+        background: rgba(255,255,255,0.8);
+        transition: 0.3s;
     }
-    button:hover {
-        background-color: #0056b3;
+
+    input:focus {
+        background: rgba(255,255,255,1);
+        box-shadow: 0 0 5px rgba(255,255,255,0.8);
     }
-    .result {
-        margin-top: 20px;
+
+   .score-box {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* kecilin jarak antar kotak */
+}
+
+.team-score {
+    flex: unset; /* supaya tidak memaksa lebar 50% */
+    text-align: center;
+}
+
+.team-score p {
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+/* khusus input angka */
+.team-score input[type="number"] {
+    width: 60px; /* kecilin lebar kotak */
+    padding: 8px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    text-align: center;
+    background: rgba(255,255,255,0.8);
+}
+
+    button {
+        background: rgb(0, 255, 0);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 1rem;
         font-weight: bold;
-        font-size: 1.2rem;
+        color: black;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.3s ease;
+        width: 100%;
+    }
+
+    button:hover {
+        transform: scale(1.05);
+        
+    }
+
+    .result {
+        margin-top: 15px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(-10px);}
+        to {opacity: 1; transform: translateY(0);}
     }
 </style>
 </head>
 <body>
 
-<div class="match-info" id="match-info">
-    <div class="teams" id="teams">Memuat...</div>
-    <div class="competition" id="competition"></div>
-    <div class="time" id="time"></div>
-</div>
-
-<p>Masukkan prediksi skor:</p>
-<div class="score-box">
-    <div>
-        <p id="home-label">Tim A</p>
-        <input type="number" id="scoreA" min="0">
+<div class="container">
+    <div class="match-info" id="match-info">
+        <div class="competition" id="competition">Premier League</div>
+        <div class="teams" id="teams">Tim A vs Tim B</div>
+        <div class="time" id="time">20:00 WIB</div>
     </div>
-    <div>
-        <p id="away-label">Tim B</p>
-        <input type="number" id="scoreB" min="0">
+
+    <div class="input-group">
+        <input type="text" id="fullName" placeholder="Nama Lengkap" required>
+
+        <div class="score-box">
+            <div class="team-score">
+                <p id="home-label">Tim A </p>
+                <input type="number" id="scoreA" min="0">
+            </div>
+              <div class="vs-label">vs</div>
+            <div class="team-score">
+                <p id="away-label">Tim B</p>
+                <input type="number" id="scoreB" min="0">
+            </div>
+        </div>
+
+        <button onclick="checkScore()">Kirim Tebakan</button>
     </div>
+
+    <div class="result" id="result"></div>
 </div>
-
-<button onclick="checkScore()">Kirim Tebakan</button>
-<div class="result" id="result"></div>
-
 <script>
-    let actualScore = { A: null, B: null };
-
-    // Ambil data match dari API FastAPI
     fetch("/api/match")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("teams").textContent = `${data.home_team} vs ${data.away_team}`;
-            document.getElementById("home-label").textContent = data.home_team;
-            document.getElementById("away-label").textContent = data.away_team;
-            document.getElementById("competition").textContent = data.competition;
-            document.getElementById("time").textContent = `${data.datetime} WIB`;
+    .then(res => res.json())
+    .then(data => {
+        console.log("📦 Data API match:", data);
 
-            // Kalau mau skornya diambil dari API juga
-            if (data.actual_score) {
-                actualScore = { A: data.actual_score.A, B: data.actual_score.B };
-            }
-        })
-        .catch(() => {
-            document.getElementById("teams").textContent = "Gagal memuat data pertandingan";
-        });
-
-    function checkScore() {
-        const scoreA = document.getElementById("scoreA").value;
-        const scoreB = document.getElementById("scoreB").value;
-        const resultEl = document.getElementById("result");
-
-        if (scoreA === "" || scoreB === "") {
-            resultEl.textContent = "⚠️ Harap isi kedua skor!";
-            resultEl.style.color = "red";
+        if (data.error) {
+            document.getElementById("teams").textContent = "⚠️ " + data.error;
             return;
         }
 
-        if (actualScore.A === null || actualScore.B === null) {
-            resultEl.textContent = "✅ Tebakan tersimpan!";
-            resultEl.style.color = "blue";
-            return;
-        }
+        currentMatchId = data.id;
+        console.log("✅ Match ID:", currentMatchId);
 
-        if (parseInt(scoreA) === actualScore.A && parseInt(scoreB) === actualScore.B) {
-            resultEl.textContent = "🎉 Tebakan kamu benar!";
-            resultEl.style.color = "green";
-        } else {
-            resultEl.textContent = `❌ Tebakan salah. Skor sebenarnya ${actualScore.A} - ${actualScore.B}`;
-            resultEl.style.color = "red";
-        }
+        // Update info pertandingan
+        document.getElementById("competition").textContent = data.competition;
+        document.getElementById("teams").textContent = `${data.home_team} vs ${data.away_team}`;
+        document.getElementById("time").textContent = `${data.datetime} WIB`;
+
+        // 🔹 Update label input skor
+        document.getElementById("home-label").textContent = data.home_team;
+        document.getElementById("away-label").textContent = data.away_team;
+    })
+    .catch(err => {
+        console.error("❌ Error fetch:", err);
+        document.getElementById("teams").textContent = "Gagal memuat data pertandingan";
+    });
+
+
+
+
+function checkScore() {
+    const fullName = document.getElementById("fullName").value;
+    const scoreA = document.getElementById("scoreA").value;
+    const scoreB = document.getElementById("scoreB").value;
+
+    console.log("🔍 Match ID saat submit:", currentMatchId); // cek di sini juga
+
+    if (!fullName || scoreA === "" || scoreB === "") {
+        alert("⚠️ Semua kolom harus diisi!");
+        return;
     }
+    if (!currentMatchId) {
+        alert("⚠️ Data pertandingan belum dimuat!");
+        return;
+    }
+
+    console.log("Data yang dikirim ke backend:", {
+        match_id: currentMatchId,
+        full_name: fullName,
+        predicted_home_score: parseInt(scoreA),
+        predicted_away_score: parseInt(scoreB)
+    });
+
+    fetch("/api/prediction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            match_id: currentMatchId,
+            full_name: fullName,
+            predicted_home_score: parseInt(scoreA),
+            predicted_away_score: parseInt(scoreB)
+        })
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if (resp.status === "success") {
+            alert("✅ Tebakan tersimpan!");
+            closeModal(); 
+        } else {
+            alert("⚠️ Gagal menyimpan tebakan.");
+        }
+    });
+}
+function closeModal() {
+    document.getElementById("gameModal").style.display = "none";
+    document.getElementById("gameModalBody").innerHTML = "";
+}
+
 </script>
 
 </body>
