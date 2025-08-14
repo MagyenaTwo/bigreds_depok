@@ -1044,7 +1044,6 @@ def get_match():
         "datetime": format_datetime_indo(match.match_datetime),
     }
 
-
 @app.post("/api/prediction")
 async def create_prediction(request: Request, db: Session = Depends(get_db)):
     try:
@@ -1061,6 +1060,16 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     for field in required_fields:
         if field not in data:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+    
+    
+    match = db.query(Match).filter(Match.id == data["match_id"]).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match tidak ditemukan")
+
+    
+    if datetime.now() >= match.match_datetime - timedelta(hours=1):
+        raise HTTPException(status_code=400, detail="Tebak skor sudah ditutup 1 jam sebelum pertandingan")
+
     
     existing = db.query(ScorePrediction).filter(
         ScorePrediction.match_id == data["match_id"],
