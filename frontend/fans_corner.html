@@ -43,7 +43,9 @@
         <tr>
           <td>{{ loop.index }}</td>
           <td>
-            <img src="{{ entry.avatar_url or '/static/img/logo.jpeg' }}" alt="{{ entry.name }}" class="avatar">
+         <img src="{{ entry.avatar_url if entry.avatar_url else '/static/img/logo.jpeg' }}" 
+     alt="{{ entry.name }}" class="avatar">
+
           </td>
           <td>{{ entry.name }}</td>
           <td>{{ entry.score }}</td>

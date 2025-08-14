@@ -1,3 +1,4 @@
+from collections import defaultdict
 import shutil
 from typing import List
 from uuid import uuid4
@@ -905,13 +906,37 @@ async def delete_event(event_id: int):
 @app.get("/fans-corner")
 def fans_corner(request: Request, db: Session = Depends(get_db)):
     games = db.query(Game).order_by(Game.id.asc()).all()
-    leaderboard = (
-        db.query(Leaderboard).order_by(Leaderboard.score.desc()).limit(10).all()
+
+    # Hitung total poin per pemain dari ScorePrediction
+    total_points = (
+        db.query(
+            func.lower(ScorePrediction.full_name).label("full_name"),
+            func.sum(ScorePrediction.points).label("points")
+        )
+        .group_by(func.lower(ScorePrediction.full_name))
+        .order_by(func.sum(ScorePrediction.points).desc())
+        .limit(10)
+        .all()
     )
+
+    # Format untuk dikirim ke template
+    leaderboard = [
+        {
+            "name": name.title(),
+            "score": points
+        }
+        for name, points in total_points
+    ]
+
     return templates.TemplateResponse(
         "fans_corner.html",
-        {"request": request, "games": games, "leaderboard": leaderboard},
+        {
+            "request": request,
+            "games": games,
+            "leaderboard": leaderboard
+        },
     )
+
 
 
 @app.post("/leaderboard")
@@ -924,19 +949,39 @@ def add_leaderboard(
     db.refresh(entry)
     return {"message": "Score berhasil disimpan"}
 
-
 @app.get("/cms/games")
 def admin_games(request: Request, db: Session = Depends(get_db)):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
 
     games = db.query(Game).order_by(Game.id.asc()).all()
-
-    return templates.TemplateResponse(
-        "cms_games.html", {"request": request, "games": games}
+    predictions = db.query(ScorePrediction).all()
+    matches = db.query(Match).order_by(Match.match_datetime.asc()).all()
+    total_points = (
+        db.query(
+            func.lower(ScorePrediction.full_name).label("full_name"),
+            func.sum(ScorePrediction.points).label("points")
+        )
+        .group_by(func.lower(ScorePrediction.full_name))
+        .all()
     )
 
+    # Biar tampilannya rapi, convert ke list dict dan title-case namanya
+    total_points_list = [
+        {"full_name": name.title(), "points": pts}
+        for name, pts in total_points
+    ]
 
+    return templates.TemplateResponse(
+        "cms_games.html", 
+        {
+            "request": request,
+            "games": games,
+            "predictions": predictions,
+            "matches": matches,
+            "total_points": total_points_list
+        }
+    )
 @app.post("/cms/games/{game_id}/toggle")
 def toggle_game(game_id: int, db: Session = Depends(get_db)):
     game = db.query(Game).filter(Game.id == game_id).first()
@@ -946,6 +991,7 @@ def toggle_game(game_id: int, db: Session = Depends(get_db)):
 
         return RedirectResponse(url="/cms/games", status_code=303)
     return RedirectResponse(url="/cms/games", status_code=303)
+
 
 
 @app.post("/fans-corner/check-or-save-name")
@@ -1015,6 +1061,17 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     for field in required_fields:
         if field not in data:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+    
+    existing = db.query(ScorePrediction).filter(
+        ScorePrediction.match_id == data["match_id"],
+        func.lower(ScorePrediction.full_name) == data["full_name"].lower()
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Anda sudah mengirim Tebak Skor"
+        )
 
     new_pred = ScorePrediction(
         match_id=data["match_id"],
@@ -1028,3 +1085,31 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     db.refresh(new_pred)
 
     return {"status": "success", "prediction_id": new_pred.id}
+
+@app.post("/cms/matches/{match_id}/set_score")
+def set_match_score(
+    match_id: int,
+    home_score: int = Form(...),
+    away_score: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    # 1. Update skor pertandingan
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+
+    match.actual_home_score = home_score
+    match.actual_away_score = away_score
+    db.commit()
+
+    predictions = db.query(ScorePrediction).all()
+    for pred in predictions:
+        if pred.match.actual_home_score is not None and pred.match.actual_away_score is not None:
+            if pred.predicted_home_score == pred.match.actual_home_score and pred.predicted_away_score == pred.match.actual_away_score:
+                pred.points = 10
+            else:
+                pred.points = 0
+    db.commit()
+
+
+    return RedirectResponse(url="/cms/games", status_code=302)

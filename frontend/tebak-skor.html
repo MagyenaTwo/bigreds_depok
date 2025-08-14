@@ -159,6 +159,37 @@
         <button onclick="checkScore()">Kirim Tebakan</button>
     </div>
 
+    <div id="loadingPopup" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 18px;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+">
+    Tunggu sebentar...
+</div>
+
+<!-- Popup sukses -->
+<div id="successPopup" style="
+    display:none;
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    color:white;
+    font-size:18px;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+">
+    ✅ Tebakan berhasil dikirim!
+</div>
+
     <div class="result" id="result"></div>
 </div>
 <script>
@@ -189,15 +220,10 @@
         document.getElementById("teams").textContent = "Gagal memuat data pertandingan";
     });
 
-
-
-
 function checkScore() {
     const fullName = document.getElementById("fullName").value;
     const scoreA = document.getElementById("scoreA").value;
     const scoreB = document.getElementById("scoreB").value;
-
-    console.log("🔍 Match ID saat submit:", currentMatchId); // cek di sini juga
 
     if (!fullName || scoreA === "" || scoreB === "") {
         alert("⚠️ Semua kolom harus diisi!");
@@ -208,12 +234,11 @@ function checkScore() {
         return;
     }
 
-    console.log("Data yang dikirim ke backend:", {
-        match_id: currentMatchId,
-        full_name: fullName,
-        predicted_home_score: parseInt(scoreA),
-        predicted_away_score: parseInt(scoreB)
-    });
+    const loading = document.getElementById("loadingPopup");
+    const success = document.getElementById("successPopup");
+
+    loading.style.display = "flex";
+    const startTime = Date.now();
 
     fetch("/api/prediction", {
         method: "POST",
@@ -227,14 +252,33 @@ function checkScore() {
     })
     .then(res => res.json())
     .then(resp => {
-        if (resp.status === "success") {
-            alert("✅ Tebakan tersimpan!");
-            closeModal(); 
-        } else {
-            alert("⚠️ Gagal menyimpan tebakan.");
-        }
+        const elapsed = Date.now() - startTime;
+        const delay = Math.max(3000 - elapsed, 0);
+
+        setTimeout(() => {
+            loading.style.display = "none";
+
+            if (resp.status === "success") {
+                success.style.display = "flex";
+
+                setTimeout(() => {
+                    success.style.display = "none";
+                    if (window.parent && typeof window.parent.closeModal === "function") {
+                        window.parent.closeModal();
+                    }
+                }, 1500); // tampil popup sukses 1,5 detik
+            } else {
+                  alert("⚠️ " + (resp.detail || "Gagal menyimpan tebakan."));
+            }
+        }, delay);
+    })
+    .catch(() => {
+        loading.style.display = "none";
+        alert("⚠️ Terjadi kesalahan saat mengirim data.");
     });
 }
+
+
 function closeModal() {
     document.getElementById("gameModal").style.display = "none";
     document.getElementById("gameModalBody").innerHTML = "";

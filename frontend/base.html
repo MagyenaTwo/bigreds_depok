@@ -11,21 +11,56 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-papdzFfZ3vmB/9M0Yf8F0vOcimL7wtXUgYekUZ+P3JrNWh6Yt1pUzx2Ao/xwYd9Lxss69YXTXFL7wBSV7XyJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
    <link rel="stylesheet" href="{{ 'cms.css' | versioned }}">
-  <style></style>
+  <style>.dropbtn {
+  display: block;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+  position: relative;
+}
+
+.dropdown-content {
+  display: none; /* penting, harus tersembunyi dulu */
+  flex-direction: column;
+  padding-left: 15px; /* submenu menjorok ke kanan */
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 8px 0;
+  text-decoration: none;
+  color: white;
+}
+
+.dropbtn.active {
+  font-weight: bold;
+  color: white;
+}
+
+.dropdown-content a.active {
+  font-weight: bold;
+  color: white;
+}</style>
 </head>
 <body>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <h2>CMS Bigreds Depok</h2>
+  <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Dashboard</a>
+  <a href="/cms" class="{% if request.path == '/cms' %}active{% endif %}">Upload Kegiatan</a>
+  <a href="#" onclick="showMaintenanceModal(event)" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
+  <a href="/cms/akun" class="{% if request.path == '/cms/akun' %}active{% endif %}">Buat Akun</a>
+<a href="#" class="dropbtn {% if request.path.startswith('/cms/games') %}active{% endif %}" onclick="toggleDropdown(event)">Games <i class="fa fa-caret-down"></i></a>
+<div class="dropdown-content" id="gamesDropdown">
+  <a href="/cms/games" class="{% if request.path == '/cms/games/tebak-skor' %}active{% endif %}">Tebak Skor</a>
+  <a href="/cms/games/quiz" class="{% if request.path == '/cms/games/quiz' %}active{% endif %}">Quiz</a>
+  <a href="/cms/games/memory" class="{% if request.path == '/cms/games/memory' %}active{% endif %}">Memory</a>
+  <a href="/cms/games/trivia" class="{% if request.path == '/cms/games/trivia' %}active{% endif %}">Trivia</a>
+</div>
 
-  <div class="sidebar" id="sidebar">
-    <h2>CMS Bigreds Depok</h2>
-    <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Dashboard</a>
-     <a href="/cms" class="{% if request.path == '/cms' %}active{% endif %}">Upload Kegiatan</a>
-    <!-- <a href="/cms/berita" class="{% if request.path == '/cms/berita' %}active{% endif %}">Upload Berita</a> -->
-    <a href="#" onclick="showMaintenanceModal(event)" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
-    <a href="/cms/akun" class="{% if request.path == '/cms/akun' %}active{% endif %}">Buat Akun</a>
-    <a href="/cms/games" class="{% if request.path == '/games' %}active{% endif %}">Games</a>
-    <a href="/logout">Keluar</a>
-  </div>
+  <a href="/logout">Keluar</a>
+</div>
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
@@ -63,6 +98,25 @@
 function closeMaintenanceModal() {
   document.getElementById('maintenanceModal').style.display = 'none';
 }
+
+function toggleDropdown(e) {
+  e.preventDefault();
+  const dropdown = document.getElementById("gamesDropdown");
+  if (dropdown.style.display === "block") {
+    dropdown.style.display = "none";
+  } else {
+    dropdown.style.display = "block";
+  }
+}
+
+// Optional: buka submenu otomatis jika halaman aktif
+window.addEventListener('DOMContentLoaded', (event) => {
+  const dropdown = document.getElementById("gamesDropdown");
+  const activeLink = dropdown.querySelector('a.active');
+  if (activeLink) {
+    dropdown.style.display = "block";
+  }
+});
   </script>
   <script src="{{ 'js/index.js' | versioned }}"></script>
   <script src="{{ 'js/cms.js' | versioned }}"></script>

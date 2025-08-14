@@ -23,6 +23,8 @@ class Match(Base):
     away_team = Column(String)
     match_datetime = Column(DateTime)
     competition = Column(String)
+    actual_home_score = Column(Integer, nullable=True)
+    actual_away_score = Column(Integer, nullable=True)
 
 
 class TicketOrder(Base):

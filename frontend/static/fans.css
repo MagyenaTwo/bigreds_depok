@@ -30,6 +30,13 @@
 }
 #gameModalBody {
   flex: 1;
-  overflow: auto;
+  overflow-y: scroll; /* atau auto */
+  overflow-x: hidden;
   padding: 0;
+
+  /* Hilangkan scrollbar di semua browser */
+  scrollbar-width: none; /* Firefox */
+}
+#gameModalBody::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }

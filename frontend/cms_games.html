@@ -3,6 +3,60 @@
 {% block title %}Admin Games{% endblock %}
 
 {% block content %}
+<style>
+  
+.score-predictions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-family: sans-serif;
+}
+
+.score-predictions-table th,
+.score-predictions-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.score-predictions-table th {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: 600;
+}
+
+.score-predictions-table tr.even-row {
+  background-color: #f9f9f9;
+}
+
+.score-predictions-table tr.odd-row {
+  background-color: #fff;
+}
+
+.score-predictions-table tr:hover {
+  background-color: #e0f7fa;
+  transition: 0.3s;
+}
+
+.score-predictions-table td {
+  font-size: 14px;
+}
+.score-input {
+  width: 60px;
+  border: 1px solid #d32f2f;
+  background-color: #ffebee;
+  color: #b71c1c;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px;
+}
+.score-input:focus {
+  outline: none;
+  border-color: #f44336;
+  box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+}
+
+</style>
 <div class="admin-games-container">
   <h1>🎮 Kelola Game</h1>
   
@@ -35,4 +89,65 @@
     </tbody>
   </table>
 </div>
+
+<h2>⚽ Input Hasil Pertandingan</h2>
+<table class="score-predictions-table">
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Match</th>
+      <th>Skor Home</th>
+      <th>Skor Away</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% if matches %}
+    {% for match in matches %}
+      <tr class="{% if loop.index0 % 2 == 0 %}even-row{% else %}odd-row{% endif %}">
+        <td>{{ loop.index }}</td>
+        <td>{{ match.home_team }} vs {{ match.away_team }}</td>
+        <td>
+         <input type="number" name="home_score" value="{{ '' if match.actual_home_score is none else match.actual_home_score }}" class="score-input" form="form-{{ match.id }}" required>
+        </td>
+        <td>
+        <input type="number" name="away_score" value="{{ '' if match.actual_away_score is none else match.actual_away_score }}" class="score-input" form="form-{{ match.id }}" required>
+        </td>
+        <td>
+          <form id="form-{{ match.id }}" action="/cms/matches/{{ match.id }}/set_score" method="post">
+            <button type="submit" class="btn-enable">Submit</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+      <td colspan="5">Tidak ada pertandingan. Tambahkan pertandingan baru dulu.</td>
+    </tr>
+  {% endif %}
+  </tbody>
+</table>
+
+<h2>🏆 Klasemen Poin Pemain</h2>
+<table class="score-predictions-table">
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Nama Pemain</th>
+      <th>Total Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for player in total_points %}
+    <tr class="{% if loop.index0 % 2 == 0 %}even-row{% else %}odd-row{% endif %}">
+      <td>{{ loop.index }}</td>
+      <td>{{ player.full_name }}</td>
+      <td>{{ player.points }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
 {% endblock %}
