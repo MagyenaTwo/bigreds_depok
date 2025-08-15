@@ -1068,19 +1068,18 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     if not match:
         raise HTTPException(status_code=404, detail="Match tidak ditemukan")
 
-    # Waktu WIB
+    # Konversi ke WIB
     wib = pytz.timezone("Asia/Jakarta")
     now_wib = datetime.now(wib)
-    match_time_wib = match.match_datetime.astimezone(wib)
 
-    # Atur cutoff waktu
-    cutoff_before = match_time_wib - timedelta(hours=1)  # 1 jam sebelum kick-off
-    cutoff_after = match_time_wib + timedelta(hours=2)   # 2 jam setelah kick-off
+    match_dt = match.match_datetime
+    if match_dt.tzinfo is None:
+        match_dt = pytz.UTC.localize(match_dt)  # Anggap UTC jika tanpa timezone
+    match_time_wib = match_dt.astimezone(wib)
 
-    print(f"Now WIB       : {now_wib}")
-    print(f"Match time WIB: {match_time_wib}")
-    print(f"Cutoff before : {cutoff_before}")
-    print(f"Cutoff after  : {cutoff_after}")
+    # Cutoff waktu
+    cutoff_before = match_time_wib - timedelta(hours=1)
+    cutoff_after = match_time_wib + timedelta(hours=2)
 
     if cutoff_before <= now_wib <= cutoff_after:
         raise HTTPException(
@@ -1113,6 +1112,7 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     db.refresh(new_pred)
 
     return {"status": "success", "prediction_id": new_pred.id}
+
 
 @app.post("/cms/matches/{match_id}/set_score")
 def set_match_score(
