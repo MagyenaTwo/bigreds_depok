@@ -1047,7 +1047,6 @@ def get_match():
         "competition": match.competition,
         "datetime": format_datetime_indo(match.match_datetime),
     }
-
 @app.post("/api/prediction")
 async def create_prediction(request: Request, db: Session = Depends(get_db)):
     try:
@@ -1065,16 +1064,31 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
         if field not in data:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
     
-    
     match = db.query(Match).filter(Match.id == data["match_id"]).first()
     if not match:
         raise HTTPException(status_code=404, detail="Match tidak ditemukan")
 
-    
-    if datetime.now() >= match.match_datetime - timedelta(hours=1):
-        raise HTTPException(status_code=400, detail="Tebak skor sudah ditutup 1 jam sebelum pertandingan")
+    # Waktu WIB
+    wib = pytz.timezone("Asia/Jakarta")
+    now_wib = datetime.now(wib)
+    match_time_wib = match.match_datetime.astimezone(wib)
 
-    
+    # Atur cutoff waktu
+    cutoff_before = match_time_wib - timedelta(hours=1)  # 1 jam sebelum kick-off
+    cutoff_after = match_time_wib + timedelta(hours=2)   # 2 jam setelah kick-off
+
+    print(f"Now WIB       : {now_wib}")
+    print(f"Match time WIB: {match_time_wib}")
+    print(f"Cutoff before : {cutoff_before}")
+    print(f"Cutoff after  : {cutoff_after}")
+
+    if cutoff_before <= now_wib <= cutoff_after:
+        raise HTTPException(
+            status_code=400,
+            detail="Tebak skor sudah ditutup mulai 1 jam sebelum hingga 2 jam setelah pertandingan"
+        )
+
+    # Cek prediksi sebelumnya
     existing = db.query(ScorePrediction).filter(
         ScorePrediction.match_id == data["match_id"],
         func.lower(ScorePrediction.full_name) == data["full_name"].lower()
@@ -1083,9 +1097,10 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(
             status_code=400, 
-            detail=f"Anda sudah mengirim Tebak Skor"
+            detail="Anda sudah mengirim Tebak Skor"
         )
 
+    # Simpan prediksi baru
     new_pred = ScorePrediction(
         match_id=data["match_id"],
         full_name=data["full_name"],
