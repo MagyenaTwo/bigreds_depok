@@ -122,7 +122,3 @@
     @media(max-width: 480px) {
       .gallery-grid { columns: 1 100%; }
     }
-    .visually-hidden {
-  position: absolute;
-  left: -9999px;
-}

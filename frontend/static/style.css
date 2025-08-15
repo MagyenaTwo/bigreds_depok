@@ -1151,3 +1151,7 @@ body {
 
 z-index: 10000;
 }
+    .visually-hidden {
+  position: absolute;
+  left: -9999px;
+}
