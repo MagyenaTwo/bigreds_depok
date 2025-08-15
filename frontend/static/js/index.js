@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Pastikan semua elemen ada
   if (!form || !popupLoading || !popupOverlay || !lottieContainer || !closeBtn) {
-    console.error("Elemen penting tidak ditemukan di DOM.");
     return;
   }
 
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       popupLoading.style.display = 'none';
       alert('Terjadi kesalahan: ' + err.message);
-      console.error(err);
     }
   });
 
@@ -195,7 +193,6 @@ function copyRekening() {
         alert("✅ Nomor rekening berhasil disalin ke clipboard!");
       })
       .catch(err => {
-        console.error("Gagal menyalin:", err);
         alert("Gagal menyalin nomor rekening.");
       });
   } else {
@@ -241,7 +238,6 @@ function copyRekening() {
 
   } catch (err) {
     document.getElementById('modalContent').innerHTML = "<em>Gagal memuat konten.</em>";
-    console.error("❌ Error loading detail berita:", err);
   }
 }
 

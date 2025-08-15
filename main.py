@@ -602,7 +602,6 @@ async def upload_gallery_nobar(
                 resource_type="auto"  
             )
         except Exception as e:
-            print("UPLOAD ERROR:", e)
             continue
 
         media_url = upload_res.get("secure_url")
@@ -649,7 +648,6 @@ def fetch_and_save_news():
         res = requests.get(url, headers=headers)
         data = res.json()
     except Exception as e:
-        print("❌ Gagal ambil data dari API:", e)
         return 0
 
     db: Session = SessionLocal()
@@ -676,7 +674,6 @@ def fetch_and_save_news():
 
     db.commit()
     db.close()
-    print(f"✅ {inserted} berita baru disimpan. Waktu: {datetime.now()}")
     return inserted
 
 
