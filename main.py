@@ -47,7 +47,8 @@ from PIL import Image, ImageDraw, ImageFont
 import io, qrcode
 import random
 import string
-
+import cloudinary
+import cloudinary.uploader
 load_dotenv()
 
 app = FastAPI()
@@ -62,6 +63,11 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 FONNTE_TOKEN = os.getenv("FONNTE_TOKEN")
 
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 def datetimeformat(value, format="%d-%m-%Y %H:%M"):
     if isinstance(value, str):
@@ -148,6 +154,7 @@ async def read_form(request: Request):
     gallery_data = (
         supabase.table("gallery_nobar")
         .select("*")
+        .in_("kategori", ["matchday", "event"])
         .order("tanggal", desc=True)
         .limit(10)
         .execute()
@@ -569,7 +576,6 @@ async def buat_akun_post(
         "cms_akun.html", {"request": request, "success": "Akun berhasil dibuat!"}
     )
 
-
 @app.post("/cms/upload")
 async def upload_gallery_nobar(
     title: str = Form(...),
@@ -587,21 +593,19 @@ async def upload_gallery_nobar(
         return {"error": "Format tanggal tidak valid"}
 
     for media in image:
-        ext = media.filename.split(".")[-1]
-        filename = f"nobar/{uuid4()}.{ext}"
-        content = await media.read()
+        file_bytes = await media.read()
 
         try:
-            upload_res = supabase.storage.from_("nobar").upload(
-                path=filename,
-                file=content,
-                file_options={"content-type": media.content_type},
+            upload_res = cloudinary.uploader.upload(
+                file_bytes,
+                public_id=f"nobar/{uuid4()}",
+                resource_type="auto"  
             )
-        except StorageException as e:
-            print("UPLOAD ERROR:", e.message)
+        except Exception as e:
+            print("UPLOAD ERROR:", e)
             continue
 
-        media_url = f"{SUPABASE_URL}/storage/v1/object/public/nobar/{filename}"
+        media_url = upload_res.get("secure_url")
         uploaded_urls.append(media_url)
 
         new_item = GalleryNobar(
