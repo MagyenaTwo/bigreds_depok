@@ -18,6 +18,9 @@ function handlePlay(gameKey, status) {
     case "trivia":
       content = `<iframe src="/games/trivia" style="width:100%;height:100%;border:none;"></iframe>`;
       break;
+    case "puzzle":
+      content = `<iframe src="/games/puzzle" style="width:100%;height:100%;border:none;"></iframe>`;
+      break;
     default:
       content = `<p>Game tidak ditemukan.</p>`;
   }

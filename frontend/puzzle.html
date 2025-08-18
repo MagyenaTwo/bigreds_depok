@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzzle Liverpool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #c8102e;
+      color: white;
+      text-align: center;
+    }
+    h1 { margin-top: 20px; }
+    #puzzleBoard {
+      width: 450px;
+      height: 450px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      border: 4px solid white;
+    }
+    .piece {
+      width: 100%;
+      height: 100%;
+      background-size: 450px 450px;
+      cursor: grab;
+      border: 1px solid #fff;
+    }
+    #info {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: gold;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: orange;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧩 Puzzle Liverpool</h1>
+  <p>Susun potongan gambar sebelum waktu habis!</p>
+  
+  <div id="info">
+    ⏱️ Waktu: <span id="timer">30</span> detik
+  </div>
+  
+  <div id="puzzleBoard"></div>
+  <div id="message"></div>
+  
+  <button onclick="newGame()">Ganti Gambar</button>
+
+  <script>
+    const board = document.getElementById("puzzleBoard");
+    const size = 3;
+    let pieces = [];
+    let dragged;
+    let timer;
+    let timeLeft = 30;
+    let imageUrl = "";
+
+   async function loadImage() {
+  const imageUrl = `https://source.unsplash.com/450x450/?football,stadium&t=${Date.now()}`;
+  console.log("URL gambarnya:", imageUrl); // cek console
+  return imageUrl;
+}
+
+    async function newGame() {
+      clearInterval(timer);
+      document.getElementById("message").innerText = "";
+      document.getElementById("timer").innerText = "30";
+      timeLeft = 30;
+
+      await loadImage();
+      createPuzzle(imageUrl);
+
+      // mulai timer
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          document.getElementById("message").innerText = "⏳ Waktu habis! Coba lagi!";
+          board.innerHTML = "";
+        }
+      }, 1000);
+    }
+
+    function createPuzzle(img) {
+      board.innerHTML = "";
+      pieces = [];
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          const piece = document.createElement("div");
+          piece.classList.add("piece");
+          piece.style.backgroundImage = `url('${img}')`;
+          piece.style.backgroundPosition = `${-col * 150}px ${-row * 150}px`;
+          piece.dataset.correct = `${row}-${col}`;
+          piece.setAttribute("draggable", true);
+          pieces.push(piece);
+        }
+      }
+      shuffle();
+    }
+
+    function shuffle() {
+      board.innerHTML = "";
+      pieces.sort(() => Math.random() - 0.5);
+      pieces.forEach((p, idx) => {
+        p.dataset.index = idx;
+        board.appendChild(p);
+      });
+    }
+
+    document.addEventListener("dragstart", e => {
+      if (e.target.classList.contains("piece")) dragged = e.target;
+    });
+
+    document.addEventListener("dragover", e => e.preventDefault());
+
+    document.addEventListener("drop", e => {
+      if (e.target.classList.contains("piece")) {
+        const draggedIndex = dragged.dataset.index;
+        const targetIndex = e.target.dataset.index;
+
+        board.insertBefore(dragged, e.target);
+        if (draggedIndex > targetIndex) {
+          board.insertBefore(e.target, board.children[draggedIndex + 1]);
+        } else {
+          board.insertBefore(e.target, board.children[draggedIndex]);
+        }
+
+        updateIndexes();
+        checkWin();
+      }
+    });
+
+    function updateIndexes() {
+      [...board.children].forEach((child, idx) => {
+        child.dataset.index = idx;
+      });
+    }
+
+    function checkWin() {
+      const children = [...board.children];
+      const correct = children.every((piece, idx) => {
+        const row = Math.floor(idx / size);
+        const col = idx % size;
+        return piece.dataset.correct === `${row}-${col}`;
+      });
+      if (correct) {
+        clearInterval(timer);
+        document.getElementById("message").innerText = "🎉 Selamat! Puzzle selesai sebelum waktu habis!";
+      }
+    }
+
+    newGame();
+  </script>
+</body>
+</html>

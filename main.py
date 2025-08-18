@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 import httpx
 import pytz
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func
+from sqlalchemy import case, create_engine, func
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 import os
@@ -49,6 +49,7 @@ import random
 import string
 import cloudinary
 import cloudinary.uploader
+
 load_dotenv()
 
 app = FastAPI()
@@ -66,8 +67,9 @@ FONNTE_TOKEN = os.getenv("FONNTE_TOKEN")
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
 )
+
 
 def datetimeformat(value, format="%d-%m-%Y %H:%M"):
     if isinstance(value, str):
@@ -576,6 +578,7 @@ async def buat_akun_post(
         "cms_akun.html", {"request": request, "success": "Akun berhasil dibuat!"}
     )
 
+
 @app.post("/cms/upload")
 async def upload_gallery_nobar(
     title: str = Form(...),
@@ -597,9 +600,7 @@ async def upload_gallery_nobar(
 
         try:
             upload_res = cloudinary.uploader.upload(
-                file_bytes,
-                public_id=f"nobar/{uuid4()}",
-                resource_type="auto"  
+                file_bytes, public_id=f"nobar/{uuid4()}", resource_type="auto"
             )
         except Exception as e:
             continue
@@ -906,13 +907,21 @@ async def delete_event(event_id: int):
 
 @app.get("/fans-corner")
 def fans_corner(request: Request, db: Session = Depends(get_db)):
-    games = db.query(Game).order_by(Game.id.asc()).all()
+    has_open = db.query(Game).filter(Game.status == "open").count() > 0
 
-    # Hitung total poin per pemain dari ScorePrediction
+    if has_open:
+        games = (
+            db.query(Game)
+            .order_by(case((Game.status == "open", 0), else_=1), Game.id.asc())
+            .all()
+        )
+    else:
+        games = db.query(Game).order_by(Game.id.asc()).all()
+
     total_points = (
         db.query(
             func.lower(ScorePrediction.full_name).label("full_name"),
-            func.sum(ScorePrediction.points).label("points")
+            func.sum(ScorePrediction.points).label("points"),
         )
         .group_by(func.lower(ScorePrediction.full_name))
         .order_by(func.sum(ScorePrediction.points).desc())
@@ -920,24 +929,14 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
         .all()
     )
 
-    # Format untuk dikirim ke template
     leaderboard = [
-        {
-            "name": name.title(),
-            "score": points
-        }
-        for name, points in total_points
+        {"name": name.title(), "score": points} for name, points in total_points
     ]
 
     return templates.TemplateResponse(
         "fans_corner.html",
-        {
-            "request": request,
-            "games": games,
-            "leaderboard": leaderboard
-        },
+        {"request": request, "games": games, "leaderboard": leaderboard},
     )
-
 
 
 @app.post("/leaderboard")
@@ -950,6 +949,7 @@ def add_leaderboard(
     db.refresh(entry)
     return {"message": "Score berhasil disimpan"}
 
+
 @app.get("/cms/games")
 def admin_games(request: Request, db: Session = Depends(get_db)):
     if not request.session.get("user_id"):
@@ -961,7 +961,7 @@ def admin_games(request: Request, db: Session = Depends(get_db)):
     total_points = (
         db.query(
             func.lower(ScorePrediction.full_name).label("full_name"),
-            func.sum(ScorePrediction.points).label("points")
+            func.sum(ScorePrediction.points).label("points"),
         )
         .group_by(func.lower(ScorePrediction.full_name))
         .all()
@@ -969,20 +969,21 @@ def admin_games(request: Request, db: Session = Depends(get_db)):
 
     # Biar tampilannya rapi, convert ke list dict dan title-case namanya
     total_points_list = [
-        {"full_name": name.title(), "points": pts}
-        for name, pts in total_points
+        {"full_name": name.title(), "points": pts} for name, pts in total_points
     ]
 
     return templates.TemplateResponse(
-        "cms_games.html", 
+        "cms_games.html",
         {
             "request": request,
             "games": games,
             "predictions": predictions,
             "matches": matches,
-            "total_points": total_points_list
-        }
+            "total_points": total_points_list,
+        },
     )
+
+
 @app.post("/cms/games/{game_id}/toggle")
 def toggle_game(game_id: int, db: Session = Depends(get_db)):
     game = db.query(Game).filter(Game.id == game_id).first()
@@ -992,7 +993,6 @@ def toggle_game(game_id: int, db: Session = Depends(get_db)):
 
         return RedirectResponse(url="/cms/games", status_code=303)
     return RedirectResponse(url="/cms/games", status_code=303)
-
 
 
 @app.post("/fans-corner/check-or-save-name")
@@ -1044,6 +1044,8 @@ def get_match():
         "competition": match.competition,
         "datetime": format_datetime_indo(match.match_datetime),
     }
+
+
 @app.post("/api/prediction")
 async def create_prediction(request: Request, db: Session = Depends(get_db)):
     try:
@@ -1060,7 +1062,7 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     for field in required_fields:
         if field not in data:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
-    
+
     match = db.query(Match).filter(Match.id == data["match_id"]).first()
     if not match:
         raise HTTPException(status_code=404, detail="Match tidak ditemukan")
@@ -1081,20 +1083,21 @@ async def create_prediction(request: Request, db: Session = Depends(get_db)):
     if cutoff_before <= now_wib <= cutoff_after:
         raise HTTPException(
             status_code=400,
-            detail="Tebak skor sudah ditutup mulai 1 jam sebelum hingga 2 jam setelah pertandingan"
+            detail="Tebak skor sudah ditutup mulai 1 jam sebelum hingga 2 jam setelah pertandingan",
         )
 
     # Cek prediksi sebelumnya
-    existing = db.query(ScorePrediction).filter(
-        ScorePrediction.match_id == data["match_id"],
-        func.lower(ScorePrediction.full_name) == data["full_name"].lower()
-    ).first()
+    existing = (
+        db.query(ScorePrediction)
+        .filter(
+            ScorePrediction.match_id == data["match_id"],
+            func.lower(ScorePrediction.full_name) == data["full_name"].lower(),
+        )
+        .first()
+    )
 
     if existing:
-        raise HTTPException(
-            status_code=400, 
-            detail="Anda sudah mengirim Tebak Skor"
-        )
+        raise HTTPException(status_code=400, detail="Anda sudah mengirim Tebak Skor")
 
     # Simpan prediksi baru
     new_pred = ScorePrediction(
@@ -1116,7 +1119,7 @@ def set_match_score(
     match_id: int,
     home_score: int = Form(...),
     away_score: int = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     # 1. Update skor pertandingan
     match = db.query(Match).filter(Match.id == match_id).first()
@@ -1129,12 +1132,22 @@ def set_match_score(
 
     predictions = db.query(ScorePrediction).all()
     for pred in predictions:
-        if pred.match.actual_home_score is not None and pred.match.actual_away_score is not None:
-            if pred.predicted_home_score == pred.match.actual_home_score and pred.predicted_away_score == pred.match.actual_away_score:
+        if (
+            pred.match.actual_home_score is not None
+            and pred.match.actual_away_score is not None
+        ):
+            if (
+                pred.predicted_home_score == pred.match.actual_home_score
+                and pred.predicted_away_score == pred.match.actual_away_score
+            ):
                 pred.points = 10
             else:
                 pred.points = 0
     db.commit()
 
-
     return RedirectResponse(url="/cms/games", status_code=302)
+
+
+@app.get("/cms/games/puzzle", response_class=HTMLResponse)
+async def get_upload_puzzle(request: Request):
+    return templates.TemplateResponse("cms_puzzle.html", {"request": request})
