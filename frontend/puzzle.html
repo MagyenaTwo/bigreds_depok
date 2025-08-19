@@ -127,7 +127,7 @@
   let pieces = [];
   let dragged;
   let timer;
-  let timeLeft = 120;
+  let timeLeft = 90;
   let imageUrl = "";
 
   async function loadImage() {
@@ -146,8 +146,8 @@
   if (resetTimer) {
     clearInterval(timer);
     document.getElementById("message").innerText = "";
-    document.getElementById("timer").innerText = "120";
-    timeLeft = 120;
+    document.getElementById("timer").innerText = "90";
+    timeLeft = 90;
     timer = setInterval(() => {
       timeLeft--;
       document.getElementById("timer").innerText = timeLeft;
