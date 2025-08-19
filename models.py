@@ -91,7 +91,7 @@ class Game(Base):
     __tablename__ = "games"
 
     id = Column(Integer, primary_key=True, index=True)
-    game_key = Column(String(50), unique=True, nullable=False)  # misal 'tebak-skor'
+    game_key = Column(String(50), unique=True, nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(Text)
     icon = Column(String(10))
@@ -107,13 +107,29 @@ class ScorePrediction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     match_id = Column(
-        Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=True
     )
-    full_name = Column(String(100), nullable=False)
-    predicted_home_score = Column(Integer, nullable=False)
-    predicted_away_score = Column(Integer, nullable=False)
+    full_name = Column(String(100), nullable=False, unique=True)
+    predicted_home_score = Column(Integer, nullable=True)
+    predicted_away_score = Column(Integer, nullable=True)
     points = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relasi ke tabel matches
     match = relationship("Match", backref="predictions")
+
+
+class PuzzleImage(Base):
+    __tablename__ = "puzzle_game"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    filename = Column(String(255), nullable=False)
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PuzzleScore(Base):
+    __tablename__ = "puzzle_scores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String(100), nullable=False)
+    points = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())

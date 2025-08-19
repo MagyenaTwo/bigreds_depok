@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 import httpx
 import pytz
 from sqlalchemy.orm import Session
-from sqlalchemy import case, create_engine, func
+from sqlalchemy import case, create_engine, func, select, union_all
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 import os
@@ -30,6 +30,8 @@ from models import (
     Game,
     Leaderboard,
     Match,
+    PuzzleImage,
+    PuzzleScore,
     ScorePrediction,
     TicketOrder,
 )
@@ -918,13 +920,20 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
     else:
         games = db.query(Game).order_by(Game.id.asc()).all()
 
+    # --- gabungan ScorePrediction + PuzzleScore ---
+    q1 = select(
+        func.lower(ScorePrediction.full_name).label("full_name"), ScorePrediction.points
+    )
+    q2 = select(
+        func.lower(PuzzleScore.full_name).label("full_name"), PuzzleScore.points
+    )
+
+    union_q = union_all(q1, q2).subquery()
+
     total_points = (
-        db.query(
-            func.lower(ScorePrediction.full_name).label("full_name"),
-            func.sum(ScorePrediction.points).label("points"),
-        )
-        .group_by(func.lower(ScorePrediction.full_name))
-        .order_by(func.sum(ScorePrediction.points).desc())
+        db.query(union_q.c.full_name, func.sum(union_q.c.points).label("points"))
+        .group_by(union_q.c.full_name)
+        .order_by(func.sum(union_q.c.points).desc())
         .limit(10)
         .all()
     )
@@ -935,7 +944,11 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         "fans_corner.html",
-        {"request": request, "games": games, "leaderboard": leaderboard},
+        {
+            "request": request,
+            "games": games,
+            "leaderboard": leaderboard,
+        },
     )
 
 
@@ -1151,3 +1164,62 @@ def set_match_score(
 @app.get("/cms/games/puzzle", response_class=HTMLResponse)
 async def get_upload_puzzle(request: Request):
     return templates.TemplateResponse("cms_puzzle.html", {"request": request})
+
+
+@app.post("/cms/games/puzzle")
+async def post_upload_puzzle(
+    request: Request,
+    title: str = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    try:
+        # upload ke cloudinary
+        result = cloudinary.uploader.upload(file.file, folder="puzzle_images")
+        filename = result.get("public_id")
+        image_url = result.get("secure_url")
+
+        # simpan ke database
+        new_image = PuzzleImage(title=title, filename=filename)
+        db.add(new_image)
+        db.commit()
+        db.refresh(new_image)
+
+        return templates.TemplateResponse(
+            "cms_puzzle.html",
+            {"request": request, "success": True, "filename": filename},
+        )
+    except Exception as e:
+        return templates.TemplateResponse(
+            "cms_puzzle.html", {"request": request, "error": str(e)}
+        )
+
+
+@app.get("/api/puzzle_images")
+def get_puzzle_images():
+    db: Session = SessionLocal()
+    images = db.query(PuzzleImage).all()
+    result = []
+    for img in images:
+        image_url = f"https://res.cloudinary.com/{cloudinary.config().cloud_name}/image/upload/c_fill,w_450,h_450/{img.filename}.jpg"
+        result.append({"id": img.id, "title": img.title, "image_url": image_url})
+    return JSONResponse(result)
+
+
+@app.post("/api/claim_puzzle_point")
+def claim_puzzle_point(full_name: str = Form(...), db: Session = Depends(get_db)):
+    existing = db.query(PuzzleScore).filter(PuzzleScore.full_name == full_name).first()
+    if existing:
+        return {
+            "message": f"❌ Nama {full_name} sudah pernah klaim poin, tidak bisa main lagi.",
+            "total_points": existing.points,
+        }
+    new_score = PuzzleScore(full_name=full_name, points=10)
+    db.add(new_score)
+    db.commit()
+    db.refresh(new_score)
+
+    return {
+        "message": f"✅ Poin berhasil ditambahkan untuk {full_name}",
+        "total_points": new_score.points,
+    }
