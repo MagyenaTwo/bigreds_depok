@@ -1208,7 +1208,9 @@ def get_puzzle_images():
 
 @app.post("/api/claim_puzzle_point")
 def claim_puzzle_point(full_name: str = Form(...), db: Session = Depends(get_db)):
-    existing = db.query(PuzzleScore).filter(PuzzleScore.full_name == full_name).first()
+    existing = (
+        db.query(PuzzleScore).filter(PuzzleScore.full_name.ilike(full_name)).first()
+    )
     if existing:
         return {
             "message": f"❌ Nama {full_name} sudah pernah klaim poin, tidak bisa main lagi.",

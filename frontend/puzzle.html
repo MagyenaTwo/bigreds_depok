@@ -99,10 +99,16 @@
     ⏱️ Waktu: <span id="timer">30</span> detik
   </div>
   
+  <div id="previewContainer" style="margin: 20px auto; max-width: 150px;">
+  <img id="previewImage" src="" alt="Preview" style="width: 100%; border: 2px solid white; border-radius: 8px;">
+  <button onclick="newGame()">Ganti Gambar</button>
+</div>
+
+
   <div id="puzzleBoard"></div>
   <div id="message"></div>
   
-  <button onclick="newGame()">Ganti Gambar</button>
+  
 
   <div class="modal fade" id="claimPointsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -121,7 +127,7 @@
   let pieces = [];
   let dragged;
   let timer;
-  let timeLeft = 90;
+  let timeLeft = 120;
   let imageUrl = "";
 
   async function loadImage() {
@@ -136,32 +142,39 @@
     }
   }
 
-  async function newGame(resetTimer = false) {
-    if (resetTimer) {
-      clearInterval(timer);
-      document.getElementById("message").innerText = "";
-      document.getElementById("timer").innerText = "90";
-      timeLeft = 90;
-      timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          board.innerHTML = "";
-          document.getElementById("message").innerHTML = `
-            ⏳ Waktu habis! <br>
-            <button class="btn btn-warning mt-3" onclick="newGame(true)">🔄 Coba Lagi</button>
-          `;
-        }
-      }, 1000);
-    }
-    imageUrl = await loadImage();
-    if (!imageUrl) {
-      document.getElementById("message").innerText = "❌ Tidak ada gambar untuk puzzle!";
-      return;
-    }
-    createPuzzle(imageUrl);
+ async function newGame(resetTimer = false) {
+  if (resetTimer) {
+    clearInterval(timer);
+    document.getElementById("message").innerText = "";
+    document.getElementById("timer").innerText = "120";
+    timeLeft = 120;
+    timer = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        board.innerHTML = "";
+        document.getElementById("message").innerHTML = `
+          ⏳ Waktu habis! <br>
+          <button class="btn btn-warning mt-3" onclick="newGame(true)">🔄 Coba Lagi</button>
+        `;
+      }
+    }, 1000);
   }
+
+  imageUrl = await loadImage();
+  if (!imageUrl) {
+    document.getElementById("message").innerText = "❌ Tidak ada gambar untuk puzzle!";
+    return;
+  }
+
+  // Update preview image
+  const previewImg = document.getElementById("previewImage");
+  previewImg.src = imageUrl;
+
+  createPuzzle(imageUrl);
+}
+
 
   function createPuzzle(img) {
   board.innerHTML = "";
