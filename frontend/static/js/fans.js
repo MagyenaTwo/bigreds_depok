@@ -21,6 +21,9 @@ function handlePlay(gameKey, status) {
     case "puzzle":
       content = `<iframe src="/games/puzzle" style="width:100%;height:100%;border:none;"></iframe>`;
       break;
+     case "penalti_game":
+      content = `<iframe src="/games/penalti" style="width:100%;height:100%;border:none;"></iframe>`;
+      break;
     default:
       content = `<p>Game tidak ditemukan.</p>`;
   }

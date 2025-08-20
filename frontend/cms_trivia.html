@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Tambah Soal Quiz{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom: 20px;">➕ Tambah Soal Trivia Liverpool</h2>
+
+  <!-- Form Tambah Soal -->
+  <form action="{{ url_for('add_quiz') }}" method="POST" class="quiz-form">
+
+    <label for="question">Pertanyaan</label>
+    <textarea id="question" name="question" rows="2" placeholder="Tulis pertanyaan disini..." required></textarea>
+
+    <label for="option_a">Opsi A</label>
+    <input type="text" id="option_a" name="option_a" placeholder="Jawaban opsi A" required>
+
+    <label for="option_b">Opsi B</label>
+    <input type="text" id="option_b" name="option_b" placeholder="Jawaban opsi B" required>
+
+    <label for="option_c">Opsi C</label>
+    <input type="text" id="option_c" name="option_c" placeholder="Jawaban opsi C" required>
+
+    <label for="option_d">Opsi D</label>
+    <input type="text" id="option_d" name="option_d" placeholder="Jawaban opsi D" required>
+
+    <label for="correct_option">Jawaban Benar</label>
+    <select id="correct_option" name="correct_option" required>
+      <option value="">-- Pilih Jawaban --</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+    </select>
+
+    <div class="btn-group">
+      <button type="submit" class="btn">💾 Simpan</button>
+      <a href="{{ url_for('cms_quiz') }}" class="btn btn-reset">Batal</a>
+    </div>
+
+  </form>
+
+  <!-- Daftar Soal -->
+  <h3 style="margin-top: 40px;">📋 Daftar Soal Trivia</h3>
+  {% if questions %}
+    <table class="quiz-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Pertanyaan</th>
+          <th>Jawaban Benar</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in questions %}
+        <tr>
+           <td>{{ loop.index }}</td>
+          <td>{{ q.question }}</td>
+          <td>{{ q.correct_option }}</td>
+          <td>
+            <form action="{{ url_for('delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="return confirm('Yakin hapus soal ini?');" style="display:inline;">
+              <button type="submit" class="btn-delete">🗑 Hapus</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p style="margin-top:10px;">Belum ada soal yang ditambahkan.</p>
+  {% endif %}
+
+</div>
+
+<style>
+  .container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 15px;
+    text-align: left;
+  }
+
+  .quiz-form {
+    background: #f9f9f9;
+    padding: 15px 20px;
+    border-radius: 8px;
+  }
+
+  .quiz-form label {
+    font-weight: bold;
+    margin-top: 6px;
+    display: block;
+  }
+
+  .quiz-form input,
+  .quiz-form textarea,
+  .quiz-form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 3px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  .quiz-form textarea {
+    resize: vertical;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #28a745;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .btn:hover {
+    background: #218838;
+  }
+
+  .btn-reset {
+    background: #6c757d;
+    text-decoration: none;
+    text-align: center;
+    color: #fff;
+  }
+
+  .btn-reset:hover {
+    background: #5a6268;
+  }
+
+  .quiz-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  .quiz-table th, .quiz-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .quiz-table th {
+    background: #e9ecef;
+    text-align: left;
+  }
+
+  .quiz-table tr:nth-child(even) {
+    background: #f8f9fa;
+  }
+
+  .btn-delete {
+    padding: 5px 10px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .btn-delete:hover {
+    background: #c82333;
+  }
+</style>
+{% endblock %}

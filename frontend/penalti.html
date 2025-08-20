@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Penalty Kick — More Real</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { margin:0; height:100%; background:#0b3d1a; overflow:hidden; }
+    canvas { display:block; }
+    #hud {
+      position:fixed; inset:0 auto auto 0; padding:12px 14px; color:#fff;
+      font:600 14px/1.3 system-ui,Segoe UI,Arial; text-shadow:0 2px 6px rgba(0,0,0,.6);
+      background:linear-gradient(90deg,rgba(0,0,0,.35),transparent);
+      border-bottom-right-radius:10px; user-select:none;
+    }
+    #centerMsg {
+      position:fixed; top:8%; left:50%; transform:translateX(-50%);
+      font:700 36px/1.1 system-ui,Segoe UI,Arial; color:#ffe36e;
+      text-shadow:0 6px 18px rgba(0,0,0,.7); letter-spacing:.5px; pointer-events:none;
+      opacity:0; transition:opacity .2s ease;
+    }
+    #hint {
+      position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      color:#fff; font:600 14px system-ui,Arial; opacity:.85; background:rgba(0,0,0,.35);
+      padding:8px 12px; border-radius:999px; backdrop-filter: blur(4px);
+      text-shadow:0 2px 6px rgba(0,0,0,.6); user-select:none;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/build/three.min.js"></script>
+</head>
+<body>
+  <div id="hud">Geser/drag dari bola untuk mengatur <b>arah</b> & <b>power</b>, lalu lepas untuk menendang.</div>
+  <div id="centerMsg"></div>
+  <div id="hint">⬆️ Geser ke atas untuk menembak • ⬅️➡️ geser untuk arah</div>
+<script>
+/* ====== Scene, Camera, Renderer ====== */
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x104a20, 40, 140);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 500);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+/* ====== Lights ====== */
+const hemi = new THREE.HemisphereLight(0xffffff, 0x224422, 0.5);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+sun.position.set(-30, 60, 30);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -40; sun.shadow.camera.right = 40;
+sun.shadow.camera.top = 40; sun.shadow.camera.bottom = -40;
+scene.add(sun);
+
+const field = new THREE.Mesh(fieldGeo, fieldMat);
+field.rotation.x = -Math.PI/2;
+field.receiveShadow = true;
+field.position.z = 0; // ❌ jangan 52.5
+scene.add(field);
+
+
+const fieldGeo = new THREE.PlaneGeometry(FIELD_W, FIELD_L, 1, 1);
+const fieldMat = new THREE.MeshLambertMaterial({ color: 0x1f8f3b });
+const field = new THREE.Mesh(fieldGeo, fieldMat);
+field.rotation.x = -Math.PI/2;
+field.receiveShadow = true;
+field.position.z = FIELD_L/2; // sehingga sisi depan lapangan berada di z=0
+scene.add(field);
+
+// Garis lapangan (simple white markings)
+const markings = new THREE.Group();
+const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+function line(w, h, x, z, rot=0){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), lineMat);
+  m.rotation.x = -Math.PI/2;
+  m.rotation.z = rot;
+  m.position.set(x, 0.01, z);
+  markings.add(m);
+}
+const LINE = 0.12;
+// garis gawang
+line(7.32 + 2, LINE, 0, 0); // garis di depan gawang
+// kotak penalti (16.5m dari garis gawang, lebar 40.32)
+line(40.32, LINE, 0, 16.5);
+line(LINE, 16.5, -40.32/2, 8.25);
+line(LINE, 16.5,  40.32/2, 8.25);
+// titik penalti
+const pSpot = new THREE.Mesh(new THREE.CircleGeometry(0.2, 24), lineMat);
+pSpot.rotation.x = -Math.PI/2;
+pSpot.position.set(0, 0.01, 11);
+markings.add(pSpot);
+scene.add(markings);
+
+/* ====== Goal (7.32 x 2.44 x 2 m) ====== */
+const GOAL_W = 7.32, GOAL_H = 2.44, GOAL_D = 2;
+const postMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
+function box(w,h,d,x,y,z){ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), postMat); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; return m; }
+const goal = new THREE.Group();
+const postL = box(0.12, GOAL_H, 0.12, -GOAL_W/2, GOAL_H/2, -0.06);
+const postR = box(0.12, GOAL_H, 0.12,  GOAL_W/2, GOAL_H/2, -0.06);
+const barT  = box(GOAL_W, 0.12, 0.12, 0, GOAL_H, -0.06);
+const barB  = box(GOAL_W, 0.12, 0.12, 0, 0.06, -0.06);
+goal.add(postL, postR, barT, barB);
+
+// Net (mesh garis) — grid line segments
+function makeNet(width, height, depth){
+  const segW = 18, segH = 12, segD = 6;
+  const lines = new THREE.Group();
+  const mat = new THREE.LineBasicMaterial({ color: 0xe6f2ff, transparent:true, opacity:0.7 });
+
+  function gridPlane(w,h,ori){
+    const geo = new THREE.BufferGeometry();
+    const pts = [];
+    const nx = segW, ny = segH;
+    for(let i=0;i<=nx;i++){
+      const x = -w/2 + (w*i/nx);
+      pts.push(x, 0, 0,  x, h, 0);
+    }
+    for(let j=0;j<=ny;j++){
+      const y = h*(j/ny);
+      pts.push(-w/2, y, 0,  w/2, y, 0);
+    }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    const mesh = new THREE.LineSegments(geo, mat);
+    if(ori==='front'){ mesh.position.set(0,0,-0.12); }
+    if(ori==='back'){  mesh.position.set(0,0,-depth); }
+    if(ori==='left'){  mesh.rotation.y = Math.PI/2; mesh.position.set(-width/2,0,-depth/2); }
+    if(ori==='right'){ mesh.rotation.y = Math.PI/2; mesh.position.set( width/2,0,-depth/2); }
+    return mesh;
+  }
+  const gH = height, gW = width;
+  lines.add(gridPlane(gW,gH,'front'));
+  lines.add(gridPlane(gW,gH,'back'));
+  const side = (h)=> {
+    const geo = new THREE.BufferGeometry();
+    const pts = [];
+    const ny = segH, nz = segD;
+    for(let j=0;j<=ny;j++){
+      const y = gH*(j/ny);
+      pts.push(0, y, 0,  0, y, -depth);
+    }
+    for(let k=0;k<=nz;k++){
+      const z = -depth*(k/nz);
+      pts.push(0, 0, z,  0, gH, z);
+    }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+    return new THREE.LineSegments(geo, mat);
+  };
+  const L = side(gH); L.rotation.y = Math.PI/2; L.position.set(-gW/2, 0, -depth/2);
+  const R = side(gH); R.rotation.y = Math.PI/2; R.position.set( gW/2, 0, -depth/2);
+  lines.add(L,R);
+  return lines;
+}
+const net = makeNet(GOAL_W, GOAL_H, GOAL_D);
+goal.add(net);
+scene.add(goal);
+
+/* ====== Keeper (kotak tinggi ±1.9m) ====== */
+const keeperW = 0.6, keeperH = 1.9, keeperD = 0.4;
+const keeper = new THREE.Mesh(
+  new THREE.BoxGeometry(keeperW, keeperH, keeperD),
+  new THREE.MeshStandardMaterial({ color: 0x1565c0, roughness:0.5, metalness:0.1 })
+);
+keeper.castShadow = true; keeper.receiveShadow = true;
+scene.add(keeper);
+
+/* ====== Ball (radius 0.22 m) ====== */
+const ball = new THREE.Mesh(
+  new THREE.SphereGeometry(0.22, 32, 32),
+  new THREE.MeshStandardMaterial({ color: 0xffffff, roughness:0.35, metalness:0.05 })
+);
+ball.castShadow = true; ball.receiveShadow = true;
+scene.add(ball);
+
+/* ====== Positions (realistic) ====== */
+function placeObjects(){
+  // Gawang: tepi depan di z = 0
+  goal.position.set(0, 0, 0);
+  // Kiper di garis gawang, sedikit maju (netral)
+  keeper.position.set(0, keeperH/2, -0.02);
+  // Bola di titik penalti (11m)
+  resetBall(false);
+}
+placeObjects();
+
+/* ====== Camera POV penendang ====== */
+function placeCamera(){
+  camera.position.set(0, 1.75, 17); // di belakang bola, setinggi mata
+  camera.lookAt(new THREE.Vector3(0, 1.8, 0));
+}
+placeCamera();
+
+/* ====== Swipe/Aim/Power ====== */
+let isDown=false, start = {x:0,y:0}, end={x:0,y:0};
+let vel = new THREE.Vector3(), isFlying = false;
+
+function screenToNDC(x,y){ return { x:(x/innerWidth)*2-1, y:-(y/innerHeight)*2+1 }; }
+
+function onDown(e){
+  if(isFlying) return;
+  isDown = true;
+  const t = e.touches? e.touches[0]: e;
+  start.x = t.clientX; start.y = t.clientY;
+  showMsg("");
+}
+function onMove(e){
+  if(!isDown) return;
+  const t = e.touches? e.touches[0]: e;
+  end.x = t.clientX; end.y = t.clientY;
+}
+function onUp(){
+  if(!isDown) return;
+  isDown=false;
+  const dx = end.x - start.x;
+  const dy = start.y - end.y; // swipe ke atas bernilai positif
+  const power = Math.min(Math.max(dy/140, 0.2), 2.2); // clamp
+  const side  = THREE.MathUtils.clamp(dx/220, -1.2, 1.2);
+  // kecepatan awal (meter per frame-ish)
+  vel.set(side*2.2, 1.6*power, -6.5*power);
+  isFlying = true;
+}
+addEventListener('mousedown', onDown);
+addEventListener('mousemove', onMove);
+addEventListener('mouseup', onUp);
+addEventListener('touchstart', onDown, {passive:true});
+addEventListener('touchmove', onMove, {passive:true});
+addEventListener('touchend', onUp);
+
+/* ====== Simple Physics & Rules ====== */
+const GRAV = 0.04;
+const AIR = 0.995;
+
+const msgEl = document.getElementById('centerMsg');
+function showMsg(t){ msgEl.textContent = t; msgEl.style.opacity = t ? 1 : 0; }
+function resetBall(withDelay=true){
+  function place(){
+    ball.position.set(0, 0.22, 11);
+    vel.set(0,0,0);
+    isFlying = false;
+  }
+  if(withDelay){ setTimeout(place, 900); } else { place(); }
+}
+
+function insideGoal(x,y,z){
+  // garis gawang di z≈0 (kita hitung jika bola melewati z<= -0.06 (sedikit di belakang tiang depan))
+  if(z > -0.12) return false;
+  const halfW = GOAL_W/2;
+  return Math.abs(x) <= (halfW-0.12) && y >= 0 && y <= (GOAL_H-0.05);
+}
+
+function collideKeeper(){
+  const kx=keeper.position.x, ky=keeper.position.y, kz=keeper.position.z;
+  const halfX=keeperW/2+0.05, halfY=keeperH/2+0.05, halfZ=keeperD/2+0.05;
+  return (
+    Math.abs(ball.position.x - kx) <= halfX &&
+    Math.abs(ball.position.y - ky) <= halfY &&
+    Math.abs(ball.position.z - kz) <= halfZ
+  );
+}
+
+/* ====== Keeper AI (gerak kiri-kanan, dive acak saat bola dilepas) ====== */
+let keeperBasePhase = Math.random()*Math.PI*2;
+let keeperDiveTarget = 0, diving=false;
+function updateKeeper(dt){
+  if(!isFlying){
+    // idle: swing sinusoidal ringan
+    keeper.position.x = Math.sin(Date.now()*0.002 + keeperBasePhase) * 1.8;
+  } else {
+    if(!diving){
+      diving = true;
+      // putuskan dive target berdasar arah bola
+      keeperDiveTarget = THREE.MathUtils.clamp(ball.position.x + (vel.x*2.5), - (GOAL_W/2-0.4), (GOAL_W/2-0.4));
+    }
+    // ease menuju target
+    keeper.position.x += (keeperDiveTarget - keeper.position.x) * 0.12;
+  }
+}
+
+/* ====== Animate ====== */
+let last = performance.now();
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt = Math.min((now-last)/16.67, 2); last = now;
+
+  updateKeeper(dt);
+
+  if(isFlying){
+    vel.y -= GRAV*dt;
+    vel.multiplyScalar(AIR);
+    ball.position.addScaledVector(vel, dt);
+
+    // bounce ringan jika menyentuh tanah sebelum gawang
+    if(ball.position.y < 0.22 && ball.position.z > -0.5){
+      ball.position.y = 0.22;
+      vel.y = Math.abs(vel.y)*0.45;
+      vel.x *= 0.96; vel.z *= 0.96;
+    }
+
+    // deteksi SAVE
+    if(collideKeeper()){
+      showMsg("❌ Diselamatkan!");
+      diving=false;
+      resetBall(true);
+    }
+    // deteksi GOAL (melewati bidang gawang & di dalam bingkai)
+    else if(ball.position.z < -0.12 && insideGoal(ball.position.x, ball.position.y, ball.position.z)){
+      showMsg("⚽ GOOOL!");
+      diving=false;
+      resetBall(true);
+    }
+    // MISS (melebar/terlalu tinggi/terlalu jauh)
+    else if(ball.position.z < -GOAL_D-1 || Math.abs(ball.position.x) > GOAL_W || ball.position.y > GOAL_H+4){
+      showMsg("😵‍💫 Meleset!");
+      diving=false;
+      resetBall(true);
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+tick(performance.now());
+
+/* ====== Resize ====== */
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

@@ -641,3 +641,69 @@ td.action {
 td.game-icon {
   font-size: 1.5rem;
 }
+/* Card styling */
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card-header {
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  padding: 15px 20px;
+}
+
+/* Form */
+.form-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #c8102e;
+  box-shadow: 0 0 5px rgba(200,16,46,0.4);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.btn-success {
+  background-color: #198754;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #157347;
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+/* Animasi halus */
+.card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}

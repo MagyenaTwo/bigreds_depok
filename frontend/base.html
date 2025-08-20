@@ -54,7 +54,6 @@
 <a href="#" class="dropbtn {% if request.path.startswith('/cms/games') %}active{% endif %}" onclick="toggleDropdown(event)">Games <i class="fa fa-caret-down"></i></a>
 <div class="dropdown-content" id="gamesDropdown">
   <a href="/cms/games" class="{% if request.path == '/cms/games/tebak-skor' %}active{% endif %}">Tebak Skor</a>
-  <a href="/cms/games/quiz" class="{% if request.path == '/cms/games/quiz' %}active{% endif %}">Quiz</a>
   <a href="/cms/games/memory" class="{% if request.path == '/cms/games/memory' %}active{% endif %}">Memory</a>
   <a href="/cms/games/trivia" class="{% if request.path == '/cms/games/trivia' %}active{% endif %}">Trivia</a>
   <a href="/cms/games/puzzle" class="{% if request.path == '/cms/games/puzzle' %}active{% endif %}">Puzzle</a>

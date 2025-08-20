@@ -32,6 +32,7 @@ from models import (
     Match,
     PuzzleImage,
     PuzzleScore,
+    QuizQuestion,
     ScorePrediction,
     TicketOrder,
 )
@@ -1225,3 +1226,191 @@ def claim_puzzle_point(full_name: str = Form(...), db: Session = Depends(get_db)
         "message": f"✅ Poin berhasil ditambahkan untuk {full_name}",
         "total_points": new_score.points,
     }
+
+
+@app.get("/games/penalti", response_class=HTMLResponse)
+async def penalti_game():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Game Penalti</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          background-color: #4caf50;
+          margin: 0;
+          padding: 0;
+        }
+
+        .game-container {
+          max-width: 400px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        .field {
+          position: relative;
+          width: 100%;
+          height: 300px;
+          margin: 20px 0;
+          background-color: #87ceeb;
+          border: 2px solid #fff;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .goal {
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80%;
+        }
+
+        .keeper {
+          position: absolute;
+          bottom: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          transition: left 0.5s;
+        }
+
+        .player {
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+        }
+
+        .controls button {
+          margin: 10px;
+          padding: 10px 20px;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        #result {
+          font-size: 18px;
+          margin-top: 15px;
+          font-weight: bold;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="game-container">
+        <h2>Penalti Challenge</h2>
+        <div class="field">
+          <img src="https://via.placeholder.com/300x100?text=Goal" alt="Gawang" class="goal">
+          <img src="https://via.placeholder.com/60x60?text=Keeper" alt="Kiper" class="keeper" id="keeper">
+          <img src="https://via.placeholder.com/60x60?text=Player" alt="Pemain" class="player" id="player">
+        </div>
+        <div class="controls">
+          <button onclick="shoot('left')">Kiri</button>
+          <button onclick="shoot('center')">Tengah</button>
+          <button onclick="shoot('right')">Kanan</button>
+        </div>
+        <div id="result"></div>
+      </div>
+
+      <script>
+        function shoot(direction) {
+          const keeper = document.getElementById('keeper');
+          const result = document.getElementById('result');
+
+          const keeperMoves = ['left', 'center', 'right'];
+          const randomMove = keeperMoves[Math.floor(Math.random() * keeperMoves.length)];
+
+          if (randomMove === 'left') keeper.style.left = '20%';
+          if (randomMove === 'center') keeper.style.left = '50%';
+          if (randomMove === 'right') keeper.style.left = '80%';
+
+          if (direction === randomMove) {
+            result.innerText = "❌ Kiper Menangkap Bola!";
+          } else {
+            result.innerText = "⚽ Gol!";
+          }
+        }
+      </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/cms/games/trivia")
+def cms_quiz(request: Request, db: Session = Depends(get_db)):
+    questions = db.query(QuizQuestion).order_by(QuizQuestion.id.desc()).all()
+    return templates.TemplateResponse(
+        "cms_trivia.html",
+        {"request": request, "questions": questions},
+    )
+
+
+@app.get("/cms/quiz/add", name="add_quiz_page")
+def add_quiz_page(request: Request):
+    return templates.TemplateResponse("add_quiz.html", {"request": request})
+
+
+# Proses simpan soal
+@app.post("/cms/quiz/add", name="add_quiz")
+def add_quiz(
+    request: Request,
+    question: str = Form(...),
+    option_a: str = Form(...),
+    option_b: str = Form(...),
+    option_c: str = Form(...),
+    option_d: str = Form(...),
+    correct_option: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    new_q = QuizQuestion(
+        question=question,
+        option_a=option_a,
+        option_b=option_b,
+        option_c=option_c,
+        option_d=option_d,
+        correct_option=correct_option.upper(),
+    )
+    db.add(new_q)
+    db.commit()
+    db.refresh(new_q)
+    # redirect balik ke daftar soal
+    return RedirectResponse(url=request.url_for("cms_quiz"), status_code=303)
+
+
+@app.post("/cms/games/trivia/delete/{quiz_id}")
+def delete_quiz(quiz_id: int, db: Session = Depends(get_db)):
+    quiz = db.query(QuizQuestion).filter(QuizQuestion.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Soal tidak ditemukan")
+
+    db.delete(quiz)
+    db.commit()
+    return RedirectResponse(url="/cms/games/trivia", status_code=303)
+
+
+@app.get("/api/trivia")
+def get_trivia(db: Session = Depends(get_db)):
+    questions = db.query(QuizQuestion).all()
+    if len(questions) > 5:
+        questions = random.sample(questions, 5)
+
+    questions_list = [
+        {
+            "id": q.id,
+            "question": q.question,
+            "option_a": q.option_a,
+            "option_b": q.option_b,
+            "option_c": q.option_c,
+            "option_d": q.option_d,
+            "correct_option": q.correct_option,
+        }
+        for q in questions
+    ]
+    return JSONResponse(content=questions_list)

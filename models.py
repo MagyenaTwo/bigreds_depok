@@ -133,3 +133,25 @@ class PuzzleScore(Base):
     full_name = Column(String(100), nullable=False)
     points = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class QuizScore(Base):
+    __tablename__ = "quiz_scores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String(100), nullable=False)
+    points = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class QuizQuestion(Base):
+    __tablename__ = "quiz_questions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    question = Column(String, nullable=False)
+    option_a = Column(String, nullable=False)
+    option_b = Column(String, nullable=False)
+    option_c = Column(String, nullable=False)
+    option_d = Column(String, nullable=False)
+    correct_option = Column(String(1), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())

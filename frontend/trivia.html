@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trivia Game</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #6B73FF, #000DFF);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #fff;
+}
+
+.container {
+  background: rgba(0,0,0,0.85);
+  padding: 20px;
+  border-radius: 15px;
+  max-width: 500px;
+  width: 90%;
+  height: 550px;
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #FFD700;
+  text-shadow: 1px 1px 3px #000;
+  margin-bottom: 15px;
+}
+
+#quiz-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#quiz-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#timer {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+#question-box {
+  font-size: 1.2rem;
+  font-weight: 500;
+  min-height: 60px;
+  margin-bottom: 15px;
+}
+
+#options-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: space-evenly;
+}
+
+.option-btn {
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  background: #1e90ff;
+  color: #fff;
+}
+
+.option-btn.correct { background: #00FF7F !important; }
+.option-btn.wrong { background: #FF0000 !important; }
+
+#next-btn {
+  padding: 10px 25px;
+  font-size: 1rem;
+  background: #FFD700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #000;
+  font-weight: bold;
+  transition: background 0.3s;
+  visibility: hidden;
+  margin-top: 10px;
+}
+
+#next-btn.show { visibility: visible; }
+
+#result {
+  display: none;
+  animation: fadeIn 0.8s ease-in;
+}
+
+#result h3 {
+  font-size: 1.8rem;
+  color: #00FF7F;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+</style>
+</head>
+<body><div class="container">
+  <h2>Trivia Game</h2>
+  <div id="quiz-container" style="display:flex; flex-direction:column; height:100%;">
+    <div id="quiz-content" style="flex:1; display:flex; flex-direction:column; justify-content:flex-start;">
+      <p id="timer">Waktu: <span id="time">10</span> detik</p>
+      <div id="question-box"></div>
+      <div id="options-box"></div>
+    </div>
+    <button id="next-btn">Next</button>
+  </div>
+  <div id="result">
+    <h3>Skor Anda: <span id="score"></span>/5</h3>
+  </div>
+</div>
+
+
+<script>
+let questions = [];
+fetch('/api/trivia')
+  .then(res => res.json())
+  .then(data => {
+    questions = data;
+    loadQuestion();
+    startTimer();
+  })
+  .catch(err => console.error(err));
+
+let currentQuestion = 0;
+let score = 0;
+let totalTime = 10;
+let timer;
+
+const questionBox = document.getElementById("question-box");
+const optionsBox = document.getElementById("options-box");
+const nextBtn = document.getElementById("next-btn");
+const resultBox = document.getElementById("result");
+const timeDisplay = document.getElementById("time");
+
+function startTimer() {
+  timeDisplay.textContent = totalTime;
+  timer = setInterval(() => {
+    totalTime--;
+    timeDisplay.textContent = totalTime;
+    if (totalTime <= 0) {
+      clearInterval(timer);
+      finishQuiz();
+    }
+  }, 1000);
+}
+
+function loadQuestion() {
+  nextBtn.classList.remove("show");
+  if (!questions || currentQuestion >= questions.length) {
+    finishQuiz();
+    return;
+  }
+
+  const q = questions[currentQuestion];
+  questionBox.innerHTML = `<strong>${currentQuestion + 1}. ${q.question}</strong>`;
+  optionsBox.innerHTML = `
+    <button class="option-btn" data-option="A">${q.option_a}</button>
+    <button class="option-btn" data-option="B">${q.option_b}</button>
+    <button class="option-btn" data-option="C">${q.option_c}</button>
+    <button class="option-btn" data-option="D">${q.option_d}</button>
+  `;
+
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.option === q.correct_option) {
+        score++;
+        btn.classList.add("correct");
+      } else {
+        btn.classList.add("wrong");
+      }
+      disableOptions();
+      nextBtn.classList.add("show");
+    });
+  });
+}
+
+function disableOptions() {
+  document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+}
+
+nextBtn.addEventListener("click", () => {
+  currentQuestion++;
+  loadQuestion();
+});
+
+function finishQuiz() {
+  clearInterval(timer);
+  document.getElementById("quiz-container").style.display = "none";
+  resultBox.style.display = "block";
+  document.getElementById("score").textContent = score;
+}
+</script>
+</body>
+</html>
