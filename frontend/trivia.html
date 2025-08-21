@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #6B73FF, #000DFF);
+  background: linear-gradient(135deg, #c8102e, #c8102e);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -18,7 +18,7 @@ body {
 }
 
 .container {
-  background: rgba(0,0,0,0.85);
+  
   padding: 20px;
   border-radius: 15px;
   max-width: 500px;
@@ -33,6 +33,7 @@ h2 {
   color: #FFD700;
   text-shadow: 1px 1px 3px #000;
   margin-bottom: 15px;
+  text-align: center;
 }
 
 #quiz-container {
@@ -75,8 +76,8 @@ h2 {
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.3s ease;
-  background: #1e90ff;
-  color: #fff;
+  background: #fff;
+  color: #000;
 }
 
 .option-btn.correct { background: #00FF7F !important; }
@@ -116,7 +117,7 @@ h2 {
 </style>
 </head>
 <body><div class="container">
-  <h2>Trivia Game</h2>
+  <h2>Trivia Liverpool</h2>
   <div id="quiz-container" style="display:flex; flex-direction:column; height:100%;">
     <div id="quiz-content" style="flex:1; display:flex; flex-direction:column; justify-content:flex-start;">
       <p id="timer">Waktu: <span id="time">10</span> detik</p>
@@ -126,8 +127,11 @@ h2 {
     <button id="next-btn">Next</button>
   </div>
   <div id="result">
-    <h3>Skor Anda: <span id="score"></span>/5</h3>
-  </div>
+  <h3>Skor Anda: <span id="score"></span>/5</h3>
+  <input type="text" id="playerName" placeholder="Masukkan Nama" style="padding:8px; border-radius:6px; border:none; margin-top:10px;">
+  <button id="claim-btn" style="margin-top:10px; padding:10px 20px; border:none; border-radius:8px; background:#FFD700; color:#000; font-weight:bold; cursor:pointer;">Klaim Poin</button>
+</div>
+
 </div>
 
 
@@ -209,7 +213,55 @@ function finishQuiz() {
   document.getElementById("quiz-container").style.display = "none";
   resultBox.style.display = "block";
   document.getElementById("score").textContent = score;
+
+  const claimBtn = document.getElementById("claim-btn");
+  claimBtn.addEventListener("click", async () => {
+    const name = document.getElementById("playerName").value.trim();
+    if (!name) return alert("Masukkan nama dulu!");
+
+    let points = 0;
+    if (score === 5) points = 10;
+    else if (score >= 3) points = 5;
+
+    try {
+      const res = await fetch("/api/claim_quiz_score", {
+        method: "POST",
+        body: new URLSearchParams({ full_name: name, points: points }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        return alert(errData.detail || "Terjadi kesalahan!");
+      }
+      
+     alert(`✅ ${name}, kamu mendapatkan ${points} poin!`);
+
+if (window.parent && window.parent.closeModal) {
+    window.parent.closeModal();
 }
+
+if (window.parent) {
+    window.parent.location.href = "/fans-corner";
+}
+
+
+    } catch (err) {
+      alert("Terjadi kesalahan saat mengirim data.");
+    }
+
+    claimBtn.disabled = true;
+  });
+}
+
+function closeModal() {
+    const modal = document.getElementById("gameModal");
+    if (modal) {
+        modal.style.display = "none";
+        const modalBody = document.getElementById("gameModalBody");
+        if (modalBody) modalBody.innerHTML = "";
+    }
+}
+
 </script>
 </body>
 </html>

@@ -33,6 +33,7 @@ from models import (
     PuzzleImage,
     PuzzleScore,
     QuizQuestion,
+    QuizScore,
     ScorePrediction,
     TicketOrder,
 )
@@ -921,15 +922,16 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
     else:
         games = db.query(Game).order_by(Game.id.asc()).all()
 
-    # --- gabungan ScorePrediction + PuzzleScore ---
+    # --- gabungan ScorePrediction + PuzzleScore + QuizScore ---
     q1 = select(
         func.lower(ScorePrediction.full_name).label("full_name"), ScorePrediction.points
     )
     q2 = select(
         func.lower(PuzzleScore.full_name).label("full_name"), PuzzleScore.points
     )
+    q3 = select(func.lower(QuizScore.full_name).label("full_name"), QuizScore.points)
 
-    union_q = union_all(q1, q2).subquery()
+    union_q = union_all(q1, q2, q3).subquery()
 
     total_points = (
         db.query(union_q.c.full_name, func.sum(union_q.c.points).label("points"))
@@ -1214,7 +1216,7 @@ def claim_puzzle_point(full_name: str = Form(...), db: Session = Depends(get_db)
     )
     if existing:
         return {
-            "message": f"❌ Nama {full_name} sudah pernah klaim poin, tidak bisa main lagi.",
+            "message": f"❌ Kamu {full_name} sudah pernah klaim poin!",
             "total_points": existing.points,
         }
     new_score = PuzzleScore(full_name=full_name, points=10)
@@ -1414,3 +1416,27 @@ def get_trivia(db: Session = Depends(get_db)):
         for q in questions
     ]
     return JSONResponse(content=questions_list)
+
+
+@app.post("/api/claim_quiz_score")
+def claim_quiz_score(
+    full_name: str = Form(...), points: int = Form(...), db: Session = Depends(get_db)
+):
+    if not full_name.strip():
+        raise HTTPException(status_code=400, detail="Isi nama dulu!")
+    existing = (
+        db.query(QuizScore)
+        .filter(func.lower(QuizScore.full_name) == full_name.lower())
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=400, detail=f"Kamu '{full_name}' sudah pernah klaim poin!"
+        )
+
+    # Simpan skor
+    score_entry = QuizScore(full_name=full_name, points=points)
+    db.add(score_entry)
+    db.commit()
+    db.refresh(score_entry)
+    return RedirectResponse(url="/fans-corner", status_code=303)
