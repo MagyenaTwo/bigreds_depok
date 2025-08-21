@@ -142,38 +142,41 @@
     }
   }
 
- async function newGame(resetTimer = false) {
-  if (resetTimer) {
-    clearInterval(timer);
-    document.getElementById("message").innerText = "";
-    document.getElementById("timer").innerText = "90";
-    timeLeft = 90;
-    timer = setInterval(() => {
-      timeLeft--;
-      document.getElementById("timer").innerText = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        board.innerHTML = "";
-        document.getElementById("message").innerHTML = `
-          ⏳ Waktu habis! <br>
-          <button class="btn btn-warning mt-3" onclick="newGame(true)">🔄 Coba Lagi</button>
-        `;
-      }
-    }, 1000);
+  async function newGame(resetTimer = false) {
+    if (resetTimer) {
+      clearInterval(timer);
+      document.getElementById("message").innerText = "";
+      document.getElementById("timer").innerText = "90";
+      timeLeft = 90;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          board.innerHTML = "";
+          document.getElementById("message").innerHTML = `
+            ⏳ Waktu habis! <br>
+            <button class="btn btn-warning mt-3" onclick="newGame(true)">🔄 Coba Lagi</button>
+          `;
+        }
+      }, 1000);
+    }
+
+    imageUrl = await loadImage();
+    if (!imageUrl) {
+      document.getElementById("message").innerText = "❌ Tidak ada gambar untuk puzzle!";
+      return;
+    }
+
+    const previewImg = document.getElementById("previewImage");
+    previewImg.src = imageUrl;
+
+    const img = new Image();
+    img.src = imageUrl;
+    img.onload = () => {
+      createPuzzle(imageUrl);
+    };
   }
-
-  imageUrl = await loadImage();
-  if (!imageUrl) {
-    document.getElementById("message").innerText = "❌ Tidak ada gambar untuk puzzle!";
-    return;
-  }
-
-  // Update preview image
-  const previewImg = document.getElementById("previewImage");
-  previewImg.src = imageUrl;
-
-  createPuzzle(imageUrl);
-}
 
 
   function createPuzzle(img) {

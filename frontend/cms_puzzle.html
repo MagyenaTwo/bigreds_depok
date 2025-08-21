@@ -12,17 +12,13 @@
     <label for="file">Pilih Gambar</label><br>
     <input type="file" id="file" name="file" accept="image/*" required onchange="previewImage(event)"><br>
 
-    <div class="preview-container">
-      <img id="preview" src="#" alt="Preview Gambar">
-    </div>
-
     <button type="submit" class="btn">Upload</button>
     <button type="reset" class="btn btn-reset" onclick="clearPreview()">Reset</button>
   </form>
 
   {% if success %}
   <div class="alert success">
-    🎉 Gambar berhasil diupload: {{ filename }}
+    🎉 Gambar berhasil diupload
   </div>
   {% endif %}
 
@@ -31,63 +27,70 @@
     ⚠️ Terjadi kesalahan: {{ error }}
   </div>
   {% endif %}
+
+  <!-- 🔽 Tabel Daftar Puzzle -->
+  <h3>Daftar Puzzle</h3>
+  <table class="puzzle-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Judul</th>
+        
+        <th>Uploaded</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for puzzle in puzzles %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ puzzle.title }}</td>
+        
+        <td>{{ puzzle.uploaded_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>
+<a href="{{ puzzle.filename }}" target="_blank" class="btn">Lihat</a>
+         <button onclick="deletePuzzle('{{ puzzle.id }}')" class="btn btn-reset">Hapus</button>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Belum ada puzzle diupload.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
 <style>
-  .container {
-    max-width: 500px;
-    margin: 50px 0;
-    padding: 0 15px;
-    text-align: left; /* Tambahkan supaya semua konten rata kiri */
-  }
-
-  .upload-form {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    text-align: left; /* Form rata kiri */
-  }
-
-  .upload-form label {
-    font-weight: bold;
-    margin-top: 10px;
-    display: block;
-    text-align: left; /* Label rata kiri */
-  }
-
-  .upload-form input[type="text"],
-  .upload-form input[type="file"] {
+  .puzzle-table {
     width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .puzzle-table th, .puzzle-table td {
+    border: 1px solid #ddd;
     padding: 8px;
-    margin-bottom: 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+    text-align: left;
   }
 
-  .preview-container {
-    margin-bottom: 15px;
-    text-align: left; /* Preview rata kiri */
+  .puzzle-table th {
+    background: #f2f2f2;
   }
+  h3 {
+  margin-top: 50px;
+}
 
-  #preview {
-    max-width: 100%;
-    max-height: 250px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    display: none;
-  }
 
   .btn {
-    padding: 10px 20px;
+    padding: 6px 12px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     background: #28a745;
     color: #fff;
-    margin-right: 10px;
-    font-size: 16px;
-   
+    font-size: 14px;
+    margin-right: 5px;
   }
 
   .btn:hover {
@@ -95,50 +98,26 @@
   }
 
   .btn-reset {
-    background: #6c757d;
-    
+    background: #dc3545;
   }
 
   .btn-reset:hover {
-    background: #5a6268;
-  }
-
-  .alert {
-    padding: 12px;
-    margin-top: 20px;
-    border-radius: 6px;
-    text-align: left; /* Alert rata kiri */
-  }
-
-  .alert.success {
-    background-color: #d4edda;
-    color: #155724;
-  }
-
-  .alert.error {
-    background-color: #f8d7da;
-    color: #721c24;
+    background: #c82333;
   }
 </style>
 
-
 <script>
-  function previewImage(event) {
-    const preview = document.getElementById('preview');
-    const file = event.target.files[0];
-    if (file) {
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = 'block';
-    } else {
-      preview.src = '#';
-      preview.style.display = 'none';
-    }
-  }
 
-  function clearPreview() {
-    const preview = document.getElementById('preview');
-    preview.src = '#';
-    preview.style.display = 'none';
+  async function deletePuzzle(id) {
+    if (!confirm("Yakin mau hapus puzzle ini?")) return;
+    const res = await fetch(`/cms/games/puzzle/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      alert("Puzzle berhasil dihapus!");
+      location.reload();
+    } else {
+      const data = await res.json();
+      alert(data.detail || "Gagal hapus puzzle!");
+    }
   }
 </script>
 {% endblock %}

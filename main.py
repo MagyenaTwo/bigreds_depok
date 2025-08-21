@@ -1165,8 +1165,21 @@ def set_match_score(
 
 
 @app.get("/cms/games/puzzle", response_class=HTMLResponse)
-async def get_upload_puzzle(request: Request):
-    return templates.TemplateResponse("cms_puzzle.html", {"request": request})
+async def get_upload_puzzle(request: Request, db: Session = Depends(get_db)):
+    puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
+    return templates.TemplateResponse(
+        "cms_puzzle.html", {"request": request, "puzzles": puzzles}
+    )
+
+
+@app.delete("/cms/games/puzzle/{puzzle_id}")
+async def delete_puzzle(puzzle_id: int, db: Session = Depends(get_db)):
+    puzzle = db.query(PuzzleImage).filter(PuzzleImage.id == puzzle_id).first()
+    if not puzzle:
+        raise HTTPException(status_code=404, detail="Puzzle not found")
+    db.delete(puzzle)
+    db.commit()
+    return {"message": f"Puzzle {puzzle_id} deleted successfully"}
 
 
 @app.post("/cms/games/puzzle")
@@ -1177,24 +1190,30 @@ async def post_upload_puzzle(
     db: Session = Depends(get_db),
 ):
     try:
-        # upload ke cloudinary
         result = cloudinary.uploader.upload(file.file, folder="puzzle_images")
         filename = result.get("public_id")
         image_url = result.get("secure_url")
 
-        # simpan ke database
-        new_image = PuzzleImage(title=title, filename=filename)
+        new_image = PuzzleImage(title=title, filename=image_url)
         db.add(new_image)
         db.commit()
         db.refresh(new_image)
 
+        puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
+
         return templates.TemplateResponse(
             "cms_puzzle.html",
-            {"request": request, "success": True, "filename": filename},
+            {
+                "request": request,
+                "success": True,
+                "filename": image_url,
+                "puzzles": puzzles,
+            },
         )
     except Exception as e:
+        puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
         return templates.TemplateResponse(
-            "cms_puzzle.html", {"request": request, "error": str(e)}
+            "cms_puzzle.html", {"request": request, "error": str(e), "puzzles": puzzles}
         )
 
 
@@ -1204,8 +1223,20 @@ def get_puzzle_images():
     images = db.query(PuzzleImage).all()
     result = []
     for img in images:
-        image_url = f"https://res.cloudinary.com/{cloudinary.config().cloud_name}/image/upload/c_fill,w_450,h_450/{img.filename}.jpg"
-        result.append({"id": img.id, "title": img.title, "image_url": image_url})
+        if "/upload/" in img.filename:
+            transformed_url = img.filename.replace(
+                "/upload/", "/upload/c_fill,w_450,h_450/"
+            )
+        else:
+            transformed_url = img.filename
+
+        result.append(
+            {
+                "id": img.id,
+                "title": img.title,
+                "image_url": transformed_url,
+            }
+        )
     return JSONResponse(result)
 
 
