@@ -6,8 +6,13 @@ body {
   color: #333;
   padding-top: 70px;
 }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+/* --- Default (Desktop pakai navbar baru) --- */
 .navbar {
-  background-color: #a60000;
+  background: linear-gradient(90deg, #a60000, #a60000);
   padding: 15px 30px;
   display: flex;
   justify-content: space-between;
@@ -16,32 +21,139 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-   box-sizing: border-box;
+  box-sizing: border-box;
   z-index: 1000;
-  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  border-bottom:2px solid #fff; /* aksen emas */
 }
 
+/* Logo */
 .navbar .logo {
   color: #fff;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.logo-img {
+  height: 35px;
+  width: auto;
+  
+  background: #a60000;
+}
+
+/* Teks tengah */
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  position: absolute;
+  left: 13%;
+  transform: translateX(-50%); /* bener2 center */
+}
+
+/* Menu */
 .navbar .menu {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
 
 .navbar .menu a {
   color: #fff;
   text-decoration: none;
-  margin-left: 20px;
-  font-weight: 500;
+  font-weight: 600;
+  background: #c70122;
+  padding: 8px 14px;
+  border-radius: 20px;
+  transition: transform 0.2s ease-in-out;
 }
 
-.navbar .menu a:first-child {
-  margin-left: 0;
+/* Animasi otomatis (tanpa hover) */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
+
+.navbar .menu a:nth-child(1) { animation: pulse 3s infinite; }
+.navbar .menu a:nth-child(3) { animation: pulse 4s infinite; }
+.navbar .menu a:nth-child(5) { animation: pulse 5s infinite; }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  font-size: 28px;
+  color: #fff;
+  margin-top: -10px;
+  cursor: pointer;
+}
+
+/* --- Mobile Override (pakai navbar lama) --- */
+@media (max-width: 768px) {
+  .navbar {
+  background-color: #a60000;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* bagi jadi kiri – tengah – kanan */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 2px solid #fff;
+}
+
+/* Logo kiri */
+.logo-left .logo-img {
+  height: 40px;
+  width: auto;
+  background: #a60000;
+}
+
+/* Teks tengah */
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* bener2 center */
+}
+
+/* Spacer biar kiri & kanan seimbang */
+.spacer {
+  width: 40px; /* samakan dengan lebar logo kira-kira */
+}
+  .navbar .menu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    background: #a60000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .navbar .menu.show{
+    margin-top: 28px;
+    background-color: #a60000;
+  }
+  .navbar .menu a {
+    background: none;  /* balik ke simple */
+    font-weight: 100;
+    
+  }
+
+  .hamburger {
+    display: block;
+    margin-top:-8px;
+    
+  }
+}
+
 /* navbar */
 
 .header {
