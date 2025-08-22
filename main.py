@@ -67,6 +67,8 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 FONNTE_TOKEN = os.getenv("FONNTE_TOKEN")
+API_KEY = os.getenv("API_KEY")
+API_URL = os.getenv("API_URL")
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -1471,3 +1473,10 @@ def claim_quiz_score(
     db.commit()
     db.refresh(score_entry)
     return RedirectResponse(url="/fans-corner", status_code=303)
+
+
+@app.get("/api/standings")
+def get_standings():
+    headers = {"X-Auth-Token": API_KEY}
+    response = requests.get(API_URL, headers=headers)
+    return JSONResponse(content=response.json())

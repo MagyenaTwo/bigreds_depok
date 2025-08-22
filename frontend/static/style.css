@@ -1155,3 +1155,45 @@ z-index: 10000;
   position: absolute;
   left: -9999px;
 }
+
+.section.league-table {
+  margin: 40px auto;
+  max-width: 800px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.section.league-table h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #b60000;
+}
+
+.table-standings {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Poppins', sans-serif;
+}
+
+.table-standings th,
+.table-standings td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.table-standings th {
+  background: #b60000;
+  color: white;
+  font-weight: 600;
+}
+
+.table-standings tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.table-standings tr:hover {
+  background: #ffeaea;
+}
