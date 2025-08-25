@@ -164,3 +164,12 @@ class MemoryCard(Base):
     title = Column(String, nullable=False)
     image_url = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class MemoryScore(Base):
+    __tablename__ = "memory_scores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String(100), nullable=False)
+    points = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())

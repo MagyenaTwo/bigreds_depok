@@ -2,7 +2,7 @@ from collections import defaultdict
 import shutil
 from typing import List
 from uuid import uuid4
-from fastapi import FastAPI, File, HTTPException, Query, Request, Form, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, Query, Request, Form, UploadFile
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
@@ -31,6 +31,7 @@ from models import (
     Leaderboard,
     Match,
     MemoryCard,
+    MemoryScore,
     PuzzleImage,
     PuzzleScore,
     QuizQuestion,
@@ -925,16 +926,24 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
     else:
         games = db.query(Game).order_by(Game.id.asc()).all()
 
-    # --- gabungan ScorePrediction + PuzzleScore + QuizScore ---
     q1 = select(
-        func.lower(ScorePrediction.full_name).label("full_name"), ScorePrediction.points
+        func.lower(ScorePrediction.full_name).label("full_name"),
+        ScorePrediction.points,
     )
     q2 = select(
-        func.lower(PuzzleScore.full_name).label("full_name"), PuzzleScore.points
+        func.lower(PuzzleScore.full_name).label("full_name"),
+        PuzzleScore.points,
     )
-    q3 = select(func.lower(QuizScore.full_name).label("full_name"), QuizScore.points)
+    q3 = select(
+        func.lower(QuizScore.full_name).label("full_name"),
+        QuizScore.points,
+    )
+    q4 = select(
+        func.lower(MemoryScore.full_name).label("full_name"),
+        MemoryScore.points,
+    )
 
-    union_q = union_all(q1, q2, q3).subquery()
+    union_q = union_all(q1, q2, q3, q4).subquery()
 
     total_points = (
         db.query(union_q.c.full_name, func.sum(union_q.c.points).label("points"))
@@ -1512,3 +1521,38 @@ def delete_memory_card(card_id: int, db: Session = Depends(get_db)):
         db.delete(card)
         db.commit()
     return RedirectResponse(url="/cms/games/memory", status_code=303)
+
+
+@app.get("/api/memory")
+def memory_game(request: Request, db: Session = Depends(get_db)):
+    cards = db.query(MemoryCard).all()
+    return templates.TemplateResponse(
+        "memory.html", {"request": request, "cards": cards}
+    )
+
+
+@app.post("/memory/score/")
+def create_memory_score(
+    full_name: str = Body(...),
+    finished: bool = Body(...),
+    db: Session = Depends(get_db),
+):
+    full_name = full_name.strip()
+
+    existing = db.execute(
+        select(MemoryScore).where(MemoryScore.full_name.ilike(full_name))
+    ).first()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="Nama sudah terdaftar")
+
+    points = 10 if finished else 5
+    new_score = MemoryScore(full_name=full_name, points=points)
+    db.add(new_score)
+    db.commit()
+    db.refresh(new_score)
+
+    return {
+        "message": "Skor berhasil disimpan",
+        "data": {"name": full_name, "points": points},
+    }

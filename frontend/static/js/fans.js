@@ -13,8 +13,8 @@ function handlePlay(gameKey, status) {
       content = `<iframe src="/games/quiz" style="width:100%;height:100%;border:none;"></iframe>`;
       break;
     case "memory-game":
-      content = `<iframe src="/games/memory-game" style="width:100%;height:100%;border:none;"></iframe>`;
-      break;
+      content = `<iframe src="/api/memory" style="width:100%;height:100%;border:none;"></iframe>`;
+  break;
     case "trivia":
       content = `<iframe src="/games/trivia" style="width:100%;height:100%;border:none;"></iframe>`;
       break;

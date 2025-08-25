@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a60000, #a60000);
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 10px;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .scoreboard {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    #timer {
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #ffeb3b;
+      text-shadow: 0 0 6px #000;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .card {
+      width: 80%;
+      margin-left: 10px;
+      margin-right: 10px;
+      aspect-ratio: 1/1;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); 
+      transform-style: preserve-3d;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+    }
+
+    .card-front {
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: background 0.3s;
+    }
+
+    .card-front:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #fff;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #a60000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      z-index: 999;
+      display: none;
+    }
+
+    .popup-content {
+      background: #a60000;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    }
+
+    /* RESPONSIVE UNTUK MOBILE */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    margin-top: 5px;
+  }
+
+  .scoreboard {
+   
+    gap: 10px;
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
+
+  #timer {
+    font-size: 1.1rem;
+  }
+
+  .game-board {
+    grid-template-columns: repeat(7, 1fr); /* ubah jadi 3 kolom biar muat */
+    gap: 8px;
+    max-width: 100%;
+    margin: 15px auto;
+  }
+
+  .card {
+    width: 100%;  /* biar penuh grid */
+    margin: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  .card-front {
+    font-size: 1.5rem; /* lebih kecil */
+  }
+
+  .popup-content {
+    width: 90%;
+    font-size: 1.2rem;
+    padding: 20px;
+  }
+}
+
+/* EXTRA RESPONSIVE UNTUK LAYAR KECIL (<480px) */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .game-board {
+    grid-template-columns: repeat(6, 1fr); /* 2 kolom saja */
+    gap: 6px;
+  }
+
+  .card-front {
+    font-size: 1.2rem;
+  }
+
+  .scoreboard {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h1>Memory Liverpool</h1>
+  <div class="scoreboard">
+    Skor: <span id="score">0</span>
+    ⏱ Waktu: <span id="timer">90</span> detik
+  </div>
+
+  <div class="game-board" id="game-board">
+    {% for card in cards %}
+      <div class="card" data-title="{{ card.title }}">
+        <div class="card-inner">
+          <div class="card-front">?</div>
+          <div class="card-back" style="background-image: url('{{ card.image_url }}')"></div>
+        </div>
+      </div>
+      <div class="card" data-title="{{ card.title }}">
+        <div class="card-inner">
+          <div class="card-front">?</div>
+          <div class="card-back" style="background-image: url('{{ card.image_url }}')"></div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Popup Winner -->
+  <div class="popup" id="winner">
+    <div class="popup-content">
+      🎉 Selamat! Kamu berhasil menyelesaikan permainan 🎉
+      <br><br>
+      <button onclick="restartGame()">Main Lagi</button>
+    </div>
+  </div>
+
+  <!-- Popup Game Over -->
+  <div class="popup" id="gameover">
+    <div class="popup-content">
+      ⏳ Waktu Habis! Coba lagi ya!
+      <br><br>
+      <button onclick="restartGame()">Main Lagi</button>
+    </div>
+  </div>
+<script>
+  const cards = document.querySelectorAll('.card');
+  let firstCard, secondCard;
+  let lockBoard = false;
+  let score = 0;
+  const totalPairs = cards.length / 2;
+
+  let timeLeft = 120;
+  let timerInterval;
+
+  function startTimer() {
+    timeLeft = 120;
+    document.getElementById("timer").textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById("gameover").style.display = "flex";
+      }
+    }, 1000);
+  }
+
+  function flipCard() {
+    if (lockBoard) return;
+    if (this === firstCard) return;
+
+    this.classList.add('flipped');
+
+    if (!firstCard) {
+      firstCard = this;
+      return;
+    }
+
+    secondCard = this;
+    checkForMatch();
+  }
+
+  function checkForMatch() {
+    let isMatch = firstCard.dataset.title === secondCard.dataset.title;
+    isMatch ? disableCards() : unflipCards();
+  }
+
+  function disableCards() {
+    firstCard.removeEventListener('click', flipCard);
+    secondCard.removeEventListener('click', flipCard);
+    score++;
+    document.getElementById("score").textContent = score;
+    resetBoard();
+
+    if (score === totalPairs) {
+      clearInterval(timerInterval);
+      document.getElementById("winner").style.display = "flex";
+      submitScore(true); // ✅ menang
+    }
+  }
+
+  function unflipCards() {
+    lockBoard = true;
+    setTimeout(() => {
+      firstCard.classList.remove('flipped');
+      secondCard.classList.remove('flipped');
+      resetBoard();
+    }, 1000);
+  }
+
+  function resetBoard() {
+    [firstCard, secondCard, lockBoard] = [null, null, false];
+  }
+
+  (function shuffle() {
+    cards.forEach(card => {
+      let randomPos = Math.floor(Math.random() * cards.length);
+      card.style.order = randomPos;
+    });
+  })();
+
+  function restartGame() {
+    document.getElementById("winner").style.display = "none";
+    document.getElementById("gameover").style.display = "none";
+    score = 0;
+    document.getElementById("score").textContent = 0;
+    cards.forEach(card => {
+      card.classList.remove('flipped');
+      card.addEventListener('click', flipCard);
+    });
+    setTimeout(() => {
+      (function shuffle() {
+        cards.forEach(card => {
+          let randomPos = Math.floor(Math.random() * cards.length);
+          card.style.order = randomPos;
+        });
+      })();
+    }, 500);
+    clearInterval(timerInterval);
+    startTimer();
+  }
+
+  // 🔹 Tambahan: fungsi kirim skor ke backend
+  function submitScore(finished) {
+    const fullName = prompt("Masukkan Nama Anda:"); 
+    if (!fullName) return;
+
+    fetch("/memory/score/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name: fullName, finished: finished })
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(err => { throw new Error(err.detail); });
+      }
+      return res.json();
+    })
+    .then(data => {
+      alert(data.message + " | Poin: " + data.data.points);
+    })
+    .catch(err => {
+      alert("Gagal simpan skor: " + err.message);
+    });
+  }
+
+  cards.forEach(card => card.addEventListener('click', flipCard));
+  startTimer();
+</script>
+
+</body>
+</html>
