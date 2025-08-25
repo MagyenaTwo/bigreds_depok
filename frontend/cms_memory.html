@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Manajemen Memory Cards{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom: 20px;">Tambah Memory Card</h2>
+
+  <!-- Form Input -->
+  <form action="/cms/games/memory" method="POST" enctype="multipart/form-data" class="upload-form">
+    <label for="title">Judul</label><br>
+    <input type="text" id="title" name="title" placeholder="Masukkan judul card" required><br>
+
+    <label for="file">Pilih Gambar</label>
+    <input type="file" name="file" id="file" accept="image/*" required>
+
+    <button type="submit" class="btn">Tambah</button>
+    <button type="reset" class="btn btn-reset">Reset</button>
+  </form>
+
+  <!-- 🔽 Tabel Daftar Memory Cards -->
+  <h3>Daftar Memory Cards</h3>
+  <table class="puzzle-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Judul</th>
+        <th>Uploaded</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for card in memory_cards %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ card.title }}</td>
+        <td>{{ card.created_at.strftime("%Y-%m-%d %H:%M") if card.created_at else "-" }}</td>
+        <td>
+          <a href="{{ card.image_url }}" target="_blank" class="btn">Lihat</a>
+          <button onclick="deleteCard('{{ card.id }}')" class="btn btn-reset">Hapus</button>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Belum ada memory card ditambahkan.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .puzzle-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .puzzle-table th, .puzzle-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .puzzle-table th {
+    background: #f2f2f2;
+  }
+
+  h3 {
+    margin-top: 40px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #28a745;
+    color: #fff;
+    font-size: 14px;
+    margin-right: 5px;
+  }
+
+  .btn:hover {
+    background: #218838;
+  }
+
+  .btn-reset {
+    background: #dc3545;
+  }
+
+  .btn-reset:hover {
+    background: #c82333;
+  }
+
+  .upload-form input {
+    margin-bottom: 10px;
+    padding: 6px;
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+
+<script>
+  async function deleteCard(id) {
+    if (!confirm("Yakin mau hapus memory card ini?")) return;
+    const res = await fetch(`/cms/games/memory/delete/${id}`, { method: "POST" });
+    if (res.ok) {
+      alert("Memory card berhasil dihapus!");
+      location.reload();
+    } else {
+      const data = await res.json();
+      alert(data.detail || "Gagal hapus memory card!");
+    }
+  }
+</script>
+{% endblock %}

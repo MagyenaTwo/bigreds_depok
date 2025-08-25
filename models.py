@@ -155,3 +155,12 @@ class QuizQuestion(Base):
     option_d = Column(String, nullable=False)
     correct_option = Column(String(1), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class MemoryCard(Base):
+    __tablename__ = "memory_cards"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    image_url = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

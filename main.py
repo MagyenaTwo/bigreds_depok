@@ -30,6 +30,7 @@ from models import (
     Game,
     Leaderboard,
     Match,
+    MemoryCard,
     PuzzleImage,
     PuzzleScore,
     QuizQuestion,
@@ -1480,3 +1481,34 @@ def get_standings():
     headers = {"X-Auth-Token": API_KEY}
     response = requests.get(API_URL, headers=headers)
     return JSONResponse(content=response.json())
+
+
+@app.api_route("/cms/games/memory", methods=["GET", "POST"])
+def memory_cards(
+    request: Request,
+    db: Session = Depends(get_db),
+    title: str = Form(None),
+    file: UploadFile = File(None),
+):
+    if request.method == "POST":
+        upload_result = cloudinary.uploader.upload(file.file)
+        image_url = upload_result.get("secure_url")
+        new_card = MemoryCard(title=title, image_url=image_url)
+        db.add(new_card)
+        db.commit()
+        db.refresh(new_card)
+
+        return RedirectResponse(url="/cms/games/memory", status_code=303)
+    memory_cards = db.query(MemoryCard).order_by(MemoryCard.id).all()
+    return templates.TemplateResponse(
+        "cms_memory.html", {"request": request, "memory_cards": memory_cards}
+    )
+
+
+@app.post("/cms/games/memory/delete/{card_id}", response_class=HTMLResponse)
+def delete_memory_card(card_id: int, db: Session = Depends(get_db)):
+    card = db.query(MemoryCard).filter(MemoryCard.id == card_id).first()
+    if card:
+        db.delete(card)
+        db.commit()
+    return RedirectResponse(url="/cms/games/memory", status_code=303)
