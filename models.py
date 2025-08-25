@@ -9,6 +9,7 @@ from sqlalchemy import (
     String,
     DateTime,
     Text,
+    UniqueConstraint,
     func,
 )
 from database import Base
@@ -106,15 +107,16 @@ class ScorePrediction(Base):
     __tablename__ = "score_predictions"
 
     id = Column(Integer, primary_key=True, index=True)
-    match_id = Column(
-        Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=True
-    )
-    full_name = Column(String(100), nullable=False, unique=True)
-    predicted_home_score = Column(Integer, nullable=True)
-    predicted_away_score = Column(Integer, nullable=True)
+    match_id = Column(Integer, ForeignKey("matches.id"), nullable=False)
+    full_name = Column(String, nullable=False)
+    predicted_home_score = Column(Integer, nullable=False)
+    predicted_away_score = Column(Integer, nullable=False)
     points = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
-    match = relationship("Match", backref="predictions")
+
+    __table_args__ = (
+        UniqueConstraint("match_id", "full_name", name="unique_match_fullname"),
+    )
 
 
 class PuzzleImage(Base):
