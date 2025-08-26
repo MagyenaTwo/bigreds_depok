@@ -1359,3 +1359,47 @@ z-index: 10000;
     font-weight: 800;
   }
 }
+
+.memorial-container {
+  display: flex;
+  margin-bottom: 20px;
+  justify-content: space-around; 
+  align-items: center;
+  padding: 10px 40px;
+  background: transparent; /* biar nempel di atas banner */
+  position: relative;
+  z-index: 10;
+}
+
+.memorial img {
+  height: 250px; /* bisa disesuaikan */
+  width: auto;
+}
+
+.banner img {
+  width: 100%;
+  display: block;
+}
+
+/* 🔽 Tablet & Mobile */
+@media (max-width: 768px) {
+  .memorial-container {
+    flex-direction: column;   /* atas bawah */
+    justify-content: center; 
+    align-items: center; 
+    gap: 10px;                /* jarak antar memorial */
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .memorial img {
+    height: 150px; /* ukuran sedang */
+  }
+}
+
+/* 🔽 HP kecil */
+@media (max-width: 480px) {
+  .memorial img {
+    height: 160px; /* lebih kecil lagi biar pas */
+  }
+}
