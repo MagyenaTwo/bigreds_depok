@@ -1309,3 +1309,53 @@ z-index: 10000;
 .table-standings tr:hover {
   background: #ffeaea;
 }
+.trophy-banner {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  padding: 20px;
+  background: white;
+  
+}
+
+.trophy {
+  text-align: center;
+  min-width: 100px;
+  flex: 0 0 auto; /* biar tidak mengecil kalau layar kecil */
+}
+
+
+.trophy img {
+  height: 80px;
+  display: block;
+  margin: 0 auto;
+}
+
+.trophy p {
+  margin-top: 8px;
+  font-size: 16px;      
+  font-weight: 900;     
+  color: grey;
+}
+
+/* 🔹 Mobile view */
+@media (max-width: 768px) {
+  .trophy-banner {
+    gap: 0px;     /* jarak antar trophy lebih kecil */
+    padding: 5px;
+  }
+
+  .trophy {
+    min-width: 10px; /* lebih kecil biar muat */
+  }
+
+  .trophy img {
+    height: 50px; /* perkecil gambar piala */
+  }
+
+  .trophy p {
+    font-size: 12px;  /* perkecil teks */
+    font-weight: 800;
+  }
+}
