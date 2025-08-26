@@ -26,6 +26,7 @@ class Match(Base):
     competition = Column(String)
     actual_home_score = Column(Integer, nullable=True)
     actual_away_score = Column(Integer, nullable=True)
+    predictions = relationship("ScorePrediction", back_populates="match")
 
 
 class TicketOrder(Base):
@@ -113,6 +114,7 @@ class ScorePrediction(Base):
     predicted_away_score = Column(Integer, nullable=False)
     points = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+    match = relationship("Match", back_populates="predictions")
 
     __table_args__ = (
         UniqueConstraint("match_id", "full_name", name="unique_match_fullname"),
