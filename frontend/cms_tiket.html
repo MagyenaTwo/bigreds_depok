@@ -149,6 +149,15 @@
 
 </div>
  <div style="position: relative; flex: 1; max-width: 280px;">
+<div style="margin: 20px 0;">
+  <label for="gameweekFilter" style="margin-right: 10px;">Filter Gameweek :</label>
+  <select id="gameweekFilter" onchange="filterByGameweek()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db;">
+    <option value="">Semua Gameweek</option>
+    {% for gw in gameweeks %}
+      <option value="{{ gw }}" {% if gw == selected_gameweek %}selected{% endif %}>Gameweek {{ gw }}</option>
+    {% endfor %}
+  </select>
+</div>
 
   <!-- Search Input -->
   <input
@@ -171,6 +180,7 @@
     onblur="this.style.borderColor='#d1d5db'"
   >
 
+  
   <!-- Clear Button (×) -->
   <span
     id="clearSearch"
@@ -226,6 +236,7 @@
     ~ "🔴 www.bigredsdepok.com"
   ) %}
   <tr>
+<tr data-gameweek="{{ tiket.match.gameweek }}">
     <td class="nomor-kolom" data-label="No">{{ loop.index }}</td>
     <td data-label="Nama">{{ tiket.nama }}</td>
     <td data-label="ID Card">{{ tiket.id_card or '-' }}</td>
@@ -279,6 +290,17 @@
 </div>
 
 <script>
+  function filterByGameweek() {
+    const select = document.getElementById("gameweekFilter");
+    const value = select.value;
+    const rows = document.querySelectorAll("#tiketTable tbody tr");
+
+    rows.forEach(row => {
+        const rowGameweek = row.dataset.gameweek; 
+        row.style.display = (!value || rowGameweek === value) ? "" : "none";
+    });
+}
+
  function filterTable() {
     const input = document.getElementById("searchInput");
     const filter = input.value.toLowerCase();

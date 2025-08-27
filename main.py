@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 import httpx
 import pytz
 from sqlalchemy.orm import Session
-from sqlalchemy import case, create_engine, func, select, union_all
+from sqlalchemy import case, create_engine, distinct, func, select, union_all
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 import os
@@ -182,16 +182,10 @@ async def read_form(request: Request):
     )
 
 
-@app.get("/buy-ticket", response_class=HTMLResponse)
-async def show_form(request: Request):
+@app.get("/buy-ticket/{match_id}", response_class=HTMLResponse)
+async def show_form(request: Request, match_id: int):
     db: Session = SessionLocal()
-    now = datetime.now()
-    match = (
-        db.query(Match)
-        .filter(Match.match_datetime >= now)
-        .order_by(Match.match_datetime.asc())
-        .first()
-    )
+    match = db.query(Match).filter(Match.id == match_id).first()
     formatted_datetime = format_datetime_indo(match.match_datetime) if match else None
     db.close()
 
@@ -201,7 +195,6 @@ async def show_form(request: Request):
             "request": request,
             "match": match,
             "formatted_datetime": formatted_datetime,
-            "datetime_now": now,
         },
     )
 
@@ -216,6 +209,7 @@ async def submit_form(
     bukti_transfer: UploadFile = File(...),
     total_harga: str = Form(...),
     metode_pembayaran: str = Form(...),
+    match_id: int = Form(...),
 ):
     ext = bukti_transfer.filename.split(".")[-1]
     filename_bukti = f"bukti/{uuid4()}.{ext}"
@@ -229,6 +223,13 @@ async def submit_form(
     bukti_url = f"{SUPABASE_URL}/storage/v1/object/public/bukti/{filename_bukti}"
 
     db: Session = SessionLocal()
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        db.close()
+        return JSONResponse(
+            {"status": "error", "message": "Match tidak ditemukan"}, status_code=400
+        )
+
     new_order = TicketOrder(
         nama=nama,
         status=status,
@@ -238,6 +239,7 @@ async def submit_form(
         bukti_transfer_url=bukti_url,
         total_harga=total_harga,
         metode_pembayaran=metode_pembayaran,
+        match_id=match.id,
     )
     db.add(new_order)
     db.commit()
@@ -505,6 +507,16 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
         .scalar()
         or 0
     )
+    gameweeks = [
+        gw[0]
+        for gw in (
+            db.query(distinct(Match.gameweek))
+            .join(TicketOrder, TicketOrder.match_id == Match.id)
+            .order_by(Match.gameweek)
+            .all()
+        )
+    ]
+
     return templates.TemplateResponse(
         "cms_tiket.html",
         {
@@ -516,6 +528,7 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
             "total_pemasukan": total_pemasukan,
             "total_gopay": total_gopay,
             "total_bni": total_bni,
+            "gameweeks": gameweeks,
         },
     )
 

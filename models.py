@@ -24,9 +24,12 @@ class Match(Base):
     away_team = Column(String)
     match_datetime = Column(DateTime)
     competition = Column(String)
+    gameweek = Column(Integer, nullable=True)
     actual_home_score = Column(Integer, nullable=True)
     actual_away_score = Column(Integer, nullable=True)
+
     predictions = relationship("ScorePrediction", back_populates="match")
+    orders = relationship("TicketOrder", back_populates="match")
 
 
 class TicketOrder(Base):
@@ -48,6 +51,9 @@ class TicketOrder(Base):
     metode_pembayaran = Column(String(50), nullable=False)
     sudah_dikirim = Column(Boolean, default=False)
     alias_url = Column(String, unique=True, index=True, nullable=True)
+
+    match_id = Column(Integer, ForeignKey("matches.id"), nullable=False)
+    match = relationship("Match", back_populates="orders")
 
 
 class User(Base):
