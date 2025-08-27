@@ -1313,11 +1313,16 @@ def claim_puzzle_point(full_name: str = Form(...), db: Session = Depends(get_db)
     existing = (
         db.query(PuzzleScore).filter(PuzzleScore.full_name.ilike(full_name)).first()
     )
+
     if existing:
+        existing.points += 10
+        db.commit()
+        db.refresh(existing)
         return {
-            "message": f"❌ Kamu {full_name} sudah pernah klaim poin!",
+            "message": f"✅ Poin berhasil ditambahkan lagi untuk {full_name}",
             "total_points": existing.points,
         }
+
     new_score = PuzzleScore(full_name=full_name, points=10)
     db.add(new_score)
     db.commit()
@@ -1458,7 +1463,6 @@ def add_quiz_page(request: Request):
     return templates.TemplateResponse("add_quiz.html", {"request": request})
 
 
-# Proses simpan soal
 @app.post("/cms/quiz/add", name="add_quiz")
 def add_quiz(
     request: Request,
@@ -1523,21 +1527,23 @@ def claim_quiz_score(
 ):
     if not full_name.strip():
         raise HTTPException(status_code=400, detail="Isi nama dulu!")
+
     existing = (
         db.query(QuizScore)
         .filter(func.lower(QuizScore.full_name) == full_name.lower())
         .first()
     )
-    if existing:
-        raise HTTPException(
-            status_code=400, detail=f"Kamu '{full_name}' sudah pernah klaim poin!"
-        )
 
-    # Simpan skor
-    score_entry = QuizScore(full_name=full_name, points=points)
-    db.add(score_entry)
-    db.commit()
-    db.refresh(score_entry)
+    if existing:
+        existing.points = points
+        db.commit()
+        db.refresh(existing)
+    else:
+        score_entry = QuizScore(full_name=full_name, points=points)
+        db.add(score_entry)
+        db.commit()
+        db.refresh(score_entry)
+
     return RedirectResponse(url="/fans-corner", status_code=303)
 
 
@@ -1595,14 +1601,19 @@ def create_memory_score(
 ):
     full_name = full_name.strip()
 
+    points = 10 if finished else 5
     existing = db.execute(
         select(MemoryScore).where(MemoryScore.full_name.ilike(full_name))
-    ).first()
+    ).scalar_one_or_none()
 
     if existing:
-        raise HTTPException(status_code=400, detail="Nama sudah terdaftar")
-
-    points = 10 if finished else 5
+        existing.points = points
+        db.commit()
+        db.refresh(existing)
+        return {
+            "message": "Skor berhasil diupdate",
+            "data": {"name": full_name, "points": existing.points},
+        }
     new_score = MemoryScore(full_name=full_name, points=points)
     db.add(new_score)
     db.commit()
