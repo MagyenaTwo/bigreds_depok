@@ -1000,6 +1000,13 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
         .limit(10)
         .all()
     )
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
 
     leaderboard = [
         {"name": name.title(), "score": points} for name, points in total_points
@@ -1011,6 +1018,7 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
             "request": request,
             "games": games,
             "leaderboard": leaderboard,
+            "match": match,
         },
     )
 
