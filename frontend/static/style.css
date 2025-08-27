@@ -981,7 +981,7 @@ body {
     }
 
 .fans-corner-banner {
-  background: #a60000;
+    background: linear-gradient(to bottom right, rgba(255, 0, 0, 0.7), rgba(0,0,0,0.8));
   color: white;
   text-align: center;
   padding: 20px 10px;
@@ -1443,7 +1443,7 @@ z-index: 10000;
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom right, rgba(200,16,46,0.7), rgba(0,0,0,0.8));
+  background: linear-gradient(to bottom right, rgba(255, 0, 0, 0.7), rgba(0,0,0,0.8));
 }
 
 .tribute-hero-text {
@@ -1520,7 +1520,7 @@ z-index: 10000;
   }
 
   .overlay {
-    background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(200,16,46,0.7));
+    background: linear-gradient(to bottom right, rgba(255, 0, 0, 0.7), rgba(0,0,0,0.8));
     /* overlay lebih gelap biar teks terbaca di layar kecil */
   }
 }
