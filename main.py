@@ -646,18 +646,44 @@ async def upload_gallery_nobar(
 
 @app.get("/pengurus", response_class=HTMLResponse)
 async def pengurus(request: Request):
-    return templates.TemplateResponse("pengurus.html", {"request": request})
+    db: Session = SessionLocal()
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+    db.close()
+
+    return templates.TemplateResponse(
+        "pengurus.html", {"request": request, "match": match}
+    )
 
 
 @app.get("/gallery", response_class=HTMLResponse)
 async def gallery(request: Request):
     db: Session = SessionLocal()
     images = db.query(GalleryNobar).order_by(GalleryNobar.tanggal.desc()).all()
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+
     db.close()
     categories = list({img.kategori for img in images if img.kategori})
 
     return templates.TemplateResponse(
-        "gallery.html", {"request": request, "images": images, "categories": categories}
+        "gallery.html",
+        {
+            "request": request,
+            "images": images,
+            "categories": categories,
+            "match": match,
+        },
     )
 
 
@@ -872,6 +898,14 @@ async def events(request: Request):
 
     unique_events = list(unique_events_dict.values())
 
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+
     db.close()
 
     categories = list({img.kategori for img in unique_events if img.kategori})
@@ -882,7 +916,8 @@ async def events(request: Request):
             "request": request,
             "images": unique_events,
             "categories": categories,
-            "now": datetime.now(),
+            "now": now,
+            "match": match,
         },
     )
 
