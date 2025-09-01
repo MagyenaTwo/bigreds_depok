@@ -147,17 +147,57 @@
   </div>
   </div>
 
+  <!-- Card: Total Pemasukan Gameweek -->
+  <div id="pemasukanCard" style="
+    flex: 1;
+    min-width: 260px;
+    background: #ffffff;
+    border-radius: 14px;
+    border-left: 5px solid #28a745;
+    padding: 20px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    display: none; /* awalnya disembunyikan */
+    align-items: center;
+    gap: 16px;
+  ">
+    <div style="
+      background: #e6f4ec;
+      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <span style="font-size: 24px; color: #28a745;">💰</span>
+    </div>
+    <div style="flex-grow: 1;">
+      <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
+        Total Pemasukan Gameweek
+      </div>
+      <div style="font-size: 22px; font-weight: 700; color: #111827;">
+        {{ total_pemasukan | rupiah }}
+      </div>
+    </div>
+  </div>
 </div>
-<div style="margin: 20px 0;">
-  <label for="gameweekFilter" style="margin-right: 10px;">Filter Gameweek :</label>
-  <select id="gameweekFilter" onchange="filterByGameweek()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db;">
-    <option value="">Semua Gameweek</option>
-    {% for gw in gameweeks %}
-      <option value="{{ gw }}" {% if gw == selected_gameweek %}selected{% endif %}>Gameweek {{ gw }}</option>
-    {% endfor %}
-  </select>
-</div>
+<div style="display: flex; align-items: center; gap: 20px; margin: 20px 0;">
+  <!-- Filter -->
+  <div>
+    <label for="gameweekFilter" style="margin-right: 10px;">Filter Gameweek :</label>
+    <select id="gameweekFilter" onchange="filterByGameweek()" 
+            style="padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db;">
+      <option value="">Semua Gameweek</option>
+      {% for gw in gameweeks %}
+        <option value="{{ gw }}" {% if gw == selected_gameweek %}selected{% endif %}>
+          Gameweek {{ gw }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
 
+</div>
+  
  <div style="position: relative; flex: 1; max-width: 280px;">
 
   <!-- Search Input -->
@@ -290,37 +330,71 @@
 </div>
 
 <script>
-  function filterByGameweek() {
-    const select = document.getElementById("gameweekFilter");
-    const value = select.value;
-    const rows = document.querySelectorAll("#tiketTable tbody tr");
+  async function filterByGameweek() {
+  const select = document.getElementById("gameweekFilter");
+  const value = select.value;
+  const rows = document.querySelectorAll("#tiketTable tbody tr");
+  const card = document.getElementById("pemasukanCard");
+  const totalText = card.querySelector("div[style*='font-size: 22px']");
 
-    rows.forEach(row => {
-        const rowGameweek = row.dataset.gameweek; 
-        row.style.display = (!value || rowGameweek === value) ? "" : "none";
-    });
+  // === Filter tabel ===
+  rows.forEach(row => {
+    const rowGameweek = row.dataset.gameweek;
+    row.style.display = (!value || rowGameweek === value) ? "" : "none";
+  });
+
+  if (value) {
+    card.style.display = "flex";
+
+    // 🔥 Ambil total pemasukan gameweek dari backend
+    fetch(`/api/total_pemasukan/${value}`)
+      .then(res => res.json())
+      .then(data => {
+        // Format jadi Rupiah
+        totalText.textContent = formatRupiah(data.total_pemasukan);
+      });
+  } else {
+    card.style.display = "none";
+  }
 }
 
- function filterTable() {
-    const input = document.getElementById("searchInput");
-    const filter = input.value.toLowerCase();
-    const rows = document.querySelectorAll("#tiketTable tbody tr");
-    const clearBtn = document.getElementById("clearSearch");
+// Helper format Rupiah
+function formatRupiah(angka) {
+  return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+async function filterByGameweek() {
+  const select = document.getElementById("gameweekFilter");
+  const value = select.value;
+  const rows = document.querySelectorAll("#tiketTable tbody tr");
+  const card = document.getElementById("pemasukanCard");
+  const totalText = card.querySelector("div[style*='font-size: 22px']");
 
-    clearBtn.style.display = filter ? "block" : "none";
+  // === Filter tabel ===
+  rows.forEach(row => {
+    const rowGameweek = row.dataset.gameweek;
+    row.style.display = (!value || rowGameweek === value) ? "" : "none";
+  });
 
-    rows.forEach(row => {
-      const nama = row.cells[1].textContent.toLowerCase();
-      row.style.display = nama.includes(filter) ? "" : "none";
-    });
+  if (value) {
+    card.style.display = "flex";
+
+  
+    fetch(`/api/total_pemasukan/${value}`)
+      .then(res => res.json())
+      .then(data => {
+        
+        totalText.textContent = formatRupiah(data.total_pemasukan);
+      });
+  } else {
+    card.style.display = "none";
   }
+}
 
-  function clearSearch() {
-    const input = document.getElementById("searchInput");
-    input.value = "";
-    document.getElementById("clearSearch").style.display = "none";
-    filterTable(); // reset tampilannya
-  }
+
+function formatRupiah(angka) {
+  return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 </script>
 {% endblock %}
 

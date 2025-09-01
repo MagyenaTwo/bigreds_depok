@@ -55,6 +55,7 @@ import random
 import string
 import cloudinary
 import cloudinary.uploader
+from sqlalchemy import event
 
 load_dotenv()
 
@@ -71,6 +72,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 FONNTE_TOKEN = os.getenv("FONNTE_TOKEN")
 API_KEY = os.getenv("API_KEY")
 API_URL = os.getenv("API_URL")
+ADMIN_WHATSAPP = os.getenv("ADMIN_WHATSAPP")
+
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -182,6 +185,33 @@ async def read_form(request: Request):
     )
 
 
+def send_whatsapp_message(to: str, message: str):
+    url = "https://api.fonnte.com/send"
+    headers = {"Authorization": FONNTE_TOKEN}
+    payload = {
+        "target": to,
+        "message": message,
+    }
+    try:
+        requests.post(url, headers=headers, data=payload, timeout=10)
+    except Exception:
+        pass
+
+
+@event.listens_for(TicketOrder, "after_insert")
+def after_insert_ticket(mapper, connection, target):
+    """
+    target = instance TicketOrder yang baru disimpan
+    """
+    pesan_admin = (
+        f"🔔 Ada yang pesan tiket Nobar nih!\n\n"
+        f"Nama: {target.nama}\n"
+        f"Metode Pembayaran: {target.metode_pembayaran}\n\n"
+        f"👉 Silakan cek detail order di CMS ya\n"
+    )
+    send_whatsapp_message(ADMIN_WHATSAPP, pesan_admin)
+
+
 @app.get("/buy-ticket/{match_id}", response_class=HTMLResponse)
 async def show_form(request: Request, match_id: int):
     db: Session = SessionLocal()
@@ -197,6 +227,24 @@ async def show_form(request: Request, match_id: int):
             "formatted_datetime": formatted_datetime,
         },
     )
+
+
+@app.get("/buy-ticket", response_class=HTMLResponse)
+async def buy_ticket_default(request: Request):
+    db: Session = SessionLocal()
+    now = datetime.now()
+    match = (
+        db.query(Match)
+        .filter(Match.match_datetime >= now)
+        .order_by(Match.match_datetime.asc())
+        .first()
+    )
+    db.close()
+
+    if not match:
+        return HTMLResponse("Tidak ada pertandingan aktif", status_code=404)
+
+    return RedirectResponse(url=f"/buy-ticket/{match.id}")
 
 
 @app.post("/submit")
@@ -531,6 +579,18 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
             "gameweeks": gameweeks,
         },
     )
+
+
+@app.get("/api/total_pemasukan/{gameweek}")
+def get_total_pemasukan_gameweek(gameweek: int, db: Session = Depends(get_db)):
+    total = (
+        db.query(func.sum(TicketOrder.total_harga))
+        .join(Match, TicketOrder.match_id == Match.id)
+        .filter(Match.gameweek == gameweek)
+        .scalar()
+        or 0
+    )
+    return {"gameweek": gameweek, "total_pemasukan": total}
 
 
 @app.get("/proxy/news/{slug}")
