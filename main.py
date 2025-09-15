@@ -890,7 +890,10 @@ Terima kasih telah melakukan pembelian tiket *NOBAR* Bigreds Depok.
 • _Status_: *{tiket.status.capitalize()}*
 • _Jumlah Tiket_: *{tiket.jumlah}*
 • _Total Pembayaran_: *Rp {tiket.total_harga:,.0f}*
-• _Tiket Nobar_: https://bigredsdepok.com/tiket/{tiket.alias_url}
+
+*Tiket Nobar Anda:*
+https://bigredsdepok.com/tiket/{tiket.alias_url}
+
 🔁 *Jangan lupa tunjukkan tiket ini saat masuk lokasi ke penjaga tiket.*
 
 _Ayu Tingting makan pisang gepok._
