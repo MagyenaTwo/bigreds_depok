@@ -220,6 +220,30 @@
     font-size: 14px;
   }
 }
+.popup {
+  display: none;
+  position: fixed;
+  margin-top: 100px;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 40%;
+  background: rgba(0,0,0,0.6);
+}
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  margin: 10% auto;
+  border-radius: 12px;
+  max-width: 320px;
+  text-align: center;
+  position: relative;
+}
+.popup .close {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 20px;
+  cursor: pointer;
+}
 
 
   </style>
@@ -242,7 +266,6 @@
       <a href="/gallery">Gallery</a>
       <a href="/buy-ticket">Buy Ticket</a>
       <a href="/pengurus">Squad</a>
-      
     </div>
   </div>
 {% if match %}
@@ -507,7 +530,34 @@
     <p>1</p>
   </div>
 </div>
+<!-- <a href="/shop" class="cart-btn" title="Merchandise">
+  <img src="/static/img/cart.png" alt="Cart" />
+</a> -->
 
+
+<a href="#" class="cart-btn" title="Merchandise" id="btnShop">
+  <img src="/static/img/cart.png" alt="Cart" />
+</a>
+
+
+<!-- Popup -->
+<div id="popupShop" class="popup">
+  <div class="popup-content">
+    <span class="close">&times;</span>
+    <video autoplay muted loop playsinline style="width: 250px; border-radius: 12px;">
+      <source src="/static/img/maintenance.mp4" type="video/mp4">
+      Browser kamu tidak mendukung video.
+    </video>
+    <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+    <p style="color: #444;">Tunggu Stok Terbaru Bigreds Depok</p>
+    <a href="/" class="submit" 
+       style="display:inline-block;margin-top:20px;padding:12px 25px;
+              background-color:#d32f2f;color:white;border-radius:8px;
+              text-decoration:none;font-weight:bold;">
+      Back
+    </a>
+  </div>
+</div>
 <!-- Footer -->
 <footer class="footer">
   <div class="footer-container">
@@ -641,6 +691,23 @@ fetch("/api/standings")
     });
   });
 
+
+document.getElementById("btnShop").addEventListener("click", function(e) {
+  e.preventDefault(); // cegah pindah ke /shop
+  document.getElementById("popupShop").style.display = "block";
+});
+
+document.querySelector("#popupShop .close").addEventListener("click", function() {
+  document.getElementById("popupShop").style.display = "none";
+});
+
+// Tutup popup kalau klik di luar konten
+window.addEventListener("click", function(e) {
+  const popup = document.getElementById("popupShop");
+  if (e.target === popup) {
+    popup.style.display = "none";
+  }
+});
 </script>
 
 </body>

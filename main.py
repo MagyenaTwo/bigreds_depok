@@ -1689,20 +1689,6 @@ def create_memory_score(
     }
 
 
-from fastapi import Form, File, UploadFile, Depends
-from sqlalchemy.orm import Session
-from uuid import uuid4
-import cloudinary
-import cloudinary.uploader
-
-# pastikan Cloudinary sudah dikonfigurasi di awal
-# cloudinary.config(
-#     cloud_name="xxx",
-#     api_key="xxx",
-#     api_secret="xxx"
-# )
-
-
 @app.post("/merchandise/")
 async def create_merchandise(
     name: str = Form(...),
@@ -1786,3 +1772,9 @@ def delete_merchandise(item_id: int, db: Session = Depends(get_db)):
 @app.get("/cms/merchandise", response_class=HTMLResponse)
 def cms_merchandise(request: Request):
     return templates.TemplateResponse("cms_merchandise.html", {"request": request})
+
+
+@app.get("/shop")
+def shop_page(request: Request):
+    # render template shop.html
+    return templates.TemplateResponse("shop.html", {"request": request})
