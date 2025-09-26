@@ -3,7 +3,7 @@
     document.querySelector(".menu").classList.toggle("show");
   }
 function toggleIDCard() {
-  const status = document.getElementById("status").value;
+  const status = document.querySelector('input[name="status"]:checked')?.value;
   const idCardField = document.getElementById("idCardField");
   const idCardInput = document.getElementById("idCardInput");
 
@@ -15,6 +15,7 @@ function toggleIDCard() {
     idCardInput.removeAttribute("required");
   }
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const tombolQRIS = document.getElementById("tombolQRIS");

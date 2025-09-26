@@ -95,24 +95,33 @@
     <form id="tiketForm" enctype="multipart/form-data">
     <input type="hidden" name="match_id" value="{{ match.id }}">
   <label>Nama Lengkap</label>
-  <input type="text" name="nama" placeholder="Contoh: Mohammed Salah" required />
+  <input type="text" name="nama" placeholder="Contoh: Baginda Curtis Jones" required />
 
   <label>Status</label>
-  <select name="status" id="status" required onchange="toggleIDCard()">
-    <option value="">Pilih Status</option>
-    <option value="member">Member</option>
-    <option value="non member">Non Member</option>
-  </select>
-  <div id="idCardField" style="display: none; margin-top: 1em;">
+<div style="margin: 0.5em 0;">
+  <label style="margin-right: 1em;">
+    <input type="radio" name="status" value="member" onchange="toggleIDCard()" required />
+    Member
+  </label>
+  <label>
+    <input type="radio" name="status" value="non member" onchange="toggleIDCard()" />
+    Non Member
+  </label>
+</div>
+
+<div id="idCardField" style="display: none; margin-top: 1em;">
   <label>ID Card Member</label>
   <div style="display: flex; align-items: center; gap: 8px;">
     <input type="text" name="id_card" id="idCardInput" />
-    <span id="idCardVerified" style="display: none; color: green; font-weight: bold; margin-left: 20px;">✅ Verified</span>
+    <span id="idCardVerified" style="display: none; color: green; font-weight: bold; margin-left: 20px;">
+      ✅ Verified
+    </span>
   </div>
 </div>
 
 <div id="nominalInfo" style="margin: 1em 0; display: none; font-weight: bold; color: #d32f2f;"></div>
 <input type="hidden" name="total_harga" id="totalHarga" />
+
 
 <label>Jumlah Tiket (max 4)</label>
 <input type="number" name="jumlah" id="jumlahTiket" min="1" max="4" required
@@ -141,7 +150,7 @@
   <label class="payment-card">
     <input type="radio" name="metode_pembayaran" value="gopay" hidden>
     <img src="/static/img/gopayicon.png" alt="GoPay" class="icon">
-    <div class="status available">🟢 Tersedia</div>
+    <div class="status unavailable">🚫 Tidak Tersedia</div>
   </label>
 
   <!-- ShopeePay -->
@@ -155,7 +164,7 @@
   <label class="payment-card">
     <input type="radio" name="metode_pembayaran" value="bank_transfer" hidden>
     <img src="/static/img/bnii.png" alt="Bank Transfer" class="icon">
-    <div class="status available">🟢 Tersedia</div>
+    <div class="status unavailable">🚫 Tidak Tersedia</div>
   </label>
 
 </div>
