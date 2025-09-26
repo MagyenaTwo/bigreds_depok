@@ -49,6 +49,7 @@
   <h2>CMS Bigreds Depok</h2>
   <a href="/cms/tiket" class="{% if request.path == '/cms/tiket' %}active{% endif %}">Dashboard</a>
   <a href="/cms" class="{% if request.path == '/cms' %}active{% endif %}">Upload Kegiatan</a>
+  <a href="/cms/merchandise" class="{% if request.path == '/cms/merchandise' %}active{% endif %}">Merchandise</a>
   <a href="#" onclick="showMaintenanceModal(event)" class="{% if request.path == '/cms/laporan' %}active{% endif %}">Laporan</a>
   <a href="/cms/akun" class="{% if request.path == '/cms/akun' %}active{% endif %}">Buat Akun</a>
 <a href="#" class="dropbtn {% if request.path.startswith('/cms/games') %}active{% endif %}" onclick="toggleDropdown(event)">Games <i class="fa fa-caret-down"></i></a>

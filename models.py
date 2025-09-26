@@ -6,6 +6,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     LargeBinary,
+    Numeric,
     String,
     DateTime,
     Text,
@@ -183,3 +184,16 @@ class MemoryScore(Base):
     full_name = Column(String(100), nullable=False)
     points = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class Merchandise(Base):
+    __tablename__ = "merchandise"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    description = Column(Text)
+    price = Column(Numeric(12, 2), nullable=False)
+    stock = Column(Integer, default=0)
+    image_url = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

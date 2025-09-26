@@ -32,6 +32,7 @@ from models import (
     Match,
     MemoryCard,
     MemoryScore,
+    Merchandise,
     PuzzleImage,
     PuzzleScore,
     QuizQuestion,
@@ -1686,3 +1687,102 @@ def create_memory_score(
         "message": "Skor berhasil disimpan",
         "data": {"name": full_name, "points": points},
     }
+
+
+from fastapi import Form, File, UploadFile, Depends
+from sqlalchemy.orm import Session
+from uuid import uuid4
+import cloudinary
+import cloudinary.uploader
+
+# pastikan Cloudinary sudah dikonfigurasi di awal
+# cloudinary.config(
+#     cloud_name="xxx",
+#     api_key="xxx",
+#     api_secret="xxx"
+# )
+
+
+@app.post("/merchandise/")
+async def create_merchandise(
+    name: str = Form(...),
+    description: str = Form(""),
+    price: float = Form(...),
+    stock: int = Form(0),
+    images: List[UploadFile] = File(...),  # 🔥 terima banyak file
+    db: Session = Depends(get_db),
+):
+    image_urls = []
+
+    for image in images:
+        file_bytes = await image.read()
+        try:
+            upload_res = cloudinary.uploader.upload(
+                file_bytes, public_id=f"merchandise/{uuid4()}", resource_type="image"
+            )
+            image_urls.append(upload_res.get("secure_url"))
+        except Exception as e:
+            return {"error": f"Gagal upload {image.filename}: {e}"}
+    new_item = Merchandise(
+        name=name,
+        description=description,
+        price=price,
+        stock=stock,
+        image_url=",".join(image_urls),
+    )
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+
+    return new_item
+
+
+@app.get("/merchandise/")
+def list_merchandise(db: Session = Depends(get_db)):
+    return db.query(Merchandise).all()
+
+
+@app.get("/merchandise/{item_id}")
+def get_merchandise(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(Merchandise).filter(Merchandise.id == item_id).first()
+    if not item:
+        return JSONResponse(status_code=404, content={"message": "Item not found"})
+    return item
+
+
+@app.put("/merchandise/{item_id}")
+def update_merchandise(
+    item_id: int,
+    name: str = Form(...),
+    price: float = Form(...),
+    stock: int = Form(0),
+    description: str = Form(""),
+    image_url: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    item = db.query(Merchandise).filter(Merchandise.id == item_id).first()
+    if not item:
+        return JSONResponse(status_code=404, content={"message": "Item not found"})
+    item.name = name
+    item.price = price
+    item.stock = stock
+    item.description = description
+    item.image_url = image_url
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@app.delete("/merchandise/{item_id}")
+def delete_merchandise(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(Merchandise).filter(Merchandise.id == item_id).first()
+    if not item:
+        return JSONResponse(status_code=404, content={"message": "Item not found"})
+    db.delete(item)
+    db.commit()
+    return {"message": "Item deleted successfully"}
+
+
+@app.get("/cms/merchandise", response_class=HTMLResponse)
+def cms_merchandise(request: Request):
+    return templates.TemplateResponse("cms_merchandise.html", {"request": request})
