@@ -127,15 +127,40 @@
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        style="width: 95%; padding: 10px; font-size: 16px;" />
 
-       <!-- Metode Pembayaran -->
-<label for="metode_pembayaran">Pilih Metode Pembayaran:</label>
-<select name="metode_pembayaran" id="metode_pembayaran" required>
-  <option value="" disabled selected>-- Pilih Metode --</option>
-  <option value="qris" >QRIS 🟢 Tersedia</option>
-  <option value="gopay">GoPay 🟢 Tersedia</option>
-  <option value="shopeepay" disabled>ShopeePay 🔒 Belum tersedia</option>
-  <option value="bank_transfer">Bank Transfer 🟢 Tersedia</option>
-</select>
+      <p><strong>Pilih Metode Pembayaran:</strong></p>
+<div class="payment-options">
+
+  <!-- QRIS -->
+  <label class="payment-card">
+    <input type="radio" name="metode_pembayaran" value="qris" required hidden>
+    <img src="/static/img/qricon.png" alt="QRIS" class="icon">
+    <div class="status available">🟢 Tersedia</div>
+  </label>
+
+  <!-- GoPay -->
+  <label class="payment-card">
+    <input type="radio" name="metode_pembayaran" value="gopay" hidden>
+    <img src="/static/img/gopayicon.png" alt="GoPay" class="icon">
+    <div class="status available">🟢 Tersedia</div>
+  </label>
+
+  <!-- ShopeePay -->
+  <label class="payment-card disabled">
+    <input type="radio" name="metode_pembayaran" value="shopeepay" disabled hidden>
+    <img src="/static/img/shopeeicon.png" alt="ShopeePay" class="icon">
+    <div class="status unavailable">🔒 Belum Tersedia</div>
+  </label>
+
+  <!-- Bank Transfer -->
+  <label class="payment-card">
+    <input type="radio" name="metode_pembayaran" value="bank_transfer" hidden>
+    <img src="/static/img/bnii.png" alt="Bank Transfer" class="icon">
+    <div class="status available">🟢 Tersedia</div>
+  </label>
+
+</div>
+
+
 <!-- Section khusus QRIS -->
 <div id="qrisSection" style="display: none; margin-top: 1em; text-align: center;">
   <img src="/static/img/qrisbigreds.png" alt="QRIS Pembayaran" style="max-width: 300px; margin: 0 auto;" />

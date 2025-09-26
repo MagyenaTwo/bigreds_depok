@@ -133,7 +133,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const popupOverlay = document.getElementById("popupOverlay");
   const popupSuccess = document.getElementById("popupSuccess");
   const qrisSection = document.getElementById("qrisSection");
-  const metodeSelect = document.getElementById("metode_pembayaran");
+  const metodeRadios = document.querySelectorAll("input[name='metode_pembayaran']");
+
   const gopaySection = document.getElementById("gopaySection");
   const shopeeSection = document.getElementById("shopeeSection");
   const bankSection = document.getElementById("bankSection");
@@ -171,13 +172,15 @@ window.addEventListener("DOMContentLoaded", () => {
   //     popupSuccess.innerHTML = "";
   //   }
   // });
-metodeSelect.addEventListener("change", () => {
-  const selected = metodeSelect.value;
+  metodeRadios.forEach(radio => {
+  radio.addEventListener("change", () => {
+    const selected = radio.value;
 
-  qrisSection.style.display = selected === "qris" ? "block" : "none";
-  gopaySection.style.display = selected === "gopay" ? "block" : "none";
-  shopeeSection.style.display = selected === "shopeepay" ? "block" : "none";
-  bankSection.style.display = selected === "bank_transfer" ? "block" : "none";
+    document.getElementById("qrisSection").style.display = selected === "qris" ? "block" : "none";
+    document.getElementById("gopaySection").style.display = selected === "gopay" ? "block" : "none";
+    document.getElementById("shopeeSection").style.display = selected === "shopeepay" ? "block" : "none";
+    document.getElementById("bankSection").style.display = selected === "bank_transfer" ? "block" : "none";
+  });
 });
 
 });
