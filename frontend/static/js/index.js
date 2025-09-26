@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // TampilanQRIS
 window.addEventListener("DOMContentLoaded", () => {
-  const tombolQRIS = document.getElementById("tombolQRIS");
+  // const tombolQRIS = document.getElementById("tombolQRIS");
   const popupOverlay = document.getElementById("popupOverlay");
   const popupSuccess = document.getElementById("popupSuccess");
   const qrisSection = document.getElementById("qrisSection");
@@ -139,48 +139,47 @@ window.addEventListener("DOMContentLoaded", () => {
   const bankSection = document.getElementById("bankSection");
 
   // Tombol QRIS diklik
-  tombolQRIS.addEventListener("click", () => {
-    popupSuccess.classList.add("fade-in");
+  // tombolQRIS.addEventListener("click", () => {
+  //   popupSuccess.classList.add("fade-in");
 
-    popupSuccess.innerHTML = `
-      <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
-        <source src="/static/img/maintenance.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-      <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
-      <p style="color: #444;">Payment QRIS under development.</p>
-      <a href="/buy-ticket" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
-        background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
-        font-weight: bold; transition: background 0.3s;">
-        Back
-      </a>
-    `;
+  //   popupSuccess.innerHTML = `
+  //     <video autoplay muted loop playsinline style="width: 250px; height: auto; margin: 0 auto 15px; display: block; border-radius: 12px;">
+  //       <source src="/static/img/maintenance.mp4" type="video/mp4">
+  //       Your browser does not support the video tag.
+  //     </video>
+  //     <h2 style="margin-bottom: 10px; color: #d32f2f;">Coming Soon</h2>
+  //     <p style="color: #444;">Payment QRIS under development.</p>
+  //     <a href="/buy-ticket" class="submit" style="display: inline-block; margin-top: 20px; padding: 12px 25px;
+  //       background-color: #d32f2f; color: white; border-radius: 8px; text-decoration: none;
+  //       font-weight: bold; transition: background 0.3s;">
+  //       Back
+  //     </a>
+  //   `;
 
-    popupOverlay.style.display = "flex";
+  //   popupOverlay.style.display = "flex";
 
-    setTimeout(() => {
-      popupSuccess.classList.add("show");
-    }, 100);
-  });
+  //   setTimeout(() => {
+  //     popupSuccess.classList.add("show");
+  //   }, 100);
+  // });
 
   // Klik luar popup → tutup
-  popupOverlay.addEventListener("click", (e) => {
-    if (e.target === popupOverlay) {
-      popupOverlay.style.display = "none";
-      popupSuccess.classList.remove("show");
-      popupSuccess.innerHTML = "";
-    }
-  });
-
-  metodeSelect.addEventListener("change", () => {
+  // popupOverlay.addEventListener("click", (e) => {
+  //   if (e.target === popupOverlay) {
+  //     popupOverlay.style.display = "none";
+  //     popupSuccess.classList.remove("show");
+  //     popupSuccess.innerHTML = "";
+  //   }
+  // });
+metodeSelect.addEventListener("change", () => {
   const selected = metodeSelect.value;
 
   qrisSection.style.display = selected === "qris" ? "block" : "none";
   gopaySection.style.display = selected === "gopay" ? "block" : "none";
   shopeeSection.style.display = selected === "shopeepay" ? "block" : "none";
   bankSection.style.display = selected === "bank_transfer" ? "block" : "none";
+});
 
-  });
 });
 
 

@@ -131,23 +131,18 @@
 <label for="metode_pembayaran">Pilih Metode Pembayaran:</label>
 <select name="metode_pembayaran" id="metode_pembayaran" required>
   <option value="" disabled selected>-- Pilih Metode --</option>
-  <option value="qris" disabled>QRIS 🔒 Belum tersedia</option>
+  <option value="qris" >QRIS 🟢 Tersedia</option>
   <option value="gopay">GoPay 🟢 Tersedia</option>
   <option value="shopeepay" disabled>ShopeePay 🔒 Belum tersedia</option>
   <option value="bank_transfer">Bank Transfer 🟢 Tersedia</option>
 </select>
-
 <!-- Section khusus QRIS -->
-<div id="qrisSection" style="display: none; margin-top: 1em;">
-  <button type="button" id="tombolQRIS" style="padding: 8px 16px;">Tampilkan QRIS</button>
-</div>
-
-
-
-  <div id="qrisContainer" style="display: none; margin-top: 1em; text-align: center;">
-  <img src="/static/img/qris.png" alt="QRIS Pembayaran" style="max-width: 300px; margin: 0 auto;" />
+<div id="qrisSection" style="display: none; margin-top: 1em; text-align: center;">
+  <img src="/static/img/qrisbigreds.png" alt="QRIS Pembayaran" style="max-width: 300px; margin: 0 auto;" />
   <p>Scan QRIS untuk membayar via Gopay, OVO, DANA, dll.</p>
 </div>
+
+
 
 <!-- SECTION METODE PEMBAYARAN TAMBAHAN -->
 <div id="gopaySection" style="display: none; text-align: center; margin-top: 1em;">
@@ -270,15 +265,15 @@ async function cekMemberAuto() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const tombolQRIS = document.getElementById("tombolQRIS");
+    // const tombolQRIS = document.getElementById("tombolQRIS");
     const qrisContainer = document.getElementById("qrisContainer");
     const radioQRIS = document.getElementById("radioQRIS");
     const qrisSection = document.getElementById("qrisSection");
 
     // Tampilkan popup QRIS
-    tombolQRIS.addEventListener("click", () => {
-      qrisContainer.style.display = "block";
-    });
+    // tombolQRIS.addEventListener("click", () => {
+    //   qrisContainer.style.display = "block";
+    // });
 
     // Sembunyikan/tampilkan section QRIS berdasarkan pilihan radio
     const radios = document.querySelectorAll("input[name='metode_pembayaran']");
