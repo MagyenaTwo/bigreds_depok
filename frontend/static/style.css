@@ -98,7 +98,7 @@ body {
   padding: 10px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* bagi jadi kiri – tengah – kanan */
+  justify-content: space-between; 
   position: fixed;
   top: 0;
   left: 0;
@@ -142,8 +142,8 @@ body {
     background-color: #a60000;
   }
   .navbar .menu a {
-    background: none;  /* balik ke simple */
-    font-weight: 100;
+    
+    font-size: 20px;
     
   }
 
@@ -441,8 +441,7 @@ body {
   }
 
   .navbar .menu a {
-    margin: 10px 0;
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .header {
