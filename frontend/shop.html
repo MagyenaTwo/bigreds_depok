@@ -174,6 +174,50 @@
   color: white;
   cursor: pointer;
 }
+.image-modal {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center; align-items:center;
+  z-index:1000;
+}
+.buy-modal {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center; align-items:center;
+  z-index:1000; padding:10px;
+}
+.buy-box {
+  background:#fff; padding:20px;
+  border-radius:12px; max-width:420px; width:100%;
+  position:relative; text-align:center;
+  overflow-y:auto; max-height:90vh;
+}
+.buy-box h3 {margin-bottom:8px; color:#222;}
+.buy-img {width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
+.buy-price {font-weight:bold; color:#e53935; margin:5px 0;}
+.buy-qty {display:flex; justify-content:center; align-items:center; gap:8px; margin:10px 0;}
+.buy-qty input {width:80px; text-align:center; padding:6px;}
+.buy-total {font-weight:bold; font-size:16px; margin-bottom:12px;}
+.buy-box input, .buy-box textarea {
+  width:100%; margin-bottom:10px; padding:10px;
+  border:1px solid #ccc; border-radius:6px; font-size:14px;
+}
+.buy-qris img {width:200px; border:1px solid #ddd; border-radius:8px; margin:10px 0;}
+.buy-btn {
+  background:#e53935; color:#fff; border:none;
+  padding:12px; border-radius:8px;
+  font-size:16px; font-weight:600; cursor:pointer;
+  width:100%; transition:background 0.3s;
+}
+.buy-btn:hover {background:#c62828;}
+.close {
+  position:absolute; top:10px; right:15px;
+  font-size:24px; cursor:pointer; color:#555;
+}
+@media (max-width:480px) {
+  .buy-box {padding:15px;}
+  .buy-btn {font-size:14px; padding:10px;}
+}
 
 </style>
 
@@ -239,6 +283,32 @@
 <div id="imgModal" class="image-modal">
   <span class="close">&times;</span>
   <img id="imgModalContent" src="" alt="Preview">
+</div>
+<div id="buyModal" class="buy-modal">
+  <div class="buy-box">
+    <span class="close" onclick="closeBuyModal()">&times;</span>
+    <h3 id="modalName"></h3>
+    <img id="modalImage" src="" alt="Produk" class="buy-img">
+
+    <p id="modalPrice" class="buy-price"></p>
+    <div class="buy-qty">
+      <label>Jumlah:</label>
+      <input type="number" id="modalQty" value="1" min="1">
+    </div>
+    <p id="modalTotal" class="buy-total"></p>
+
+    <h4>Data Pembeli</h4>
+    <input type="text" id="buyerName" placeholder="Nama Lengkap" required>
+    <input type="text" id="buyerPhone" placeholder="Nomor HP / WA" required>
+    <textarea id="buyerAddress" placeholder="Alamat Pengiriman" required></textarea>
+
+    <div class="buy-qris">
+      <h4>Scan QRIS untuk pembayaran</h4>
+      <img src="/static/img/qris.png" alt="QRIS">
+    </div>
+
+    <button onclick="finishOrder()" class="buy-btn">Kirim Pesanan</button>
+  </div>
 </div>
 
 </footer>
@@ -320,7 +390,9 @@ async function loadShop() {
             <span class="shop-price">Rp ${parseFloat(item.price).toLocaleString()}</span>
             <span class="shop-stock">${stock}</span>
           </div>
-          <button class="shop-btn">🛒 Add to cart</button>
+          <button class="shop-btn" onclick='openBuyModal(${JSON.stringify(item)})'>🛒 Buy Now</button>
+
+
         </div>
       </div>
     `;
@@ -364,6 +436,47 @@ document.addEventListener("DOMContentLoaded", () => {
     enableThumbnailClick();
   });
 });
+
+let currentProduct = {};
+
+function openBuyModal(item) {
+  currentProduct = item;
+  document.getElementById("modalName").textContent = item.name;
+  document.getElementById("modalImage").src = (item.image_url || "").split(",")[0] || "/static/img/no-image.png";
+  document.getElementById("modalPrice").textContent = "Harga: Rp " + parseFloat(item.price).toLocaleString();
+  document.getElementById("modalQty").value = 1;
+  document.getElementById("modalTotal").textContent = "Total: Rp " + parseFloat(item.price).toLocaleString();
+  
+  // update total kalau qty berubah
+  document.getElementById("modalQty").oninput = () => {
+    const qty = parseInt(document.getElementById("modalQty").value) || 1;
+    const total = currentProduct.price * qty;
+    document.getElementById("modalTotal").textContent = "Total: Rp " + total.toLocaleString();
+  };
+
+  document.getElementById("buyModal").style.display = "flex";
+}
+
+function closeBuyModal() {
+  document.getElementById("buyModal").style.display = "none";
+}
+
+function finishOrder() {
+  const qty = parseInt(document.getElementById("modalQty").value) || 1;
+  const total = currentProduct.price * qty;
+  const name = document.getElementById("buyerName").value;
+  const phone = document.getElementById("buyerPhone").value;
+  const address = document.getElementById("buyerAddress").value;
+
+  if (!name || !phone || !address) {
+    alert("Harap isi semua data pemesan.");
+    return;
+  }
+
+  alert(`Pesanan berhasil dibuat!\n\nProduk: ${currentProduct.name}\nJumlah: ${qty}\nTotal: Rp ${total.toLocaleString()}\nNama: ${name}\nHP: ${phone}\nAlamat: ${address}\n\n(Sementara hanya UI demo, belum tersimpan ke DB)`);
+  closeBuyModal();
+}
+
 
 </script>
 
