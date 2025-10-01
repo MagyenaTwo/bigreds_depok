@@ -129,6 +129,52 @@
   .shop-btn:hover {
     background: #c62828;
   }
+  .shop-thumbs {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.shop-thumbs img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: transform 0.2s, border 0.2s;
+}
+.shop-thumbs img:hover {
+  transform: scale(1.1);
+  border-color: #e53935;
+}
+
+.image-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.image-modal .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
 </style>
 
 <body>
@@ -190,6 +236,11 @@
     </div>
   </div>
 </div>
+<div id="imgModal" class="image-modal">
+  <span class="close">&times;</span>
+  <img id="imgModalContent" src="" alt="Preview">
+</div>
+
 </footer>
 <script src="{{ 'js/index.js' | versioned }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
@@ -241,39 +292,79 @@
     `;
   }
 
-function loadShop() {
-  fetch("/merchandise/")
-    .then(res => res.json())
-    .then(data => {
-      const grid = document.getElementById("shopGrid");
-      grid.innerHTML = "";
+async function loadShop() {
+  const res = await fetch("/merchandise/");
+  const data = await res.json();
+  const grid = document.getElementById("shopGrid");
+  grid.innerHTML = "";
 
-      data.forEach(item => {
-        let images = (item.image_url || "").split(",");
-        let firstImage = images[0]?.trim() || "/static/img/no-image.png";
-        let category = item.category || "Merchandise";
-        let stock = item.stock ? `Stock: ${item.stock}` : "Stok tidak tersedia";
+  data.forEach(item => {
+    let images = (item.image_url || "").split(",");
+    let firstImage = images[0]?.trim() || "/static/img/no-image.png";
+    let thumbs = images.slice(1).map(img => {
+      let src = img.trim();
+      return `<img src="${src}" alt="thumb" class="thumb-img">`;
+    }).join("");
+    let category = item.category || "Merchandise";
+    let stock = item.stock ? `Stock: ${item.stock}` : "Stok tidak tersedia";
 
-        grid.innerHTML += `
-          <div class="shop-card" data-aos="fade-up">
-            <div class="shop-badge">${category}</div>
-            <img src="${firstImage}" alt="${item.name}">
-            <div class="shop-content">
-              <h3 class="shop-title">${item.name}</h3>
-              <div class="shop-desc">${formatDescription(item.description)}</div>
-              <div class="shop-meta">
-                <span class="shop-price">Rp ${parseFloat(item.price).toLocaleString()}</span>
-                <span class="shop-stock"> ${stock}</span>
-              </div>
-              <button class="shop-btn">🛒 Add to cart</button>
-            </div>
+    grid.innerHTML += `
+      <div class="shop-card" data-aos="fade-up">
+        <div class="shop-badge">${category}</div>
+        <img src="${firstImage}" alt="${item.name}" class="main-image">
+        <div class="shop-thumbs">${thumbs}</div>
+        <div class="shop-content">
+          <h3 class="shop-title">${item.name}</h3>
+          <div class="shop-desc">${formatDescription(item.description)}</div>
+          <div class="shop-meta">
+            <span class="shop-price">Rp ${parseFloat(item.price).toLocaleString()}</span>
+            <span class="shop-stock">${stock}</span>
           </div>
-        `;
-      });
-    });
+          <button class="shop-btn">🛒 Add to cart</button>
+        </div>
+      </div>
+    `;
+  });
 }
 
-document.addEventListener("DOMContentLoaded", loadShop);
+document.querySelectorAll(".shop-card").forEach(card => {
+  const mainImg = card.querySelector(".main-image");
+  const thumbs = card.querySelectorAll(".shop-thumbs img");
+  thumbs.forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      mainImg.src = thumb.src;
+    });
+  });
+});
+function enableThumbnailClick() {
+  const modal = document.getElementById("imgModal");
+  const modalImg = document.getElementById("imgModalContent");
+  const closeBtn = modal.querySelector(".close");
+
+  document.querySelectorAll(".thumb-img, .main-image").forEach(img => {
+    img.addEventListener("click", () => {
+      modal.style.display = "flex";
+      modalImg.src = img.src;
+    });
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadShop().then(() => {
+    enableThumbnailClick();
+  });
+});
+
 </script>
 
 </body>
