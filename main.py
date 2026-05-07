@@ -220,13 +220,13 @@ async def show_form(request: Request, match_id: int):
     db.close()
 
     return templates.TemplateResponse(
-        "form.html",
-        {
-            "request": request,
-            "match": match,
-            "formatted_datetime": formatted_datetime,
-        },
-    )
+    request=request,
+    name="form.html",
+    context={
+        "match": match,
+        "formatted_datetime": formatted_datetime,
+    },
+)
 
 
 @app.get("/buy-ticket", response_class=HTMLResponse)
@@ -483,14 +483,14 @@ def cms_page(request: Request, page: int = 1):
     )
 
     return templates.TemplateResponse(
-        "cms.html",
-        {
-            "request": request,
-            "images": data.data,
-            "current_page": page,
-            "total_pages": total_pages,
-        },
-    )
+    request=request,
+    name="cms.html",
+    context={
+        "images": data.data,
+        "current_page": page,
+        "total_pages": total_pages,
+    },
+)
 
 
 @app.get("/login", response_class=HTMLResponse)
@@ -510,8 +510,10 @@ async def login_post(
         request.session["user_id"] = user.id
         return RedirectResponse(url="/cms/tiket", status_code=302)
     return templates.TemplateResponse(
-        "login.html", {"request": request, "error": "Username atau password salah."}
-    )
+    request=request,
+    name="login.html",
+    context={"error": "Username atau password salah."}
+)
 
 
 @app.get("/logout")
@@ -566,19 +568,19 @@ def halaman_tiket(request: Request, page: int = 1, db: Session = Depends(get_db)
     ]
 
     return templates.TemplateResponse(
-        "cms_tiket.html",
-        {
-            "request": request,
-            "daftar_tiket": daftar_tiket,
-            "current_page": page,
-            "total_pages": total_pages,
-            "total_pemesan": total_pemesan,
-            "total_pemasukan": total_pemasukan,
-            "total_gopay": total_gopay,
-            "total_bni": total_bni,
-            "gameweeks": gameweeks,
-        },
-    )
+    request=request,
+    name="cms_tiket.html",
+    context={
+        "daftar_tiket": daftar_tiket,
+        "current_page": page,
+        "total_pages": total_pages,
+        "total_pemesan": total_pemesan,
+        "total_pemasukan": total_pemasukan,
+        "total_gopay": total_gopay,
+        "total_bni": total_bni,
+        "gameweeks": gameweeks,
+    },
+)
 
 
 @app.get("/api/total_pemasukan/{gameweek}")
@@ -614,7 +616,11 @@ async def cms_laporan(request: Request):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
 
-    return templates.TemplateResponse("cms_laporan.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="cms_laporan.html",
+    context={}
+)
 
 
 @app.get("/cms/berita", response_class=HTMLResponse)
@@ -622,7 +628,11 @@ async def cms_berita(request: Request):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
 
-    return templates.TemplateResponse("cms_berita.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="cms_berita.html",
+    context={}
+)
 
 
 @app.get("/cms/akun")
@@ -630,7 +640,11 @@ def form_akun(request: Request):
     if not request.session.get("user_id"):
         return RedirectResponse(url="/login", status_code=302)
 
-    return templates.TemplateResponse("cms_akun.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="cms_akun.html",
+    context={}
+)
 
 
 @app.post("/cms/akun", response_class=HTMLResponse)
@@ -645,10 +659,11 @@ async def buat_akun_post(
 
     existing_user = db.query(User).filter(User.username == username).first()
     if existing_user:
-        return templates.TemplateResponse(
-            "cms_akun.html",
-            {"request": request, "error": "Username sudah digunakan. Coba yang lain."},
-        )
+     return templates.TemplateResponse(
+    request=request,
+    name="cms_akun.html",
+    context={"error": "Username sudah digunakan. Coba yang lain."}
+)
 
     hashed_password = generate_password_hash(password)
     new_user = User(username=username, password=hashed_password)
@@ -656,8 +671,10 @@ async def buat_akun_post(
     db.commit()
 
     return templates.TemplateResponse(
-        "cms_akun.html", {"request": request, "success": "Akun berhasil dibuat!"}
-    )
+    request=request,
+    name="cms_akun.html",
+    context={"success": "Akun berhasil dibuat!"}
+)
 
 
 @app.post("/cms/upload")
@@ -717,8 +734,10 @@ async def pengurus(request: Request):
     db.close()
 
     return templates.TemplateResponse(
-        "pengurus.html", {"request": request, "match": match}
-    )
+    request=request,
+    name="pengurus.html",
+    context={"match": match}
+)
 
 
 @app.get("/gallery", response_class=HTMLResponse)
@@ -737,15 +756,14 @@ async def gallery(request: Request):
     categories = list({img.kategori for img in images if img.kategori})
 
     return templates.TemplateResponse(
-        "gallery.html",
-        {
-            "request": request,
-            "images": images,
-            "categories": categories,
-            "match": match,
-        },
-    )
-
+    request=request,
+    name="gallery.html",
+    context={
+        "images": images,
+        "categories": categories,
+        "match": match,
+    },
+)
 
 # Fungsi utama untuk sinkronisasi berita
 def fetch_and_save_news():
@@ -972,17 +990,16 @@ async def events(request: Request):
     db.close()
 
     categories = list({img.kategori for img in unique_events if img.kategori})
-
     return templates.TemplateResponse(
-        "events.html",
-        {
-            "request": request,
-            "images": unique_events,
-            "categories": categories,
-            "now": now,
-            "match": match,
-        },
-    )
+    request=request,
+    name="events.html",
+    context={
+        "images": unique_events,
+        "categories": categories,
+        "now": now,
+        "match": match,
+    },
+)
 
 
 @app.get("/event-details")
@@ -1076,14 +1093,14 @@ def fans_corner(request: Request, db: Session = Depends(get_db)):
     ]
 
     return templates.TemplateResponse(
-        "fans_corner.html",
-        {
-            "request": request,
-            "games": games,
-            "leaderboard": leaderboard,
-            "match": match,
-        },
-    )
+    request=request,
+    name="fans_corner.html",
+    context={
+        "games": games,
+        "leaderboard": leaderboard,
+        "match": match,
+    },
+)
 
 
 @app.post("/leaderboard")
@@ -1120,15 +1137,15 @@ def admin_games(request: Request, db: Session = Depends(get_db)):
     ]
 
     return templates.TemplateResponse(
-        "cms_games.html",
-        {
-            "request": request,
-            "games": games,
-            "predictions": predictions,
-            "matches": matches,
-            "total_points": total_points_list,
-        },
-    )
+    request=request,
+    name="cms_games.html",
+    context={
+        "games": games,
+        "predictions": predictions,
+        "matches": matches,
+        "total_points": total_points_list,
+    },
+)
 
 
 @app.post("/cms/games/{game_id}/toggle")
@@ -1299,8 +1316,10 @@ def set_match_score(
 async def get_upload_puzzle(request: Request, db: Session = Depends(get_db)):
     puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
     return templates.TemplateResponse(
-        "cms_puzzle.html", {"request": request, "puzzles": puzzles}
-    )
+    request=request,
+    name="cms_puzzle.html",
+    context={"puzzles": puzzles}
+)
 
 
 @app.delete("/cms/games/puzzle/{puzzle_id}")
@@ -1333,19 +1352,24 @@ async def post_upload_puzzle(
         puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
 
         return templates.TemplateResponse(
-            "cms_puzzle.html",
-            {
-                "request": request,
-                "success": True,
-                "filename": image_url,
-                "puzzles": puzzles,
-            },
-        )
+        request=request,
+        name="cms_puzzle.html",
+        context={
+            "success": True,
+            "filename": image_url,
+            "puzzles": puzzles,
+        },
+    )
     except Exception as e:
         puzzles = db.query(PuzzleImage).order_by(PuzzleImage.uploaded_at.desc()).all()
         return templates.TemplateResponse(
-            "cms_puzzle.html", {"request": request, "error": str(e), "puzzles": puzzles}
-        )
+    request=request,
+    name="cms_puzzle.html",
+    context={
+        "error": str(e),
+        "puzzles": puzzles
+    }
+)
 
 
 @app.get("/api/puzzle_images")
@@ -1516,14 +1540,19 @@ async def penalti_game():
 def cms_quiz(request: Request, db: Session = Depends(get_db)):
     questions = db.query(QuizQuestion).order_by(QuizQuestion.id.desc()).all()
     return templates.TemplateResponse(
-        "cms_trivia.html",
-        {"request": request, "questions": questions},
-    )
+    request=request,
+    name="cms_trivia.html",
+    context={"questions": questions}
+)
 
 
 @app.get("/cms/quiz/add", name="add_quiz_page")
 def add_quiz_page(request: Request):
-    return templates.TemplateResponse("add_quiz.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="add_quiz.html",
+    context={}
+)
 
 
 @app.post("/cms/quiz/add", name="add_quiz")
@@ -1635,9 +1664,10 @@ def memory_cards(
         return RedirectResponse(url="/cms/games/memory", status_code=303)
     memory_cards = db.query(MemoryCard).order_by(MemoryCard.id).all()
     return templates.TemplateResponse(
-        "cms_memory.html", {"request": request, "memory_cards": memory_cards}
-    )
-
+    request=request,
+    name="cms_memory.html",
+    context={"memory_cards": memory_cards}
+)
 
 @app.post("/cms/games/memory/delete/{card_id}", response_class=HTMLResponse)
 def delete_memory_card(card_id: int, db: Session = Depends(get_db)):
@@ -1652,8 +1682,10 @@ def delete_memory_card(card_id: int, db: Session = Depends(get_db)):
 def memory_game(request: Request, db: Session = Depends(get_db)):
     cards = db.query(MemoryCard).all()
     return templates.TemplateResponse(
-        "memory.html", {"request": request, "cards": cards}
-    )
+    request=request,
+    name="memory.html",
+    context={"cards": cards}
+)
 
 
 @app.post("/memory/score/")
@@ -1770,10 +1802,18 @@ def delete_merchandise(item_id: int, db: Session = Depends(get_db)):
 
 @app.get("/cms/merchandise", response_class=HTMLResponse)
 def cms_merchandise(request: Request):
-    return templates.TemplateResponse("cms_merchandise.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="cms_merchandise.html",
+    context={}
+)
 
 
 @app.get("/shop")
 def shop_page(request: Request):
     # render template shop.html
-    return templates.TemplateResponse("shop.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="shop.html",
+    context={}
+)
