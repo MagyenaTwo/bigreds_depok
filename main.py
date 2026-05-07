@@ -175,16 +175,15 @@ async def read_form(request: Request):
     )
 
     return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "match": match,
-            "formatted_datetime": formatted_datetime,
-            "gallery_items": gallery_data.data,
-            "berita_items": berita_terbaru,
-        },
-    )
-
+    request=request,               # Masukkan request di sini
+    name="index.html",             # Nama template
+    context={                      # Sisanya masuk ke context
+        "match": match,
+        "formatted_datetime": formatted_datetime,
+        "gallery_items": gallery_data.data,
+        "berita_items": berita_terbaru,
+    },
+)
 
 def send_whatsapp_message(to: str, message: str):
     url = "https://api.fonnte.com/send"

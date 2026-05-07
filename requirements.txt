@@ -15,4 +15,3 @@ qrcode[pil]
 Pillow
 qrcode
 cloudinary>=1.41.0
-Werkzeug==3.1.3
