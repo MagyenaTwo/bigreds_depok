@@ -42,9 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let hargaPerTiket = 0;
     if (status === "member") {
-      hargaPerTiket = 20000;
+      hargaPerTiket = 25000;
     } else if (status === "non member") {
-      hargaPerTiket = 20000;
+      hargaPerTiket = 25000;
     }
 
     const total = hargaPerTiket * jumlah;

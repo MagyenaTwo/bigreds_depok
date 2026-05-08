@@ -495,7 +495,11 @@ def cms_page(request: Request, page: int = 1):
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_get(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
+   return templates.TemplateResponse(
+    request=request,
+    name="login.html",
+    context={"error": None}
+)
 
 
 @app.post("/login", response_class=HTMLResponse)
