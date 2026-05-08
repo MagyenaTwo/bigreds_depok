@@ -65,15 +65,7 @@ app.add_middleware(SessionMiddleware, secret_key="bigredsmantap", max_age=1800)
 
 app.add_middleware(SessionMiddleware, secret_key="bigredsmantap")
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-@app.middleware("http")
-async def cache_control(request, call_next):
-    response = await call_next(request)
 
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-
-    return response
 templates = Jinja2Templates(directory="frontend")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -119,12 +111,15 @@ def get_db():
     finally:
         db.close()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def versioned_filter(filename):
-    filepath = os.path.join("static", filename)
+    filepath = os.path.join(BASE_DIR, "frontend", "static", filename)
+
     if os.path.exists(filepath):
         timestamp = int(os.path.getmtime(filepath))
         return f"/static/{filename}?v={timestamp}"
+
     return f"/static/{filename}"
 
 
@@ -223,6 +218,7 @@ def after_insert_ticket(mapper, connection, target):
 @app.get("/buy-ticket/{match_id}", response_class=HTMLResponse)
 async def show_form(request: Request, match_id: int):
     db: Session = SessionLocal()
+    
     match = db.query(Match).filter(Match.id == match_id).first()
     formatted_datetime = format_datetime_indo(match.match_datetime) if match else None
     db.close()
