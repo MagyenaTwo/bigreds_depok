@@ -65,7 +65,15 @@ app.add_middleware(SessionMiddleware, secret_key="bigredsmantap", max_age=1800)
 
 app.add_middleware(SessionMiddleware, secret_key="bigredsmantap")
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+@app.middleware("http")
+async def cache_control(request, call_next):
+    response = await call_next(request)
 
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 templates = Jinja2Templates(directory="frontend")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
