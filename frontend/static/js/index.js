@@ -31,16 +31,18 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tiketForm");
 
-  const statusSelect = form.querySelector('[name="status"]');
   const jumlahTiketInput = form.querySelector('[name="jumlah"]');
   const nominalInfo = document.getElementById("nominalInfo");
   const totalHargaInput = form.querySelector('[name="total_harga"]');
 
   function updateHarga() {
-    const status = statusSelect.value;
+    const selectedStatus = form.querySelector('input[name="status"]:checked');
+    const status = selectedStatus ? selectedStatus.value : "";
+
     const jumlah = parseInt(jumlahTiketInput.value) || 0;
 
     let hargaPerTiket = 0;
+
     if (status === "member") {
       hargaPerTiket = 20000;
     } else if (status === "non member") {
@@ -48,9 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const total = hargaPerTiket * jumlah;
+
     if (status && jumlah > 0) {
       nominalInfo.style.display = "block";
-      nominalInfo.textContent = `Total yang harus di Bayar: Rp ${total.toLocaleString("id-ID")}`;
+      nominalInfo.textContent =
+        `Total yang harus di Bayar: Rp ${total.toLocaleString("id-ID")}`;
     } else {
       nominalInfo.style.display = "none";
     }
@@ -58,7 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
     totalHargaInput.value = total;
   }
 
-  statusSelect.addEventListener("change", updateHarga);
+  const statusRadios = form.querySelectorAll('input[name="status"]');
+
+  statusRadios.forEach(radio => {
+    radio.addEventListener("change", updateHarga);
+  });
+
   jumlahTiketInput.addEventListener("input", updateHarga);
 });
 
